@@ -62,6 +62,12 @@ dotnet run --project BancoAlimentar.AlimentaEstaIdeia.Tools\BancoAlimentar.Alime
 
 `--output` is optional; the default is a timestamped JSON file in the current directory. The command reports a nonzero exit code if either target fails, while preserving the other target's results in the report. Review the reported database server/catalog and endpoint before acting on any findings. Do not commit generated reports; they contain internal subscription identifiers and reconciliation data.
 
+Any incomplete provider audit, including invalid local IDs, missing initial donations, missing
+credentials or API failures, marks that target `Failed` when no lookup succeeded, or `Partial` when
+some did. Both outcomes produce a nonzero exit code and retain collected rows. Local expired and
+non-expired totals are counted independently of provider lookups and sum to the local subscription
+count.
+
 ## Report contents and database impact
 
 For each local subscription the report includes local status, deletion flag, payment type, frequency, amount, expiration, and related donation/payment/failed-email counts. It fetches provider ID, key-match result, amount, method status/type, retry count, failover, expiration and max captures. It flags cases where the scheduled retry reconciliation would set retries to three, without issuing a PATCH. It also aggregates local notification delivery states and provider lookup failures. Donor names, contact details, payment keys, and API credentials are not included.
@@ -69,7 +75,7 @@ For each local subscription the report includes local status, deletion flag, pay
 The `databaseImpact` section summarizes the effect of prior payment changes:
 
 - Raising the Easypay retry count is provider-side only; it requires no local write or schema migration. The existing scheduled function preserves each subscription's failover value.
-- A verified failed capture can update or create a recurring donation, payment and subscription-donation link using the existing schema. Failure-email delivery tracking uses the existing `PaymentNotifications` table and delivery states. The report counts rows already present; it cannot predict future webhooks.
+- Failure persistence and email tracking use the existing donation, payment, subscription-donation and `PaymentNotifications` tables. Production failed subscription callbacks are currently rejected until authenticated or terminal provider failure evidence is available; an unsigned `failed` callback with a zero-paid transaction is insufficient. The report counts rows already present; it cannot predict future webhooks.
 - The local subscription model stores a concrete expiration time. The current generated Easypay detail model does not expose `unlimited_payments`; the tool reports the local and provider expiration fields and `max_captures`, but does not infer a lifetime-policy change or modify either value. Confirm the intended lifetime and provider representation before any migration or bulk update.
 - `databaseWrites`, `easypayWriteOperations`, and `schemaChangesRequired` are all zero for this command.
 

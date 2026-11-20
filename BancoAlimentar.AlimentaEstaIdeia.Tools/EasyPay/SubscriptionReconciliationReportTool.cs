@@ -31,14 +31,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
     {
         private const int TargetRetries = 3;
         private readonly IConfiguration configuration;
+        private readonly Func<Subscription, IConfiguration, ISubscriptionPaymentApi> createSubscriptionApi;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionReconciliationReportTool"/> class.
         /// </summary>
         /// <param name="configuration">Tool configuration.</param>
-        public SubscriptionReconciliationReportTool(IConfiguration configuration)
+        /// <param name="createSubscriptionApi">Provider client factory.</param>
+        public SubscriptionReconciliationReportTool(
+            IConfiguration configuration,
+            Func<Subscription, IConfiguration, ISubscriptionPaymentApi> createSubscriptionApi = null)
         {
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.createSubscriptionApi = createSubscriptionApi ?? CreateSubscriptionApi;
         }
 
         /// <summary>
@@ -68,7 +73,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 {
                     RetryPolicy = "Eligible active credit-card subscriptions with fewer than three Easypay retries are candidates for a provider PATCH; this report only identifies them.",
                     ExpirationPolicy = "The local model stores a concrete expiration time. The generated Easypay response model does not expose unlimited_payments; compare local/provider expiration fields and decide the policy separately.",
-                    FailedCapture = "A verified failed subscription capture may update or create a recurring donation, payment and subscription-donation link. A failure email uses a separate PaymentNotifications row and delivery-state updates. The report counts existing related records; it does not predict unreceived webhooks.",
+                    FailedCapture = "Failed subscription callbacks are rejected until authenticated or terminal provider failure evidence is available. Failure persistence and email tracking use the existing donation, payment, subscription-donation and PaymentNotifications tables. The report counts existing related records; it does not predict unreceived webhooks.",
                     RetrySetting = "Changing Easypay retries does not require a local database write or schema migration.",
                 },
             };
@@ -154,41 +159,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                     .Where(notification => notification.NotificationType == NotificationType.SubscriptionPaymentFailureEmail)
                     .ToList();
 
-                report.Summary.LocalSubscriptions = subscriptions.Count;
-                report.Summary.ActiveSubscriptions = subscriptions.Count(subscription =>
-                    subscription.Status == SubscriptionStatus.Active && !subscription.IsDeleted);
-                report.Summary.LocalExpiredSubscriptions = subscriptions.Count(subscription =>
-                    subscription.ExpirationTime <= DateTime.UtcNow);
-                report.Summary.FailureEmailNotifications = failureNotifications.Count;
-                report.Summary.FailureEmailNotificationsSent = failureNotifications.Count(notification =>
-                    notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Sent);
-                report.Summary.FailureEmailNotificationsFailed = failureNotifications.Count(notification =>
-                    notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Failed);
-                report.Summary.FailureEmailNotificationsPending = failureNotifications.Count(notification =>
-                    notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Pending);
-
-                var paymentNotificationsById = failureNotifications
-                    .Where(notification => notification.Payment != null)
-                    .GroupBy(notification => notification.Payment.Id)
-                    .ToDictionary(group => group.Key, group => group.Count());
-
-                foreach (Subscription subscription in subscriptions)
-                {
-                    report.Subscriptions.Add(this.ReconcileSubscription(
-                        subscription,
-                        targetConfiguration,
-                        paymentNotificationsById,
-                        report.Summary));
-                }
-
-                report.Summary.LocalDonations = subscriptions
-                    .SelectMany(GetSubscriptionDonations)
-                    .Select(donation => donation.Id)
-                    .Distinct()
-                    .Count();
-                report.Status = report.Subscriptions.Any(row => row.ProviderLookupStatus == "Failed")
-                    ? (report.Summary.ProviderSubscriptionsRead > 0 ? "Partial" : "Failed")
-                    : "Succeeded";
+                this.PopulateSubscriptionReport(report, subscriptions, failureNotifications, targetConfiguration);
             }
             catch (Exception exception)
             {
@@ -199,6 +170,52 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
             }
 
             return report;
+        }
+
+        internal void PopulateSubscriptionReport(
+            SubscriptionEnvironmentReport report,
+            IReadOnlyCollection<Subscription> subscriptions,
+            IReadOnlyCollection<PaymentNotifications> failureNotifications,
+            IConfiguration targetConfiguration)
+        {
+            report.Summary.LocalSubscriptions = subscriptions.Count;
+            report.Summary.ActiveSubscriptions = subscriptions.Count(subscription =>
+                subscription.Status == SubscriptionStatus.Active && !subscription.IsDeleted);
+            DateTime now = DateTime.UtcNow;
+            report.Summary.LocalExpiredSubscriptions = subscriptions.Count(subscription =>
+                subscription.ExpirationTime <= now);
+            report.Summary.NonExpiredSubscriptions = subscriptions.Count(subscription =>
+                subscription.ExpirationTime > now);
+            report.Summary.FailureEmailNotifications = failureNotifications.Count;
+            report.Summary.FailureEmailNotificationsSent = failureNotifications.Count(notification =>
+                notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Sent);
+            report.Summary.FailureEmailNotificationsFailed = failureNotifications.Count(notification =>
+                notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Failed);
+            report.Summary.FailureEmailNotificationsPending = failureNotifications.Count(notification =>
+                notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Pending);
+
+            var paymentNotificationsById = failureNotifications
+                .Where(notification => notification.Payment != null)
+                .GroupBy(notification => notification.Payment.Id)
+                .ToDictionary(group => group.Key, group => group.Count());
+
+            foreach (Subscription subscription in subscriptions)
+            {
+                report.Subscriptions.Add(this.ReconcileSubscription(
+                    subscription,
+                    targetConfiguration,
+                    paymentNotificationsById,
+                    report.Summary));
+            }
+
+            report.Summary.LocalDonations = subscriptions
+                .SelectMany(GetSubscriptionDonations)
+                .Select(donation => donation.Id)
+                .Distinct()
+                .Count();
+            report.Status = report.Summary.ProviderLookupFailures > 0
+                ? (report.Summary.ProviderSubscriptionsRead > 0 ? "Partial" : "Failed")
+                : "Succeeded";
         }
 
         private SubscriptionReconciliationRow ReconcileSubscription(
@@ -258,7 +275,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
 
             try
             {
-                ISubscriptionPaymentApi api = CreateSubscriptionApi(subscription, targetConfiguration);
+                ISubscriptionPaymentApi api = this.createSubscriptionApi(subscription, targetConfiguration);
                 SubscriptionIdGet200Response provider = api.SubscriptionIdGet(easypaySubscriptionId);
                 if (provider == null)
                 {
@@ -309,11 +326,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                 {
                     summary.FailoverEnabledSubscriptions++;
                     row.ReconciliationNotes.Add("Failover is enabled at Easypay; the site does not currently have a verified donor-facing failover recovery flow.");
-                }
-
-                if (subscription.ExpirationTime > DateTime.UtcNow)
-                {
-                    summary.NonExpiredSubscriptions++;
                 }
 
                 summary.ProviderSubscriptionsRead++;

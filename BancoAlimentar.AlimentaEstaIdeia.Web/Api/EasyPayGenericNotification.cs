@@ -198,7 +198,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                 subject,
                 NotificationType.SubscriptionPaymentFailureEmail))
             {
-                return null;
+                if (this.context.PaymentNotificationRepository.EmailNotificationWasSent(
+                    payment.Id,
+                    NotificationType.SubscriptionPaymentFailureEmail))
+                {
+                    return null;
+                }
+
+                this.telemetryClient.TrackEvent("SubscriptionPaymentFailureEmailAwaitingDelivery");
+                return this.StatusCode((int)HttpStatusCode.ServiceUnavailable);
             }
 
             try

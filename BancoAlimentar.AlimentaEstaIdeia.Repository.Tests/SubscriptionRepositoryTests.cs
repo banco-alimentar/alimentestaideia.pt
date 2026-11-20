@@ -373,6 +373,101 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// A same-day capture reuses the existing initial-donation link.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task CompleteSubscriptionCaptureReusesInitialDonationLink()
+        {
+            DateTime captureDate = DateTime.UtcNow;
+            var (subscription, donation) = await this.SeedSubscriptionAsync(
+                SubscriptionStatus.Active,
+                initialDonationDate: captureDate);
+            donation.PaymentStatus = PaymentStatus.WaitingPayment;
+            await this.context.SaveChangesAsync();
+            var evidence = new EasyPaySubscriptionPaymentEvidence
+            {
+                EasypaySubscriptionId = subscription.EasyPaySubscriptionId,
+                EasypayPaymentId = Guid.NewGuid().ToString(),
+                TransactionKey = subscription.TransactionKey,
+                PaymentDate = captureDate,
+                Requested = 5,
+                Paid = 5,
+            };
+
+            var result = this.repository.CompleteSubscriptionCapture(evidence);
+            var replay = this.repository.CompleteSubscriptionCapture(evidence);
+
+            Assert.Equal(donation.Id, result.DonationId);
+            Assert.Equal(result, replay);
+            Assert.Equal(PaymentStatus.Payed, donation.PaymentStatus);
+            int linkCount = await this.context.SubscriptionDonations.CountAsync(
+                link => link.Subscription.Id == subscription.Id);
+            int paymentCount = await this.context.Payments.CountAsync(
+                payment => payment.TransactionKey == subscription.TransactionKey);
+            Assert.Equal(1, linkCount);
+            Assert.Equal(1, paymentCount);
+        }
+
+        /// <summary>
+        /// A same-day unmatched capture cannot replace a paid or confirmed initial donation.
+        /// </summary>
+        /// <param name="status">Incoming capture status.</param>
+        /// <param name="confirmed">Whether the initial donation has a confirmed payment.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Theory]
+        [InlineData(NotificationGeneric.StatusEnum.Failed, false)]
+        [InlineData(NotificationGeneric.StatusEnum.Failed, true)]
+        [InlineData(NotificationGeneric.StatusEnum.Success, false)]
+        [InlineData(NotificationGeneric.StatusEnum.Success, true)]
+        public async Task CompleteSubscriptionCapturePreservesPaidInitialDonation(
+            NotificationGeneric.StatusEnum status,
+            bool confirmed)
+        {
+            DateTime captureDate = DateTime.UtcNow;
+            var (subscription, donation) = await this.SeedSubscriptionAsync(
+                SubscriptionStatus.Active,
+                initialDonationDate: captureDate);
+            if (confirmed)
+            {
+                donation.PaymentStatus = PaymentStatus.WaitingPayment;
+                donation.ConfirmedPayment = new CreditCardPayment
+                {
+                    Created = captureDate.AddDays(-1),
+                    TransactionKey = Guid.NewGuid().ToString(),
+                    Donation = donation,
+                    Completed = captureDate.AddDays(-1),
+                    Status = "Success",
+                    Requested = 5,
+                    Paid = 5,
+                };
+                await this.context.SaveChangesAsync();
+            }
+
+            PaymentStatus previousStatus = donation.PaymentStatus;
+            var result = this.repository.CompleteSubscriptionCapture(
+                new EasyPaySubscriptionPaymentEvidence
+                {
+                    EasypaySubscriptionId = subscription.EasyPaySubscriptionId,
+                    EasypayPaymentId = Guid.NewGuid().ToString(),
+                    TransactionKey = subscription.TransactionKey,
+                    PaymentDate = captureDate,
+                    Requested = 5,
+                    Paid = status == NotificationGeneric.StatusEnum.Success ? 5 : 0,
+                },
+                status);
+
+            Assert.Equal("Donation already has a confirmed payment", result.Reason);
+            Assert.Equal(previousStatus, donation.PaymentStatus);
+            Assert.Equal(confirmed, donation.ConfirmedPayment != null);
+            Assert.False(await this.context.Payments.AnyAsync(
+                payment => payment.TransactionKey == subscription.TransactionKey));
+            int linkCount = await this.context.SubscriptionDonations.CountAsync(
+                link => link.Subscription.Id == subscription.Id);
+            Assert.Equal(1, linkCount);
+        }
+
+        /// <summary>
         /// Returns an existing capture payment donation id when dates differ.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>

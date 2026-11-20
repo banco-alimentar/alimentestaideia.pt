@@ -50,6 +50,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Checks whether an email was delivered, independently of pending delivery claims.
+        /// </summary>
+        /// <param name="paymentId">Payment id.</param>
+        /// <param name="notificationType">Notification type.</param>
+        /// <returns>True only when delivery was recorded as sent.</returns>
+        public bool EmailNotificationWasSent(int paymentId, NotificationType notificationType = NotificationType.Email)
+        {
+            return this.DbContext.PaymentNotifications.AsNoTracking().Any(
+                notification => notification.Payment.Id == paymentId
+                    && notification.NotificationType == notificationType
+                    && notification.DeliveryStatus == PaymentNotificationDeliveryStatus.Sent);
+        }
+
+        /// <summary>
         /// Adds the payment notification to the database.
         /// </summary>
         /// <param name="user">User.</param>

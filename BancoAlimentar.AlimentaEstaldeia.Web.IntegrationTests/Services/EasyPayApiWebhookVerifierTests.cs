@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
@@ -209,6 +210,78 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.Services
 
             Assert.False(result.IsValid);
             Assert.Equal("easypay_capture_status_mismatch", result.FailureReason);
+        }
+
+        /// <summary>
+        /// Only explicit provider failures can validate failed single-payment notifications.
+        /// </summary>
+        /// <param name="status">Provider method status.</param>
+        /// <param name="expectedValid">Whether the status proves failure.</param>
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("", false)]
+        [InlineData("unrecognized", false)]
+        [InlineData("pending", false)]
+        [InlineData("failed", true)]
+        [InlineData("error", true)]
+        public async Task VerifyGenericNotificationAsync_RequiresExplicitProviderFailure(
+            string status,
+            bool expectedValid)
+        {
+            (Donation donation, string transactionKey) = await this.SeedPendingDonationAsync();
+            Guid paymentId = Guid.NewGuid();
+            var provider = CreateProviderPayment(donation.PublicId, DonationAmount, "pending");
+            provider.Method.Status = status;
+            this.ConfigureProviderPayment(paymentId, provider);
+
+            var result = await this.verifier.VerifyGenericNotificationAsync(new NotificationGeneric(
+                id: paymentId,
+                key: transactionKey,
+                type: NotificationGeneric.TypeEnum.Capture,
+                status: NotificationGeneric.StatusEnum.Failed));
+
+            Assert.Equal(expectedValid, result.IsValid);
+            if (!expectedValid)
+            {
+                Assert.Equal("easypay_capture_status_mismatch", result.FailureReason);
+            }
+        }
+
+        /// <summary>
+        /// A forged failed callback cannot convert a matching unpaid subscription transaction to failure evidence.
+        /// </summary>
+        [Fact]
+        public async Task VerifyGenericNotificationAsync_RejectsUnverifiedSubscriptionFailure()
+        {
+            (Guid subscriptionId, string transactionKey) = await this.SeedSubscriptionAsync();
+            Guid captureId = Guid.NewGuid();
+            DateTime captureDate = DateTime.UtcNow;
+            var provider = CreateProviderSubscription(subscriptionId, transactionKey);
+            provider.Value = (decimal)DonationAmount;
+            provider.Transactions = new Collection<SubscriptionIdGet200ResponseTransactionsInner>
+            {
+                new SubscriptionIdGet200ResponseTransactionsInner(
+                    id: captureId.ToString(),
+                    key: transactionKey,
+                    date: captureDate.ToString("O"),
+                    values: new SubscriptionIdGet200ResponseTransactionsInnerValues(
+                        requested: (decimal)DonationAmount,
+                        paid: 0)),
+            };
+            this.subscriptionPaymentApi
+                .Setup(api => api.SubscriptionIdGetAsync(subscriptionId, It.IsAny<int>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(provider);
+
+            var result = await this.verifier.VerifyGenericNotificationAsync(new NotificationGeneric(
+                id: captureId,
+                key: transactionKey,
+                type: NotificationGeneric.TypeEnum.SubscriptionCapture,
+                status: NotificationGeneric.StatusEnum.Failed,
+                date: captureDate.ToString("O")));
+
+            Assert.False(result.IsValid);
+            Assert.Null(result.VerifiedSubscriptionPayment);
+            Assert.Equal("subscription_terminal_failure_not_verified", result.FailureReason);
         }
 
         /// <summary>

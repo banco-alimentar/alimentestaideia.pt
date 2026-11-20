@@ -369,6 +369,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                 if (evidence.PaymentDate.Date == subscription.InitialDonation.DonationDate.Date)
                 {
                     donation = subscription.InitialDonation;
+                    this.DbContext.Entry(donation).Reference(d => d.ConfirmedPayment).Load();
+                    if (donation.PaymentStatus == PaymentStatus.Payed || donation.ConfirmedPayment != null)
+                    {
+                        return (donation.Id, "Donation already has a confirmed payment");
+                    }
+
+                    if (this.DbContext.SubscriptionDonations.Any(link =>
+                        link.DonationId == donation.Id && link.Subscription.Id != subscription.Id))
+                    {
+                        return (donation.Id, "Payment donation does not belong to the subscription");
+                    }
                 }
                 else
                 {
@@ -382,11 +393,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.DbContext.Donations.Add(donation);
                 }
 
-                this.DbContext.SubscriptionDonations.Add(new SubscriptionDonations
+                if (!this.DbContext.SubscriptionDonations.Any(link =>
+                    link.Subscription.Id == subscription.Id && link.DonationId == donation.Id))
                 {
-                    Donation = donation,
-                    Subscription = subscription,
-                });
+                    this.DbContext.SubscriptionDonations.Add(new SubscriptionDonations
+                    {
+                        Donation = donation,
+                        Subscription = subscription,
+                    });
+                }
 
                 payment = new CreditCardPayment
                 {

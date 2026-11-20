@@ -236,10 +236,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// Selects a failed transaction only when its requested amount and zero paid value match.
+        /// Matching identity, amount and date do not prove that an unpaid capture has failed.
         /// </summary>
         [Fact]
-        public void SelectsFailedTransactionEvidence()
+        public void RejectsUnpaidTransactionWithoutTerminalFailureEvidence()
         {
             Guid subscriptionId = Guid.NewGuid();
             Guid paymentId = Guid.NewGuid();
@@ -259,10 +259,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 paymentDate,
                 5.40d);
 
-            Assert.True(result.IsMatch);
-            Assert.Equal(paymentId.ToString(), result.Evidence.EasypayPaymentId);
-            Assert.Equal(5.40m, result.Evidence.Requested);
-            Assert.Equal(0, result.Evidence.Paid);
+            Assert.False(result.IsMatch);
+            Assert.Null(result.Evidence);
+            Assert.Equal("subscription_terminal_failure_not_verified", result.FailureReason);
         }
 
         /// <summary>
@@ -289,7 +288,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 5.40d);
 
             Assert.False(result.IsMatch);
-            Assert.Equal("subscription_failed_transaction_not_found", result.FailureReason);
+            Assert.Equal("subscription_terminal_failure_not_verified", result.FailureReason);
         }
 
         /// <summary>

@@ -232,6 +232,100 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Unsent active claims remain retryable; expired claims can be reclaimed without duplicate alerts.
+        /// </summary>
+        /// <param name="expired">Whether the existing claim has expired.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task EasyPayGeneric_FailedSubscriptionCapture_PreservesPendingEmailRetry(bool expired)
+        {
+            DateTime captureDate = DateTime.UtcNow;
+            using var webFactory = this.CreateWebhookFactory(emailEnabled: true);
+            IntegrationTestDataSeeder.SubscriptionCaptureSeed seed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedSubscriptionWithCapturePaymentAsync(
+                    scope.ServiceProvider,
+                    captureDate);
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var payment = await context.Payments.Include(value => value.Donation)
+                    .ThenInclude(donation => donation.User)
+                    .SingleAsync(value => value.TransactionKey == seed.TransactionKey);
+                context.PaymentNotifications.Add(new PaymentNotifications
+                {
+                    Created = DateTime.UtcNow,
+                    Payment = payment,
+                    User = payment.Donation.User,
+                    NotificationType = NotificationType.SubscriptionPaymentFailureEmail,
+                    DeliveryStatus = PaymentNotificationDeliveryStatus.Pending,
+                    LastAttemptAtUtc = DateTime.UtcNow.AddMinutes(expired ? -16 : -1),
+                    AttemptCount = 1,
+                });
+                await context.SaveChangesAsync();
+            }
+
+            var payload = EasyPayWebhookPayloadBuilder.BuildGenericSubscriptionCaptureNotification(
+                seed.EasyPayId,
+                seed.TransactionKey,
+                captureDate,
+                success: false);
+            var response = await this.PostJsonAsync(webFactory.CreateClient(), "/easypay/generic", payload);
+
+            Assert.Equal(expired ? HttpStatusCode.OK : HttpStatusCode.ServiceUnavailable, response.StatusCode);
+            var tracker = webFactory.Services.GetRequiredService<StubMailTracker>();
+            Assert.Equal(expired ? 1 : 0, tracker.SendMailCalls);
+            using var assertScope = webFactory.Services.CreateScope();
+            var assertContext = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var notification = await assertContext.PaymentNotifications.SingleAsync(
+                value => value.Payment.Donation.Id == seed.CaptureDonationId);
+            Assert.Equal(
+                expired ? PaymentNotificationDeliveryStatus.Sent : PaymentNotificationDeliveryStatus.Pending,
+                notification.DeliveryStatus);
+            Assert.Equal(expired ? 2 : 1, notification.AttemptCount);
+        }
+
+        /// <summary>
+        /// A rejected capture on a paid initial donation cannot send a misleading failure email.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Fact]
+        public async Task EasyPayGeneric_FailedSubscriptionCapture_DoesNotNotifyForRejectedCapture()
+        {
+            DateTime captureDate = DateTime.UtcNow;
+            using var webFactory = this.CreateWebhookFactory(emailEnabled: true);
+            IntegrationTestDataSeeder.SubscriptionRecurringCaptureSeed seed;
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                seed = await IntegrationTestDataSeeder.SeedActiveSubscriptionForRecurringCaptureAsync(
+                    scope.ServiceProvider,
+                    captureDate);
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var donation = await context.Donations.SingleAsync(value => value.Id == seed.InitialDonationId);
+                donation.DonationDate = captureDate;
+                donation.PaymentStatus = PaymentStatus.Payed;
+                await context.SaveChangesAsync();
+            }
+
+            var payload = EasyPayWebhookPayloadBuilder.BuildGenericSubscriptionCaptureNotification(
+                seed.EasyPayId,
+                seed.TransactionKey,
+                captureDate,
+                success: false);
+            var response = await this.PostJsonAsync(webFactory.CreateClient(), "/easypay/generic", payload);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(0, webFactory.Services.GetRequiredService<StubMailTracker>().SendMailCalls);
+            using var assertScope = webFactory.Services.CreateScope();
+            var assertContext = assertScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            Assert.Equal(PaymentStatus.Payed, (await assertContext.Donations.FindAsync(seed.InitialDonationId)).PaymentStatus);
+            Assert.False(await assertContext.Payments.AnyAsync(value => value.TransactionKey == seed.TransactionKey));
+            Assert.False(await assertContext.PaymentNotifications.AnyAsync(
+                value => value.NotificationType == NotificationType.SubscriptionPaymentFailureEmail));
+        }
+
+        /// <summary>
         /// Generic event types not used by the site cannot change payment state.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
