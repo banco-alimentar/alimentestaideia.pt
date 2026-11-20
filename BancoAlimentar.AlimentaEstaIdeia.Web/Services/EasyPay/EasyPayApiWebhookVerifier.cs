@@ -200,7 +200,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay
             SinglePaymentStatus providerStatus = verifiedPayment.ResolvePaymentStatus();
             bool providerStatusMatchesNotification = notification.Status == NotificationGeneric.StatusEnum.Success
                 ? providerStatus == SinglePaymentStatus.Paid
-                : providerStatus == SinglePaymentStatus.Failed || providerStatus == SinglePaymentStatus.Error;
+                : providerStatus == SinglePaymentStatus.Failed
+                    || (providerStatus == SinglePaymentStatus.Error
+                        && string.Equals(verifiedPayment.Method?.Status, "error", StringComparison.OrdinalIgnoreCase));
             if (!providerStatusMatchesNotification)
             {
                 return EasyPayWebhookVerificationResult.Invalid("easypay_capture_status_mismatch");
