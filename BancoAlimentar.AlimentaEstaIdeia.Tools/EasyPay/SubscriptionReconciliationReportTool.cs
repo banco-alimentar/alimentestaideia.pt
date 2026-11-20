@@ -186,7 +186,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.EasyPay
                     .Select(donation => donation.Id)
                     .Distinct()
                     .Count();
-                report.Status = "Succeeded";
+                report.Status = report.Subscriptions.Any(row => row.ProviderLookupStatus == "Failed")
+                    ? (report.Summary.ProviderSubscriptionsRead > 0 ? "Partial" : "Failed")
+                    : "Succeeded";
             }
             catch (Exception exception)
             {
