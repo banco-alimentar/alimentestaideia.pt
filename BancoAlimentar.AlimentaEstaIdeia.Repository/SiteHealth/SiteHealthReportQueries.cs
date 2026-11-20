@@ -6,6 +6,9 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
 {
+    using System;
+    using System.Globalization;
+
     /// <summary>
     /// Kusto queries for site health reporting against Log Analytics App* tables.
     /// </summary>
@@ -34,8 +37,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         /// </summary>
         /// <param name="window">Kusto ago window (24h or 7d).</param>
         /// <param name="appRoleName">App role name or empty for CI/unscoped.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Kusto query.</returns>
-        public static string EventCountsByName(string window, string appRoleName)
+        public static string EventCountsByName(string window, string appRoleName, DateTime? asOfUtc = null)
         {
             string roleFilter = string.IsNullOrWhiteSpace(appRoleName)
                 ? "| where isempty(AppRoleName) or AppRoleName !contains \"alimentaestaideia\""
@@ -43,7 +47,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
 
             return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{TimeRangeFilter(window, asOfUtc)}
 | where Name in ({EventNameList()})
 {roleFilter}
 | summarize count() by Name
@@ -55,12 +59,13 @@ AppEvents
         /// </summary>
         /// <param name="window">Kusto ago window.</param>
         /// <param name="appRoleName">Production app role name.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Kusto query.</returns>
-        public static string EasypayRejectionReasons(string window, string appRoleName)
+        public static string EasypayRejectionReasons(string window, string appRoleName, DateTime? asOfUtc = null)
         {
             return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{TimeRangeFilter(window, asOfUtc)}
 | where Name == ""EasypayWebhookRejected""
 | where AppRoleName == ""{Escape(appRoleName)}""
 | summarize count() by Reason = tostring(Properties.Reason)
@@ -72,12 +77,13 @@ AppEvents
         /// </summary>
         /// <param name="window">Kusto ago window.</param>
         /// <param name="appRoleName">Production app role name.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Kusto query.</returns>
-        public static string EasypayLookupDistinctKeys(string window, string appRoleName)
+        public static string EasypayLookupDistinctKeys(string window, string appRoleName, DateTime? asOfUtc = null)
         {
             return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{TimeRangeFilter(window, asOfUtc)}
 | where Name == ""EasypayApiLookupFailed""
 | where AppRoleName == ""{Escape(appRoleName)}""
 | summarize DistinctKeys = dcount(tostring(Properties.TransactionKey))";
@@ -88,12 +94,13 @@ AppEvents
         /// </summary>
         /// <param name="window">Kusto ago window.</param>
         /// <param name="appRoleName">Production app role name.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Kusto query.</returns>
-        public static string RequestCount(string window, string appRoleName)
+        public static string RequestCount(string window, string appRoleName, DateTime? asOfUtc = null)
         {
             return $@"
 AppRequests
-| where TimeGenerated > ago({window})
+{TimeRangeFilter(window, asOfUtc)}
 | where AppRoleName == ""{Escape(appRoleName)}""
 | summarize RequestCount = count()";
         }
@@ -103,12 +110,13 @@ AppRequests
         /// </summary>
         /// <param name="window">Kusto ago window.</param>
         /// <param name="appRoleName">Production app role name.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Kusto query.</returns>
-        public static string FailedRequestCount(string window, string appRoleName)
+        public static string FailedRequestCount(string window, string appRoleName, DateTime? asOfUtc = null)
         {
             return $@"
 AppRequests
-| where TimeGenerated > ago({window})
+{TimeRangeFilter(window, asOfUtc)}
 | where AppRoleName == ""{Escape(appRoleName)}""
 | where Success == false and ResultCode !in (""404"")
 | summarize FailedRequestCount = count()";
@@ -119,14 +127,40 @@ AppRequests
         /// </summary>
         /// <param name="window">Kusto ago window.</param>
         /// <param name="appRoleName">Production app role name.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Kusto query.</returns>
-        public static string ExceptionCount(string window, string appRoleName)
+        public static string ExceptionCount(string window, string appRoleName, DateTime? asOfUtc = null)
         {
             return $@"
 AppExceptions
-| where TimeGenerated > ago({window})
+{TimeRangeFilter(window, asOfUtc)}
 | where AppRoleName == ""{Escape(appRoleName)}""
 | summarize ExceptionCount = count()";
+        }
+
+        /// <summary>
+        /// Builds a time range relative to a fixed report timestamp, or a rolling window when omitted.
+        /// </summary>
+        /// <param name="window">Kusto ago window (24h or 7d).</param>
+        /// <param name="asOfUtc">Optional fixed end time in UTC.</param>
+        /// <returns>Kusto time filter.</returns>
+        public static string TimeRangeFilter(string window, DateTime? asOfUtc)
+        {
+            if (!asOfUtc.HasValue)
+            {
+                return $"| where TimeGenerated > ago({window})";
+            }
+
+            TimeSpan duration = string.Equals(window, "7d", StringComparison.OrdinalIgnoreCase)
+                ? TimeSpan.FromDays(7)
+                : TimeSpan.FromHours(24);
+            DateTime endUtc = asOfUtc.Value.Kind == DateTimeKind.Utc
+                ? asOfUtc.Value
+                : asOfUtc.Value.ToUniversalTime();
+            DateTime startUtc = endUtc - duration;
+            string start = startUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ", CultureInfo.InvariantCulture);
+            string end = endUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffffffZ", CultureInfo.InvariantCulture);
+            return $"| where TimeGenerated > datetime({start}) and TimeGenerated <= datetime({end})";
         }
 
         private static string EventNameList()

@@ -139,6 +139,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
 
             try
             {
+                DateTime telemetryAsOfUtc = DateTime.UtcNow;
                 this.generationState.SetProgress(5, $"Querying Application Insights ({slot.DisplayLabel}, 24h)…");
                 await this.PersistStatusAsync(cancellationToken).ConfigureAwait(false);
 
@@ -146,6 +147,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                     options,
                     slot,
                     "24h",
+                    telemetryAsOfUtc,
                     cancellationToken).ConfigureAwait(false);
 
                 this.generationState.SetProgress(45, $"Querying Application Insights ({slot.DisplayLabel}, 7d)…");
@@ -155,6 +157,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                     options,
                     slot,
                     "7d",
+                    telemetryAsOfUtc,
                     cancellationToken).ConfigureAwait(false);
 
                 this.generationState.SetProgress(85, "Saving report…");
@@ -163,6 +166,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                 SiteHealthReport report = new SiteHealthReport
                 {
                     GeneratedAtUtc = DateTime.UtcNow,
+                    TelemetryAsOfUtc = telemetryAsOfUtc,
                     GeneratedBy = generatedBy,
                     WorkspaceId = options.LogAnalyticsWorkspaceId,
                     SlotKey = slot.SlotKey,
@@ -199,6 +203,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
             SiteHealthReportOptions options,
             SiteHealthResolvedSlot slot,
             string window,
+            DateTime asOfUtc,
             CancellationToken cancellationToken)
         {
             string workspaceId = options.LogAnalyticsWorkspaceId;
@@ -206,35 +211,35 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
 
             long requestCount = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.RequestCount(window, targetRole),
+                SiteHealthReportQueries.RequestCount(window, targetRole, asOfUtc),
                 "RequestCount",
                 cancellationToken).ConfigureAwait(false);
 
             long failedRequestCount = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.FailedRequestCount(window, targetRole),
+                SiteHealthReportQueries.FailedRequestCount(window, targetRole, asOfUtc),
                 "FailedRequestCount",
                 cancellationToken).ConfigureAwait(false);
 
             long exceptionCount = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.ExceptionCount(window, targetRole),
+                SiteHealthReportQueries.ExceptionCount(window, targetRole, asOfUtc),
                 "ExceptionCount",
                 cancellationToken).ConfigureAwait(false);
 
             Dictionary<string, long> eventCounts = await this.EventCountsAsync(
                 workspaceId,
-                SiteHealthReportQueries.EventCountsByName(window, targetRole),
+                SiteHealthReportQueries.EventCountsByName(window, targetRole, asOfUtc),
                 cancellationToken).ConfigureAwait(false);
 
             Dictionary<string, long> rejectionReasons = await this.RejectionReasonsAsync(
                 workspaceId,
-                SiteHealthReportQueries.EasypayRejectionReasons(window, targetRole),
+                SiteHealthReportQueries.EasypayRejectionReasons(window, targetRole, asOfUtc),
                 cancellationToken).ConfigureAwait(false);
 
             long easypayDistinctKeys = await this.ScalarLongAsync(
                 workspaceId,
-                SiteHealthReportQueries.EasypayLookupDistinctKeys(window, targetRole),
+                SiteHealthReportQueries.EasypayLookupDistinctKeys(window, targetRole, asOfUtc),
                 "DistinctKeys",
                 cancellationToken).ConfigureAwait(false);
 

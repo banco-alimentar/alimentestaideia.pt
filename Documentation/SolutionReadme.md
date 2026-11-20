@@ -301,7 +301,7 @@ Tools ──► Model, Repository, Sas.*
 - No dedicated tests for `Sas.ConfigurationProvider`, **Function** triggers, or **Paypal** project.
 - **Payment webhooks** — limited automated contract/security tests (not enough evidence of full EasyPay signature coverage).
 - **TenantManagement** — no test project.
-- **GitHub Actions** — `dotnet test` **commented out**.
+- **CI tests** — Azure DevOps runs the test projects and Selenium checks for PRs.
 - Repository/SAS tests depend on **full Web** project.
 
 ### 6.3 Highest-value tests to add first
@@ -321,13 +321,13 @@ Tools ──► Model, Repository, Sas.*
 | **Target frameworks** | Almost all **net9.0**; **Easypay.Rest.Client** is **net8.0**. |
 | **Warnings as errors** | Most projects; undermined on `Sas.ConfigurationProvider` (`WarningLevel` 0). |
 | **Missing pipeline file** | `azure-pipeline-core.yml` in solution, absent on disk. |
-| **GitHub Actions** | `checkout@v5`, `setup-dotnet@v5` (Node 24); **build only**, no test gate. |
+| **Azure DevOps** | PR build, five test projects, Selenium, coverage, and scheduled NuGet audit on the `Default` Linux pool. |
 | **Package drift** | `Microsoft.AspNetCore.Http.Abstractions` **2.3.0** on some net9 projects alongside `FrameworkReference`. |
 | **Migrations** | Two contexts, two migration assemblies — deploy must run both. |
 | **Publish size** | Large `wwwroot`, tenant themes, PDF generation — `TenantStaticSyncHostedService` for static sync. |
 | **Secrets in repo** | `**/local.settings.json` gitignored; historical secrets still in git objects. |
 
-**CI/CD:** Selenium pipeline separate (`azure-pipeline-selenium-ui-tests.yml`); core build/test/release path fragmented.
+**CI/CD:** PR validation and dependency audit share `azure-pipeline-selenium-ui-tests.yml`; Core, developer, and preproduction deployment flows remain separate.
 
 ---
 
@@ -370,7 +370,7 @@ Tools ──► Model, Repository, Sas.*
 | 3 | Upgrade GitHub Actions to v5 / Node 24 | Deprecation warnings | CI longevity | **Done** |
 | 4 | Gitignore **Function `local.settings.json`** | Secret commits | Safer dev | **Done** |
 | 5 | Fix **DocumentationFile** net9.0 path | Stale tooling | Clean builds | **Done** |
-| 6 | Enable **`dotnet test`** in GitHub Actions | No test gate | Catch regressions | Open |
+| 6 | Consolidate PR build/test validation in Azure DevOps | CI split across GitHub Actions and Azure Pipelines | One self-hosted agent and one PR gate | In progress |
 | 7 | Keep **PayPal sandbox credentials** in user secrets / CI only (removed Playwright E2E project that had hardcoded password) | Credential in git | Rotatable secrets | Done (E2E removed) |
 | 8 | **Rotate + purge** historical secrets (Unicre, storage keys, etc.) | Git history exposure | Compliance | Open |
 | 9 | Restore or remove broken **`azure-pipeline-core.yml`** solution link | Broken solution items | Cleaner repo | Open |
