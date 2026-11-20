@@ -118,6 +118,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                         throw new InvalidOperationException("Easypay returned no subscription details.");
                     }
 
+                    if (current.Id != easypaySubscriptionId
+                        || string.IsNullOrWhiteSpace(subscription.TransactionKey)
+                        || !string.Equals(current.Key, subscription.TransactionKey, StringComparison.Ordinal))
+                    {
+                        throw new InvalidOperationException("Easypay subscription identity does not match the local subscription.");
+                    }
+
                     if (current.Retries >= 3
                         || current.Method?.Status != SubscriptionIdGet200ResponseMethod.StatusEnum.Active)
                     {
