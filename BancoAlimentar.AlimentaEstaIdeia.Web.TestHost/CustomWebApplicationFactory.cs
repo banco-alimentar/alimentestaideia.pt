@@ -85,6 +85,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         /// <inheritdoc />
         protected override IHost CreateHost(IHostBuilder builder)
         {
+            // Host configuration runs before the default JSON and user-secrets providers are built.
+            builder.ConfigureHostConfiguration(config => config.AddInMemoryCollection(new Dictionary<string, string>
+            {
+                ["hostBuilder:reloadConfigOnChange"] = bool.FalseString,
+            }));
             builder.UseDefaultServiceProvider((context, options) =>
             {
                 options.ValidateScopes = false;

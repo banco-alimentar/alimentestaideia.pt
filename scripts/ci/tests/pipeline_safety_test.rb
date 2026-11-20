@@ -117,7 +117,11 @@ module PipelinePolicy
     when Array then value.map { |child| substitute_parameters(child, parameters) }
     when Hash then value.each_with_object({}) { |(key, child), result| result[key] = substitute_parameters(child, parameters) }
     when String
-      value.gsub(/\$\{\{\s*parameters\.([\w]+)\s*\}\}/) { parameters.fetch(Regexp.last_match(1)).to_s }
+      if (match = /\A\$\{\{\s*parameters\.([\w]+)\s*\}\}\z/.match(value))
+        parameters.fetch(match[1])
+      else
+        value.gsub(/\$\{\{\s*parameters\.([\w]+)\s*\}\}/) { parameters.fetch(Regexp.last_match(1)).to_s }
+      end
     else value
     end
   end
@@ -163,73 +167,117 @@ class PipelineSafetyTest < Minitest::Test
     'DeployFunctionDeveloper' => %w[DeployDeveloper Build BrowserRegression]
   }.freeze
 
-  def test_github_triggers_include_documentation_only_prs_pushes_and_plain_dispatch
-    workflow = read_yaml('.github/workflows/alimentestaideia.yaml')
-    events = workflow['on'] || workflow[true]
-    assert_kind_of Hash, events
-    %w[pull_request push].each do |event|
-      assert_kind_of Hash, events[event], "Missing #{event} trigger"
-      assert_equal %w[developer master], events[event].fetch('branches').sort
-      %w[paths paths-ignore branches-ignore].each { |key| refute events[event].key?(key), "#{event} must not filter #{key}" }
-    end
-    assert events.key?('workflow_dispatch')
-    assert [nil, {}].include?(events['workflow_dispatch']), 'workflow_dispatch must be plain'
-  end
-
-  def test_github_uses_read_only_permissions
-    workflow = read_yaml('.github/workflows/alimentestaideia.yaml')
-    assert_equal({ 'contents' => 'read' }, workflow['permissions'])
-    workflow.fetch('jobs').each_value do |job|
-      permissions = job['permissions']
-      next unless permissions
-
-      assert permissions == 'read-all' || (permissions.is_a?(Hash) && permissions.values.all? { |value| %w[read none].include?(value) }),
-             'Job permissions must not grant writes'
-    end
-  end
-
-  def test_github_required_aggregate_runs_always_and_fails_closed
-    workflow = read_yaml('.github/workflows/alimentestaideia.yaml')
-    aggregate = workflow.fetch('jobs').values.find { |job| job['name'] == 'Required build and tests' }
-    refute_nil aggregate, 'Missing stable Required build and tests aggregate job'
-    assert_equal %w[build test], Array(aggregate['needs']).sort
-    assert_match(/\A(?:\$\{\{\s*)?always\(\)(?:\s*\}\})?\z/, aggregate['if'].to_s)
-    refute_equal true, aggregate['continue-on-error']
-    checks = aggregate.fetch('steps').select { |step| step.key?('run') }
-    refute_empty checks, 'Aggregate must check upstream results'
-    # Exercise the actual aggregate shell with substituted GitHub results. Only
-    # shell builtins are accepted here; this never invokes actions or network tools.
-    %w[success failure cancelled skipped].repeated_permutation(2) do |build, test|
-      values = { 'needs.build.result' => build, 'needs.test.result' => test }
-      outcomes = checks.map do |step|
-        refute_equal true, step['continue-on-error']
-        assert [nil, 'always()', '${{ always() }}'].include?(step['if']), 'Aggregate checks must not skip failed or canceled dependencies'
-        source = step.fetch('run').gsub(/\$\{\{\s*(needs\.(?:build|test)\.result)\s*\}\}/) { values.fetch(Regexp.last_match(1)) }
-        refute_match(/\$\{\{/, source, 'Unsupported aggregate expression')
-        refute_match(/\$\(|`/, source, 'Aggregate must not execute command substitutions')
-        syntax = source.gsub(/'[^']*'|"(?:[^"\\]|\\.)*"/m, 'quoted')
-        assert_match(/\A[\s\w\[\]"'$!=&|;:,().{}\\<>\/-]*\z/, syntax, 'Unsupported aggregate shell characters')
-        commands = syntax.gsub(/\[\[.*?\]\]/m, 'test').scan(/(?:\A|\n|;|&&|\|\|)\s*([a-zA-Z][\w-]*)/).flatten
-        assert_empty commands - %w[if then else elif fi exit echo printf set true false test], 'Aggregate must use shell builtins only'
-        environment = (aggregate['env'] || {}).merge(step['env'] || {}).transform_values do |value|
-          value.to_s.gsub(/\$\{\{\s*(needs\.(?:build|test)\.result)\s*\}\}/) { values.fetch(Regexp.last_match(1)) }
-        end
-        _, _, status = Open3.capture3(environment.merge('PATH' => '', 'BASH_ENV' => ''), '/bin/bash', '--noprofile', '--norc', '-c', source)
-        status.success?
-      end
-      assert_equal(build == 'success' && test == 'success', outcomes.all?, "Aggregate results: build=#{build}, test=#{test}")
-    end
-  end
-
-  def test_standalone_is_pr_and_manual_only_and_expands_the_shared_job
+  def test_azure_validation_is_pr_only_and_targets_developer
     path = 'azure-pipeline-selenium-ui-tests.yml'
     document = read_yaml(path)
     assert_equal 'none', document['trigger']
     assert_equal true, document.dig('pr', 'autoCancel')
-    assert_equal %w[developer master], document.dig('pr', 'branches', 'include').sort
-    refute document['pr'].key?('paths'), 'Documentation-only PRs must run'
-    assert_shared_job_reference(document.fetch('jobs'), path)
-    assert_equal ['Selenium'], pipeline(path).fetch('jobs').map { |job| job['job'] }
+    assert_equal %w[developer], document.dig('pr', 'branches', 'include').sort
+    assert_equal '23 6 * * 1', document.dig('schedules', 0, 'cron')
+    assert_equal ['master'], document.dig('schedules', 0, 'branches', 'include')
+    assert_equal true, document.dig('schedules', 0, 'always')
+
+    raw_jobs = document.fetch('jobs')
+    assert_shared_job_reference([raw_jobs.fetch(1)], path)
+    jobs = pipeline(path).fetch('jobs')
+    assert_equal %w[DotNetTests Selenium DependencyAudit], jobs.map { |job| job['job'] }
+    assert_equal 'Default', jobs.first.dig('pool', 'name')
+    assert_equal 'Default', jobs.last.dig('pool', 'name')
+    assert_equal ['DotNetTests'], jobs[1]['dependsOn']
+    assert_match(/succeededOrFailed/, jobs[1]['condition'])
+  end
+
+  def test_push_and_pr_path_filters_require_a_csharp_change
+    triggers = PIPELINES.keys.map { |path| [path, read_yaml(path).fetch('trigger')] }
+    path = 'azure-pipeline-selenium-ui-tests.yml'
+    triggers << [path, read_yaml(path).fetch('pr')]
+    scenarios = {
+      ['Program.cs'] => true,
+      ['BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs'] => true,
+      ['BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/DonationTest.cs'] => true,
+      ['Documentation/CI-Azure-DevOps.md', 'CHANGELOG.md'] => false,
+      ['azure-pipelines/core-build.yml', 'scripts/ci/tests/pipeline_safety_test.rb'] => false,
+      ['Directory.Packages.props', 'global.json', 'BancoAlimentar.AlimentaEstaIdeia.Web.sln'] => false,
+      ['Web/Web.csproj', 'Web/appsettings.json', 'Web/Pages/Index.cshtml', 'Web/wwwroot/site.css', 'Web/wwwroot/site.js'] => false,
+      ['Web/Program.CS', 'Web/Program.cs.txt'] => false,
+      ['README.md', 'Web/Nested/Service.cs', 'Web/appsettings.json'] => true
+    }
+
+    triggers.each do |pipeline_path, trigger|
+      filters = trigger.fetch('paths')
+      scenarios.each do |files, expected|
+        selected = files.any? do |file|
+          filters.fetch('include').any? { |pattern| File.fnmatch?(pattern, file, File::FNM_PATHNAME) } &&
+            !Array(filters['exclude']).any? { |pattern| File.fnmatch?(pattern, file, File::FNM_PATHNAME) }
+        end
+        assert_equal expected, selected, "#{pipeline_path}: unexpected trigger selection for #{files.inspect}"
+      end
+    end
+  end
+
+  def test_pr_validation_runs_all_test_projects_and_publishes_coverage
+    job = pipeline('azure-pipeline-selenium-ui-tests.yml').fetch('jobs').find { |entry| entry['job'] == 'DotNetTests' }
+    refute_nil job
+    test_script = job.fetch('steps').find { |step| step['displayName'] == 'Run all five test projects and collect coverage' }.fetch('bash')
+    %w[
+      BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
+      BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
+      BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
+      BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+      BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
+    ].each { |project| assert_includes test_script, project }
+    assert_match(/test_failure=1/, test_script, 'A failed test project must fail the validation job')
+    assert_match(/XPlat Code Coverage/, test_script)
+    assert job.fetch('steps').any? { |step| step['task'] == 'PublishTestResults@2' }
+    assert job.fetch('steps').any? { |step| step['task'] == 'PublishCodeCoverageResults@2' }
+    assert job.fetch('steps').any? { |step| step['task'] == 'PublishPipelineArtifact@1' }
+  end
+
+  def test_dependency_audit_runs_for_schedule_and_manual_queue
+    jobs = pipeline('azure-pipeline-selenium-ui-tests.yml').fetch('jobs')
+    audit = jobs.find { |entry| entry['job'] == 'DependencyAudit' }
+    refute_nil audit
+    assert_match(/Build.Reason.*Schedule/, audit['condition'])
+    assert_match(/Build.Reason.*Manual/, audit['condition'])
+    scripts = audit.fetch('steps').filter_map { |step| step['bash'] }
+    assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--vulnerable') }
+    assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--outdated') }
+    assert scripts.all? { |source| !source.include?('Tools.Tests') }, 'Audit must not reference the removed standalone Tools.Tests project'
+    assert_equal 'Default', audit.dig('pool', 'name')
+  end
+
+  def test_github_actions_build_and_audit_workflows_are_removed
+    refute File.exist?(File.join(ROOT, '.github/workflows/alimentestaideia.yaml'))
+    refute File.exist?(File.join(ROOT, '.github/workflows/dependency-audit.yml'))
+  end
+
+  def test_all_azure_yaml_jobs_use_the_default_pool
+    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT) + ['azure-pipeline-selenium-ui-tests.yml']
+    paths.each do |path|
+      pools = hashes(read_yaml(path)).select { |entry| entry.key?('pool') }.map { |entry| entry.fetch('pool') }
+      next if pools.empty? && path.end_with?('templates/report-disk-usage.yml')
+
+      refute_empty pools, "#{path} must declare its agent pool"
+      pools.each do |pool|
+        assert_equal 'Default', pool['name'], "#{path} must use the Default pool"
+        refute pool.key?('vmImage'), "#{path} must not request a Microsoft-hosted image"
+      end
+    end
+  end
+
+  def test_all_azure_jobs_clean_their_workspace_and_deployments_download_artifacts
+    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT) + ['azure-pipeline-selenium-ui-tests.yml']
+    paths.each do |path|
+      jobs = hashes(read_yaml(path)).select { |entry| entry.key?('job') || entry.key?('deployment') }
+      jobs.each do |job|
+        name = job['job'] || job['deployment']
+        assert_equal 'all', job.dig('workspace', 'clean'), "#{path}: #{name} must start with a clean workspace"
+        next unless job.key?('deployment')
+
+        downloads = hashes(job).select { |entry| entry.key?('download') }
+        refute_empty downloads, "#{path}: #{name} must download artifacts instead of reusing another job's local files"
+      end
+    end
   end
 
   PIPELINES.each do |path, approved|
@@ -314,7 +362,7 @@ class PipelineSafetyTest < Minitest::Test
   def test_shared_job_is_isolated_and_secret_free
     template = read_yaml(TEMPLATE)
     job = template.fetch('jobs').first
-    assert_equal 'ubuntu-24.04', job.dig('pool', 'vmImage')
+    assert_equal 'Default', job.dig('pool', 'name')
     assert_operator job.fetch('timeoutInMinutes'), :>, 0
     assert_operator job.fetch('cancelTimeoutInMinutes'), :>, 0
     checkout = job_steps.find { |step| step['checkout'] == 'self' }
@@ -352,10 +400,51 @@ class PipelineSafetyTest < Minitest::Test
     assert_equal 'Local', env['SeleniumTest__Target']
     assert_equal 'true', env['SeleniumTest__Headless'].to_s
     assert_equal 'true', env['SeleniumTest__Local__SelfContained'].to_s
-    assert_match(%r{\Ahttp://(?:127\.0\.0\.1|localhost):8025/?\z}, env['SeleniumTest__Local__MailpitBaseUrl'])
-    assert_equal '1025', env['SeleniumTest__Local__MailpitSmtpPort'].to_s
+    assert_equal '$(MailpitBaseUrl)', env['SeleniumTest__Local__MailpitBaseUrl']
+    assert_equal '$(MailpitSmtpPort)', env['SeleniumTest__Local__MailpitSmtpPort']
     steps.each do |step|
       refute_match(/scripts\/test-selenium\.sh\s+developer\b|Category=LivePayment/, script(step))
+    end
+  end
+
+  def test_mailpit_uses_docker_assigned_loopback_ports_and_passes_ready_endpoints_to_tests
+    start = job_steps.find { |step| step['displayName'] == 'Start isolated Mailpit and wait for HTTP and SMTP' }
+    cleanup = job_steps.find { |step| step['displayName'] == "Remove this run's Mailpit container and temporary inbox" }
+    [start, cleanup].each do |step|
+      assert_equal '0', step.dig('env', 'MAILPIT_SMTP_PORT')
+      assert_equal '0', step.dig('env', 'MAILPIT_HTTP_PORT')
+    end
+    compose = read_yaml('compose.mailpit.yml')
+    assert_equal [
+      '127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025',
+      '127.0.0.1:${MAILPIT_HTTP_PORT:-8025}:8025'
+    ], compose.dig('services', 'mailpit', 'ports')
+
+    [[32101, 32102], [32201, 32202]].each do |smtp, http|
+      stdout, stderr, status = run_mailpit_start('SMTP_BINDING' => "127.0.0.1:#{smtp}", 'HTTP_BINDING' => "127.0.0.1:#{http}")
+      assert status.success?, stderr
+      assert_includes stderr, "http://127.0.0.1:#{http}/api/v1/messages"
+      assert_includes stderr, "timeout:#{smtp}\n"
+      assert_includes stdout, "##vso[task.setvariable variable=MailpitBaseUrl]http://127.0.0.1:#{http}\n"
+      assert_includes stdout, "##vso[task.setvariable variable=MailpitSmtpPort]#{smtp}\n"
+    end
+  end
+
+  def test_mailpit_rejects_missing_non_loopback_and_invalid_port_bindings
+    ['', '0.0.0.0:32101', '127.0.0.1:0', '127.0.0.1:65536', "127.0.0.1:32101\n127.0.0.1:32102"].each do |binding|
+      stdout, stderr, status = run_mailpit_start('SMTP_BINDING' => binding)
+      refute status.success?, "Accepted binding: #{binding.inspect}"
+      assert_match(/(?:Unexpected Mailpit binding|Invalid Mailpit host port)/, stderr)
+      refute_includes stdout, 'task.setvariable'
+    end
+  end
+
+  def test_mailpit_does_not_publish_endpoints_if_startup_discovery_or_readiness_fails
+    [{'DOCKER_EXIT' => '42'}, {'PORT_EXIT' => '43'}, {'HTTP_EXIT' => '1'}, {'SMTP_EXIT' => '1'}].each do |environment|
+      stdout, stderr, status = run_mailpit_start(environment)
+      refute status.success?, "Ignored failure: #{environment.inspect}"
+      refute_includes stdout, 'task.setvariable'
+      assert_includes stderr, 'did not become ready' if environment.key?('HTTP_EXIT') || environment.key?('SMTP_EXIT')
     end
   end
 
@@ -422,6 +511,31 @@ class PipelineSafetyTest < Minitest::Test
   end
 
   private
+
+  def run_mailpit_start(environment)
+    start = job_steps.find { |step| step['displayName'] == 'Start isolated Mailpit and wait for HTTP and SMTP' }
+    stubs = <<~'BASH'
+      docker() {
+        case "$*" in
+          *" up --detach") return "${DOCKER_EXIT:-0}" ;;
+          *" port mailpit 1025") printf '%s\n' "$SMTP_BINDING"; return "${PORT_EXIT:-0}" ;;
+          *" port mailpit 8025") printf '%s\n' "$HTTP_BINDING"; return "${PORT_EXIT:-0}" ;;
+          *) echo "Unexpected Docker arguments: $*" >&2; return 99 ;;
+        esac
+      }
+      curl() { printf 'curl:%s\n' "$*" >&2; return "${HTTP_EXIT:-0}"; }
+      timeout() { printf 'timeout:%s\n' "${@: -1}" >&2; return "${SMTP_EXIT:-0}"; }
+      sleep() { :; }
+    BASH
+    env = {
+      'MAILPIT_PROJECT' => 'selenium-test-1',
+      'SMTP_BINDING' => '127.0.0.1:32101',
+      'HTTP_BINDING' => '127.0.0.1:32102',
+      'DOCKER_EXIT' => '0', 'PORT_EXIT' => '0', 'HTTP_EXIT' => '0', 'SMTP_EXIT' => '0',
+      'BASH_ENV' => ''
+    }.merge(environment)
+    Open3.capture3(env, 'bash', '--noprofile', '--norc', '-c', stubs + script(start))
+  end
 
   def assert_shared_job_reference(jobs, path)
     assert_equal 1, jobs.length, "#{path} should reference one shared browser job"

@@ -29,19 +29,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         /// <param name="windowLabel">Report window label (24h or 7d).</param>
         /// <param name="appRoleName">Application Insights cloud role name.</param>
         /// <param name="options">Site health configuration.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Azure portal URL, or null when the issue has no drill-down query.</returns>
         public static string BuildInvestigateUrlForRole(
             string issueCode,
             string windowLabel,
             string appRoleName,
-            SiteHealthReportOptions options)
+            SiteHealthReportOptions options,
+            DateTime? asOfUtc = null)
         {
             if (string.IsNullOrWhiteSpace(issueCode) || string.IsNullOrWhiteSpace(appRoleName))
             {
                 return null;
             }
 
-            string query = BuildInvestigateQueryForRole(issueCode, windowLabel, appRoleName);
+            string query = BuildInvestigateQueryForRole(issueCode, windowLabel, appRoleName, asOfUtc);
             string workspaceResourceId = ResolveWorkspaceResourceId(options);
             return BuildPortalUrl(workspaceResourceId, query, MapTimespan(windowLabel));
         }
@@ -53,12 +55,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         /// <param name="windowLabel">Report window label (24h or 7d).</param>
         /// <param name="scope">Telemetry scope filter.</param>
         /// <param name="options">Site health configuration.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Azure portal URL, or null when the issue has no drill-down query.</returns>
         public static string BuildInvestigateUrl(
             string issueCode,
             string windowLabel,
             SiteHealthTelemetryScope scope,
-            SiteHealthReportOptions options)
+            SiteHealthReportOptions options,
+            DateTime? asOfUtc = null)
         {
             if (string.IsNullOrWhiteSpace(issueCode))
             {
@@ -71,7 +75,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
 
             if (scope == SiteHealthTelemetryScope.CiUnscoped)
             {
-                string query = BuildInvestigateQuery(issueCode, windowLabel, scope, options);
+                string query = BuildInvestigateQuery(issueCode, windowLabel, scope, options, asOfUtc);
                 if (string.IsNullOrWhiteSpace(query))
                 {
                     return null;
@@ -81,7 +85,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
                 return BuildPortalUrl(workspaceResourceId, query, MapTimespan(windowLabel));
             }
 
-            return BuildInvestigateUrlForRole(issueCode, windowLabel, roleName, options);
+            return BuildInvestigateUrlForRole(issueCode, windowLabel, roleName, options, asOfUtc);
         }
 
         /// <summary>
@@ -90,16 +94,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth
         /// <param name="windowLabel">Report window label (24h or 7d).</param>
         /// <param name="productionAppRoleName">Production cloud role name.</param>
         /// <param name="options">Site health configuration.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Azure portal URL.</returns>
         public static string BuildFailedRequestsUrl(
             string windowLabel,
             string productionAppRoleName,
-            SiteHealthReportOptions options)
+            SiteHealthReportOptions options,
+            DateTime? asOfUtc = null)
         {
             string window = NormalizeWindow(windowLabel);
             string query = $@"
 AppRequests
-| where TimeGenerated > ago({window})
+{SiteHealthReportQueries.TimeRangeFilter(window, asOfUtc)}
 | where AppRoleName == ""{EscapeKusto(productionAppRoleName)}""
 | where Success == false and ResultCode !in (""404"")
 | project TimeGenerated, Name, Url, ResultCode, DurationMs, OperationId
@@ -116,16 +122,18 @@ AppRequests
         /// <param name="windowLabel">Report window label (24h or 7d).</param>
         /// <param name="productionAppRoleName">Production cloud role name.</param>
         /// <param name="options">Site health configuration.</param>
+        /// <param name="asOfUtc">Optional fixed report timestamp.</param>
         /// <returns>Azure portal URL.</returns>
         public static string BuildExceptionsUrl(
             string windowLabel,
             string productionAppRoleName,
-            SiteHealthReportOptions options)
+            SiteHealthReportOptions options,
+            DateTime? asOfUtc = null)
         {
             string window = NormalizeWindow(windowLabel);
             string query = $@"
 AppExceptions
-| where TimeGenerated > ago({window})
+{SiteHealthReportQueries.TimeRangeFilter(window, asOfUtc)}
 | where AppRoleName == ""{EscapeKusto(productionAppRoleName)}""
 | project TimeGenerated, Type, OuterMessage, Details, OperationId
 | order by TimeGenerated desc
@@ -135,16 +143,21 @@ AppExceptions
             return BuildPortalUrl(workspaceResourceId, query, MapTimespan(windowLabel));
         }
 
-        private static string BuildInvestigateQueryForRole(string issueCode, string windowLabel, string appRoleName)
+        private static string BuildInvestigateQueryForRole(
+            string issueCode,
+            string windowLabel,
+            string appRoleName,
+            DateTime? asOfUtc)
         {
             string window = NormalizeWindow(windowLabel);
             string roleFilter = BuildRoleFilterForName(appRoleName);
+            string timeFilter = SiteHealthReportQueries.TimeRangeFilter(window, asOfUtc);
 
             if (string.Equals(issueCode, "FailedHttpRequests", StringComparison.OrdinalIgnoreCase))
             {
                 return $@"
 AppRequests
-| where TimeGenerated > ago({window})
+{timeFilter}
 {roleFilter}
 | where Success == false and ResultCode !in (""404"")
 | project TimeGenerated, Name, Url, ResultCode, DurationMs, OperationId
@@ -156,7 +169,7 @@ AppRequests
             {
                 return $@"
 AppExceptions
-| where TimeGenerated > ago({window})
+{timeFilter}
 {roleFilter}
 | project TimeGenerated, Type, OuterMessage, Details, OperationId
 | order by TimeGenerated desc
@@ -169,7 +182,7 @@ AppExceptions
                 string reason = issueCode.Substring(webhookPrefix.Length);
                 return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{timeFilter}
 | where Name == ""EasypayWebhookRejected""
 {roleFilter}
 | where tostring(Properties.Reason) == ""{EscapeKusto(reason)}""
@@ -180,7 +193,7 @@ AppEvents
 
             return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{timeFilter}
 | where Name == ""{EscapeKusto(issueCode)}""
 {roleFilter}
 | project TimeGenerated, Name, AppRoleName, Properties
@@ -197,16 +210,18 @@ AppEvents
             string issueCode,
             string windowLabel,
             SiteHealthTelemetryScope scope,
-            SiteHealthReportOptions options)
+            SiteHealthReportOptions options,
+            DateTime? asOfUtc)
         {
             string window = NormalizeWindow(windowLabel);
             string roleFilter = BuildRoleFilter(scope, options);
+            string timeFilter = SiteHealthReportQueries.TimeRangeFilter(window, asOfUtc);
 
             if (string.Equals(issueCode, "FailedHttpRequests", StringComparison.OrdinalIgnoreCase))
             {
                 return $@"
 AppRequests
-| where TimeGenerated > ago({window})
+{timeFilter}
 {roleFilter}
 | where Success == false and ResultCode !in (""404"")
 | project TimeGenerated, Name, Url, ResultCode, DurationMs, OperationId
@@ -218,7 +233,7 @@ AppRequests
             {
                 return $@"
 AppExceptions
-| where TimeGenerated > ago({window})
+{timeFilter}
 {roleFilter}
 | project TimeGenerated, Type, OuterMessage, Details, OperationId
 | order by TimeGenerated desc
@@ -231,7 +246,7 @@ AppExceptions
                 string reason = issueCode.Substring(webhookPrefix.Length);
                 return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{timeFilter}
 | where Name == ""EasypayWebhookRejected""
 {roleFilter}
 | where tostring(Properties.Reason) == ""{EscapeKusto(reason)}""
@@ -242,7 +257,7 @@ AppEvents
 
             return $@"
 AppEvents
-| where TimeGenerated > ago({window})
+{timeFilter}
 | where Name == ""{EscapeKusto(issueCode)}""
 {roleFilter}
 | project TimeGenerated, Name, AppRoleName, Properties
