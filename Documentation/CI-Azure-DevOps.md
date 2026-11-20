@@ -7,9 +7,8 @@ CI/CD for [alimentestaideia.pt](https://dev.azure.com/BancoAlimentar/Alimentesta
 | File | Purpose |
 |------|---------|
 | [`azure-pipelines/core-build.yml`](../azure-pipelines/core-build.yml) | **Release** build artifact for preprod/prod (replaces classic id=8) |
-| [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | Build, test, deploy **developer** web + function slots |
+| [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) | PR/push validation for **developer/master**, weekly NuGet audit, and guarded **developer** web + function deployment |
 | [`azure-pipelines/preprod-release.yml`](../azure-pipelines/preprod-release.yml) | Apply EF migrations, deploy **preprod** slot (replaces classic release id=5) |
-| [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) | PR build/tests, Selenium, and scheduled NuGet dependency audit |
 
 **Agent pool:** Every YAML job uses the self-hosted **Default** pool. The Linux agent needs .NET 10 (installed by `UseDotNet@2`), PowerShell 7+, Azure CLI, Chrome/ChromeDriver, Docker Compose, Ruby, and Python 3. Docker must be running, and the agent account must be able to use it.
 
@@ -41,47 +40,60 @@ Review cache growth separately during scheduled, agent-scoped maintenance.
 No agent image rebuild or restart is required. The policy takes effect when a
 job runs with the updated YAML; classic pipeline definitions need equivalent
 configuration separately. YAML-only changes do not match the automatic C# path
-filters, so validate this change with a manual run of the test-only PR pipeline.
+filters, so validate changes with a manual `developer-debug` run on a feature branch.
+Feature-branch runs contain validation and auditing only, not deployment stages.
 
 ## PR validation and trusted branch builds
 
-Azure **PR validation** runs for PRs targeting `developer` when at least one changed file
-matches `**/*.cs`, and can be queued manually. It does not run on branch pushes. One job
-restores/builds the solution and runs all five test projects sequentially: Repository, Sas.Core,
-Integration, Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML
-coverage. A second job runs the secret-free self-contained Selenium checks and depends on the
-.NET job while still running after test failures so both result sets are available.
+The consolidated **developer-debug** pipeline validates PRs targeting `developer` or `master`
+and pushes to either branch when at least one changed file matches `**/*.cs`. It also supports
+manual runs. Its secret-free **BrowserRegression** stage first restores/builds the solution in
+Release and runs all five test projects sequentially: Repository, Sas.Core, Integration,
+Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML coverage.
+A second job runs the self-contained Selenium checks and depends on the .NET job while still
+running after test failures so both result sets are available. Either job failing fails the
+stage and prevents developer packaging/deployment.
 
 The same YAML runs the NuGet vulnerability/outdated-package audit weekly on `master` and during a
-manual queue. Scheduled runs skip build, test, and browser jobs. GitGuardian remains independent
-of these Azure pipelines. Core and developer pipelines retain their existing branch filters,
-but branch-push triggers also require at least one changed file matching `**/*.cs`.
+manual queue. Its **DependencyAudit** stage has no dependencies, so it runs independently of
+validation/deployment outcomes and is not a deployment gate. Scheduled runs skip validation,
+packaging, and deployment. GitGuardian remains independent of these Azure pipelines. Core
+continues building release packages on `developer` and `master` pushes with a `.cs` change;
+its packaging flow and preproduction deployment are unchanged.
 
 The path filter includes C# files in any project or test directory, at any depth, and is
 case-sensitive. Mixed C# and non-C# changes still trigger validation/builds. Changes only to
 documentation, YAML, `.csproj`, package versions, configuration, Razor markup, or static assets
 do not trigger these pipelines; queue a manual run when those changes need validation or deployment.
-Manual runs, the weekly dependency audit, and the manual preproduction release are unchanged.
+Manual queues bypass the path filters; the weekly dependency audit and manual preproduction
+release remain available.
 
-The Core and developer pipelines set `pr: none`. They always begin with **BrowserRegression**.
+Core still sets `pr: none`; `developer-debug` now owns PR validation for both protected branches.
+Both begin with **BrowserRegression**, but only Core runs browser validation on every run reason;
+the consolidated pipeline skips the entire validation stage for the weekly audit.
 Credentialed stages are included only for the following trusted contexts:
 
 | Pipeline | Source refs | Allowed run reasons | After successful browser validation |
 |----------|-------------|---------------------|-------------------------------------|
-| `developer-debug` | `refs/heads/developer` | `IndividualCI`, `BatchedCI`, `Manual` | Build/test, publish, then deploy developer web and Functions slots |
+| `developer-debug` | `refs/heads/developer` | `IndividualCI`, `BatchedCI`, `Manual` | Build/publish Debug packages, then deploy developer web and Functions slots |
 | Core | `refs/heads/developer`, `refs/heads/master` | `IndividualCI`, `BatchedCI`, `Manual` | Build deployable projects and publish release packages |
 
 For PR refs, tags, feature branches, missing context, or other run reasons, compile-time guards
-omit the stages containing Key Vault, token replacement, artifact publication, and deployments.
+omit the stages containing Key Vault, token replacement, release artifact publication, and deployments.
+In `developer-debug`, this also applies to every `master` run: PRs/pushes validate only, while
+scheduled runs audit and manual runs validate/audit. None can deploy a developer slot from `master`.
 Runtime guards repeat the branch/reason checks and require each named dependency to be exactly
 `Succeeded`. Failed, skipped, canceled, or `SucceededWithIssues` browser validation cannot release
-artifacts or deploy. A manual feature-branch run is test-only; it cannot deploy that feature branch.
+artifacts or deploy. A manual feature-branch run validates/audits only; it cannot deploy that feature branch.
 
 These are repository execution guards, not a security boundary against someone who can change
 the YAML. Environment/service-connection branch control, approvals, trusted-template policies,
-and GitHub protected branches remain separate administrative controls. After migration, update
-GitHub branch protection to require the Azure PR validation status instead of the retired GitHub
-Actions build/test status; preserve GitGuardian and review requirements.
+and GitHub protected branches remain separate administrative controls. Consolidation means PR
+validation shares a pipeline definition with deployment-resource authorization; do not rely on
+separate pipeline permissions to isolate it. Enforce trusted-branch restrictions and appropriate
+approvals on the service connection and environments, and restrict untrusted PR execution on
+the shared self-hosted pool. After migration, require the consolidated `developer-debug` PR
+status on both protected branches; preserve GitGuardian and review requirements.
 
 ## Core release packaging
 
@@ -90,7 +102,7 @@ self-hosted **Default** Linux agent
 and restores and builds only the public
 website, tenant-management website, and Functions app, including their referenced libraries.
 The packaging job does not restore or build the test projects. Browser validation runs in its own
-job; PR unit/integration validation runs in the standalone PR pipeline and the developer pipeline.
+job; PR/push unit/integration validation runs in the consolidated developer pipeline.
 
 Each publish task sets `publishWebProjects: false` so its explicit project path is used.
 The three project-named ZIP files and the `drop` artifact remain unchanged for release consumers.
@@ -139,10 +151,12 @@ The `developer-debug.yml` pipeline replaces the classic pair:
 - Build **developer-debug** (definition id=11)
 - Release **[DEV] AlimentaEstaIdeia** (definition id=3)
 
-**Stages:** BrowserRegression → Build/test/publish → Deploy web (developer slot) → Deploy function (developer slot) → Disable function timers on developer slot.
+**Stages on trusted developer runs:** BrowserRegression (Release .NET tests/coverage, then Selenium) → Build/publish Debug packages → Deploy web (developer slot) → Deploy function (developer slot) → Disable function timers on developer slot.
 
-**Trigger:** pushes to `developer` that change at least one `.cs` file, plus manual queueing. PR validation belongs to the dedicated
-secret-free pipelines; PR-trigger UI overrides still cannot include credentialed stages in this YAML.
+**Triggers:** PRs targeting and pushes to `developer`/`master` with at least one `.cs` change,
+plus manual queueing. PRs and `master` pushes run validation only. The weekly `master` schedule
+runs only the independent dependency audit; manual runs also include that audit. Only trusted
+`developer` CI/manual contexts can include packaging or deployment stages.
 
 **Agent:** The self-hosted **Default** Linux agent is used for Selenium, build, and deployment.
 
@@ -150,14 +164,17 @@ The web deployment uses **Zip Deploy** because Web Deploy (`msdeploy`) is Window
 overwrites the deployed `wwwroot` contents and keeps the app's files writable; do not switch this
 web app to Run From Package. Function deployment remains Run From Package as before.
 
-The shared browser job gates the build/publish stage. Web and function deployment explicitly depend
-on successful browser/build stages, with the function stage also requiring successful web deployment.
-All credentialed stages require a trusted developer-branch context. The browser job tests its
-temporary application, not the deployed slot. See [TESTS.md](TESTS.md).
+The combined .NET/browser stage gates the build/publish stage. The packaging job no longer repeats
+the four former Debug test runs: all five projects are validated once in Release before credentials
+are accessed. Debug packaging, project-named ZIPs, and the `drop` artifact remain unchanged.
+Web and function deployment explicitly depend on successful validation/build stages, with the
+function stage also requiring successful web deployment. All credentialed stages require a
+trusted developer-branch context. The browser job tests its temporary application, not the
+deployed slot. See [TESTS.md](TESTS.md).
 
 ## PR validation, Selenium, and dependency audit
 
-[`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) is the PR validation and scheduled audit pipeline. It builds and tests the five .NET test projects, publishes their TRX and coverage, then runs the offline checks and self-contained Selenium selection with headless Chrome. The current CI selections contain 109 offline cases and 60 browser cases; seven additional live browser cases remain developer-only.
+[`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) owns PR/push validation and the scheduled audit. It builds and tests the five .NET test projects, publishes their TRX and coverage, then runs the offline checks and self-contained Selenium selection with headless Chrome. The current CI selections contain 109 offline cases and 60 browser cases; seven additional live browser cases remain developer-only. The former root-level `azure-pipeline-selenium-ui-tests.yml` has been removed.
 
 The pipeline uses the Linux agent in **Default**. Docker runs only the pinned Mailpit image from `compose.mailpit.yml`; the .NET application and Chrome run directly on the agent. Mailpit's SMTP and API ports bind only to loopback. Each job sets `MAILPIT_SMTP_PORT=0` and `MAILPIT_HTTP_PORT=0`, letting Docker allocate free host ports atomically, then discovers them with `docker compose port`. HTTP/SMTP readiness checks and browser tests use those exact endpoints through job-scoped pipeline variables. Concurrent agent containers sharing the host daemon do not need fixed per-agent ports. Browser fixtures create temporary SQLite in-memory application and infrastructure databases. Payment-provider responses are simulated locally. No SQL Server, Key Vault access, Azure service connection, SMTP credentials, or real recipient accounts are needed.
 
@@ -176,25 +193,28 @@ rewriting reports. The refactored job and its reporting fix still require a vali
 
 To configure it in Azure DevOps:
 
-1. Point the existing PR validation YAML pipeline at `/azure-pipeline-selenium-ui-tests.yml`. A classic pipeline is not updated by changing this file.
-2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. The file validates PRs targeting `developer` with at least one `.cs` change; manual runs can select any branch containing the changes.
-3. Configure the Linux agent with the required tools and run the PR pipeline on a feature branch. Confirm all five test projects, Selenium, TRX publication, coverage, and pipeline/report policy checks succeed. Do not queue a deployment-capable pipeline to validate unmerged changes.
-4. After a PR demonstrates the expected status, update required checks for `developer`. The PR pipeline gates merges only when configured as required; deployment/package gates remain explicit dependencies inside their respective YAML pipelines. Do not require this automatic PR status on `master`, which is outside the PR trigger.
+1. Keep the existing **developer-debug** definition (id=11) pointing at `/azure-pipelines/developer-debug.yml`. Do not repoint the old Selenium definition to this path: two active definitions would duplicate validation, schedules, and potentially developer deployments.
+2. Use the GitHub repository connection and check that pipeline UI settings do not override YAML triggers. Merge the YAML into both `developer` and `master` so their push and scheduled runs use it; Azure registers YAML schedules separately per branch. Remove any UI-defined schedule that would override the weekly YAML schedule.
+3. Configure the Linux agent with the required tools and manually run `developer-debug` on a feature branch containing these changes. Confirm all five test projects, Selenium, TRX publication, coverage, policy checks, and dependency auditing succeed. Confirm packaging, Key Vault, and deployment stages are absent. A manual run on `developer` is deployment-capable; do not use it for this test.
+4. Verify the new PR status with a C#-changing PR targeting each branch. Update required checks on **both** `developer` and `master` to the observed consolidated status, preserving GitGuardian and review checks. Check skip handling for non-C#-only PRs before making this path-filtered status required.
+5. Disable the old **Selenium regression tests** pipeline definition and its CI/PR/UI schedules, then remove its obsolete required status. Repository changes do not disable an Azure definition, and the old definition can fail when it tries to load the deleted YAML. Preserve deployment environment/service-connection restrictions and disable the classic developer release if it still consumes `drop`, to avoid duplicate deployments.
 
-The pipeline explicitly selects `Local` and `SelfContained=true`, even though it runs in Azure. It never selects the deployed developer slot, sends email through its SMTP server, applies cloud migrations, or changes staging financial records. Developer-slot tests remain a separate, explicitly configured workflow described in [Local-Email-Tests.md](Local-Email-Tests.md#run-against-the-developer-slot).
+The browser job explicitly selects `Local` and `SelfContained=true`, even though it runs in Azure. It never selects the deployed developer slot, sends email through its SMTP server, applies cloud migrations, or changes staging financial records. Developer-slot tests remain a separate, explicitly configured workflow described in [Local-Email-Tests.md](Local-Email-Tests.md#run-against-the-developer-slot).
 
 ## Administrative follow-up and deferred smoke tests
 
 Repository changes do not modify these external settings:
 
-- Review Azure pipeline UI trigger overrides and any classic releases that consume `drop`.
+- Disable the retired standalone Selenium definition and review Azure pipeline UI trigger
+  overrides, UI schedules, and any classic releases that consume `drop`.
   A classic release does not automatically inherit YAML branch/reason guards.
 - Restrict environment/service-connection access to trusted branches with appropriate approvals.
-  Do not grant PR validation access to Key Vault or deployment credentials.
-- After successful PR validation, require the Azure PR validation status on `developer`, preserving
-  existing GitGuardian and review checks on both protected branches. Remove the retired GitHub Actions
-  **Required build and tests** requirement. Review any legacy required Core or developer
-  deployment status before changing it; these pipelines do not run on PRs.
+  PR validation must not retrieve Key Vault or deployment credentials, even though its pipeline
+  definition now also owns trusted developer deployment.
+- After successful PR validation, require the consolidated `developer-debug` PR status on
+  `developer` and `master`, preserving existing GitGuardian and review checks. Replace the old
+  Selenium and retired GitHub Actions **Required build and tests** requirements. Review any
+  legacy required Core deployment status before changing it; Core does not run on PRs.
 - Read-only post-deployment smoke tests are not implemented by this change. The 19 existing
   developer-slot browser cases remain manual and may create staging records/send slot emails.
   Before production promotion, retain the requirement for a successful preproduction smoke test.
@@ -215,9 +235,10 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
 1. **Configure YAML pipelines**
    Pipelines → New pipeline → Azure Repos Git → **Existing Azure Pipelines YAML file**:
    - `/azure-pipelines/core-build.yml` — **Alimentestaideia.pt Core** (Release artifact, id=8)
-   - `/azure-pipelines/developer-debug.yml` — developer build + deploy (id=11 / release id=3)
+   - `/azure-pipelines/developer-debug.yml` — developer/master validation, dependency audit, developer build + deploy (id=11 / release id=3)
    - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
-   - `/azure-pipeline-selenium-ui-tests.yml` — PR validation and scheduled dependency audit (existing validation definition)
+
+   Retire the separate Selenium validation definition; its root-level YAML has been removed.
 
    Select the **Default** pool for every YAML pipeline. Confirm its Linux agent is online and has
    the tools listed under [Default self-hosted agent setup](#default-self-hosted-agent-setup).
@@ -243,7 +264,7 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
    Optional food-bank seed settings are not in Key Vault; `appsettings*.json` uses empty strings for `AzureStorage:FoodBankSourceBlobName` and `AzureStorage:FoodBankSourceContainerName` (food-bank DB seeding is skipped when unset).
 
 6. **Validate, then retire classic**
-   After a green run, disable classic build id=8 (Core), release id=3 (developer), and release id=5 (preprod). Build definition id=11 already uses `developer-debug.yml`.
+   After a green run, disable classic build id=8 (Core), release id=3 (developer), and release id=5 (preprod). Keep build definition id=11, which already uses `developer-debug.yml`. Follow the consolidated PR-status migration above before retiring the old Selenium validation definition.
 
 ### Troubleshooting: `Requested SDK version: 10.0.300` / exit code 145
 

@@ -157,8 +157,9 @@ end
 class PipelineSafetyTest < Minitest::Test
   include PipelinePolicy
 
+  VALIDATION_PIPELINE = 'azure-pipelines/developer-debug.yml'
   PIPELINES = {
-    'azure-pipelines/developer-debug.yml' => %w[developer],
+    VALIDATION_PIPELINE => %w[developer],
     'azure-pipelines/core-build.yml' => %w[developer master]
   }.freeze
   REQUIRED_DEPENDENCIES = {
@@ -167,29 +168,49 @@ class PipelineSafetyTest < Minitest::Test
     'DeployFunctionDeveloper' => %w[DeployDeveloper Build BrowserRegression]
   }.freeze
 
-  def test_azure_validation_is_pr_only_and_targets_developer
-    path = 'azure-pipeline-selenium-ui-tests.yml'
+  def test_consolidated_validation_targets_prs_and_pushes_to_both_branches
+    path = VALIDATION_PIPELINE
     document = read_yaml(path)
-    assert_equal 'none', document['trigger']
+    assert_equal %w[developer master], document.dig('trigger', 'branches', 'include').sort
     assert_equal true, document.dig('pr', 'autoCancel')
-    assert_equal %w[developer], document.dig('pr', 'branches', 'include').sort
+    assert_equal %w[developer master], document.dig('pr', 'branches', 'include').sort
     assert_equal '23 6 * * 1', document.dig('schedules', 0, 'cron')
     assert_equal ['master'], document.dig('schedules', 0, 'branches', 'include')
     assert_equal true, document.dig('schedules', 0, 'always')
 
-    raw_jobs = document.fetch('jobs')
+    raw_jobs = document.fetch('stages').first.fetch('jobs')
     assert_shared_job_reference([raw_jobs.fetch(1)], path)
-    jobs = pipeline(path).fetch('jobs')
-    assert_equal %w[DotNetTests Selenium DependencyAudit], jobs.map { |job| job['job'] }
+    jobs = stages(path).first.fetch('jobs')
+    assert_equal %w[DotNetTests Selenium], jobs.map { |job| job['job'] }
     assert_equal 'Default', jobs.first.dig('pool', 'name')
-    assert_equal 'Default', jobs.last.dig('pool', 'name')
     assert_equal ['DotNetTests'], jobs[1]['dependsOn']
-    assert_match(/succeededOrFailed/, jobs[1]['condition'])
+    assert_equal 'succeededOrFailed()', jobs[1]['condition'], 'Selenium must still run after .NET failures, but not cancellation'
+    jobs.each { |job| refute_equal true, job['continueOnError'] }
+    refute File.exist?(File.join(ROOT, 'azure-pipeline-selenium-ui-tests.yml')), 'Retire the duplicate pipeline YAML'
+  end
+
+  def test_validation_and_independent_audit_select_the_expected_run_reasons
+    validation, audit = stages(VALIDATION_PIPELINE, context('PullRequest', 'refs/pull/123/merge'))
+    assert_equal 'BrowserRegression', validation['stage']
+    assert_equal 'DependencyAudit', audit['stage']
+    assert_equal [], audit['dependsOn'], 'Audit must not wait for skipped validation or deployments'
+    assert_no_credentials([validation, audit])
+    %w[PullRequest IndividualCI BatchedCI Manual Schedule].product(
+      %w[refs/heads/developer refs/heads/master refs/heads/feature/test refs/pull/123/merge]
+    ).each do |reason, branch|
+      variables = context(reason, branch)
+      assert_equal reason != 'Schedule', Expression.new(validation['condition'], variables).value,
+                   "Unexpected validation selection for #{variables.inspect}"
+      [true, false].each do |success|
+        assert_equal %w[Schedule Manual].include?(reason), Expression.new(audit['condition'], variables, {}, success).value,
+                     "Unexpected audit selection for #{variables.inspect}, validation success=#{success}"
+      end
+    end
   end
 
   def test_push_and_pr_path_filters_require_a_csharp_change
     triggers = PIPELINES.keys.map { |path| [path, read_yaml(path).fetch('trigger')] }
-    path = 'azure-pipeline-selenium-ui-tests.yml'
+    path = VALIDATION_PIPELINE
     triggers << [path, read_yaml(path).fetch('pr')]
     scenarios = {
       ['Program.cs'] => true,
@@ -216,7 +237,7 @@ class PipelineSafetyTest < Minitest::Test
   end
 
   def test_pr_validation_runs_all_test_projects_and_publishes_coverage
-    job = pipeline('azure-pipeline-selenium-ui-tests.yml').fetch('jobs').find { |entry| entry['job'] == 'DotNetTests' }
+    job = stages(VALIDATION_PIPELINE).first.fetch('jobs').find { |entry| entry['job'] == 'DotNetTests' }
     refute_nil job
     test_script = job.fetch('steps').find { |step| step['displayName'] == 'Run all five test projects and collect coverage' }.fetch('bash')
     %w[
@@ -228,17 +249,24 @@ class PipelineSafetyTest < Minitest::Test
     ].each { |project| assert_includes test_script, project }
     assert_match(/test_failure=1/, test_script, 'A failed test project must fail the validation job')
     assert_match(/XPlat Code Coverage/, test_script)
-    assert job.fetch('steps').any? { |step| step['task'] == 'PublishTestResults@2' }
-    assert job.fetch('steps').any? { |step| step['task'] == 'PublishCodeCoverageResults@2' }
-    assert job.fetch('steps').any? { |step| step['task'] == 'PublishPipelineArtifact@1' }
+    assert_match(/--configuration Release/, test_script)
+    %w[PublishTestResults@2 PublishCodeCoverageResults@2 PublishPipelineArtifact@1].each do |task|
+      publication = job.fetch('steps').find { |step| step['task'] == task }
+      refute_nil publication
+      assert_equal 'always()', publication['condition']
+    end
+    build = stages(VALIDATION_PIPELINE).find { |stage| stage['stage'] == 'Build' }
+    refute hashes(build).any? { |entry| entry.dig('inputs', 'command') == 'test' },
+           'Packaging must not duplicate validation tests'
+    assert_equal 'Debug', read_yaml(VALIDATION_PIPELINE).dig('variables', 'BuildConfiguration')
   end
 
   def test_dependency_audit_runs_for_schedule_and_manual_queue
-    jobs = pipeline('azure-pipeline-selenium-ui-tests.yml').fetch('jobs')
-    audit = jobs.find { |entry| entry['job'] == 'DependencyAudit' }
+    stage = stages(VALIDATION_PIPELINE).find { |entry| entry['stage'] == 'DependencyAudit' }
+    audit = stage.fetch('jobs').find { |entry| entry['job'] == 'DependencyAudit' }
     refute_nil audit
-    assert_match(/Build.Reason.*Schedule/, audit['condition'])
-    assert_match(/Build.Reason.*Manual/, audit['condition'])
+    assert_match(/Build.Reason.*Schedule/, stage['condition'])
+    assert_match(/Build.Reason.*Manual/, stage['condition'])
     scripts = audit.fetch('steps').filter_map { |step| step['bash'] }
     assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--vulnerable') }
     assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--outdated') }
@@ -252,7 +280,7 @@ class PipelineSafetyTest < Minitest::Test
   end
 
   def test_all_azure_yaml_jobs_use_the_default_pool
-    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT) + ['azure-pipeline-selenium-ui-tests.yml']
+    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT)
     paths.each do |path|
       pools = hashes(read_yaml(path)).select { |entry| entry.key?('pool') }.map { |entry| entry.fetch('pool') }
       next if pools.empty? && path.end_with?('templates/report-disk-usage.yml')
@@ -266,7 +294,7 @@ class PipelineSafetyTest < Minitest::Test
   end
 
   def test_all_azure_jobs_clean_their_workspace_and_deployments_download_artifacts
-    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT) + ['azure-pipeline-selenium-ui-tests.yml']
+    paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT)
     paths.each do |path|
       jobs = hashes(read_yaml(path)).select { |entry| entry.key?('job') || entry.key?('deployment') }
       jobs.each do |job|
@@ -283,17 +311,23 @@ class PipelineSafetyTest < Minitest::Test
   PIPELINES.each do |path, approved|
     label = File.basename(path, '.yml').tr('-', '_')
 
-    define_method("test_#{label}_has_shared_browser_gate_first_and_no_pr_trigger") do
+    define_method("test_#{label}_has_shared_browser_gate_first") do
       document = read_yaml(path)
-      assert_equal 'none', document['pr']
-      assert_equal approved.sort, document.dig('trigger', 'branches', 'include').sort
       browser = document.fetch('stages').first
       assert_equal 'BrowserRegression', browser['stage']
-      assert_shared_job_reference(browser.fetch('jobs'), path)
       expanded = stages(path).first
-      assert_equal ['Selenium'], expanded.fetch('jobs').map { |job| job['job'] }
       assert_equal [], dependency_names(expanded)
-      refute expanded.key?('condition'), 'Browser validation must not inherit deployment branch/reason guards'
+      if path == VALIDATION_PIPELINE
+        assert_shared_job_reference([browser.fetch('jobs').last], path)
+        assert_equal %w[DotNetTests Selenium], expanded.fetch('jobs').map { |job| job['job'] }
+        assert_equal "ne(variables['Build.Reason'], 'Schedule')", expanded['condition']
+      else
+        assert_equal 'none', document['pr']
+        assert_equal approved.sort, document.dig('trigger', 'branches', 'include').sort
+        assert_shared_job_reference(browser.fetch('jobs'), path)
+        assert_equal ['Selenium'], expanded.fetch('jobs').map { |job| job['job'] }
+        refute expanded.key?('condition'), 'Browser validation must not inherit deployment branch/reason guards'
+      end
     end
 
     define_method("test_#{label}_compile_time_guards_omit_all_credentialed_stages_for_untrusted_contexts") do
@@ -303,21 +337,26 @@ class PipelineSafetyTest < Minitest::Test
                    context('Manual', 'refs/tags/developer'), context('Manual', 'refs/tags/master'),
                    {}, { 'Build.Reason' => 'Manual' }, { 'Build.SourceBranch' => 'refs/heads/developer' }]
       %w[Schedule BuildCompletion ResourceTrigger Unknown].each { |reason| scenarios << context(reason) }
-      scenarios << context('Manual', 'refs/heads/master') unless approved.include?('master')
+      unless approved.include?('master')
+        %w[Manual IndividualCI BatchedCI Schedule].each { |reason| scenarios << context(reason, 'refs/heads/master') }
+      end
       scenarios.each do |variables|
         expanded = pipeline(path, variables)
-        assert_equal ['BrowserRegression'], expanded.fetch('stages').map { |stage| stage['stage'] },
+        expected = path == VALIDATION_PIPELINE ? %w[BrowserRegression DependencyAudit] : %w[BrowserRegression]
+        assert_equal expected, expanded.fetch('stages').map { |stage| stage['stage'] },
                      "#{path} must omit credentialed stages at compile time for #{variables.inspect}"
         assert_no_credentials(expanded)
+        refute hashes(expanded).any? { |entry| entry['artifact'] == 'drop' },
+               "#{path} must not consume or publish deployment artifacts in untrusted contexts"
       end
     end
 
     define_method("test_#{label}_trusted_builds_preserve_stages_and_dependency_graph") do
       approved.product(%w[Manual IndividualCI BatchedCI]).each do |branch, reason|
         selected = stages(path, context(reason, "refs/heads/#{branch}"))
-        expected = path.include?('developer-debug') ? %w[BrowserRegression Build DeployDeveloper DeployFunctionDeveloper] : %w[BrowserRegression Build]
+        expected = path == VALIDATION_PIPELINE ? %w[BrowserRegression Build DeployDeveloper DeployFunctionDeveloper DependencyAudit] : %w[BrowserRegression Build]
         assert_equal expected, selected.map { |stage| stage['stage'] }
-        selected.drop(1).each do |stage|
+        selected.select { |stage| REQUIRED_DEPENDENCIES.key?(stage['stage']) }.each do |stage|
           assert_equal REQUIRED_DEPENDENCIES.fetch(stage.fetch('stage')).sort, dependency_names(stage).sort,
                        "#{path}: #{stage['stage']} must depend on every required gate"
         end
@@ -326,7 +365,7 @@ class PipelineSafetyTest < Minitest::Test
 
     define_method("test_#{label}_runtime_guards_repeat_branch_reason_and_exact_success_requirements") do
       selected = stages(path)
-      credentialed = selected.reject { |stage| stage['stage'] == 'BrowserRegression' }
+      credentialed = selected.select { |stage| REQUIRED_DEPENDENCIES.key?(stage['stage']) }
       refute_empty credentialed
       credentialed.each do |stage|
         condition = stage['condition']
@@ -342,7 +381,9 @@ class PipelineSafetyTest < Minitest::Test
                        "#{stage['stage']} allowed #{variables.inspect}"
         end
         unless approved.include?('master')
-          assert_equal false, Expression.new(condition, context('Manual', 'refs/heads/master'), dependencies).value
+          %w[Manual IndividualCI BatchedCI Schedule].each do |reason|
+            assert_equal false, Expression.new(condition, context(reason, 'refs/heads/master'), dependencies).value
+          end
         end
         %w[Schedule BuildCompletion ResourceTrigger Unknown].each do |reason|
           assert_equal false, Expression.new(condition, context(reason), dependencies).value,
