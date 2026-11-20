@@ -123,7 +123,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Api
                         }
                     }
                     else if (notificationRequest.Status == NotificationGeneric.StatusEnum.Failed
-                        && subcriptionDonationId > 0)
+                        && subcriptionDonationId > 0
+                        && string.Equals(reason, "Subscription capture failure recorded", StringComparison.Ordinal))
                     {
                         IActionResult emailResult = this.SendSubscriptionPaymentFailedEmail(
                             subcriptionDonationId,
