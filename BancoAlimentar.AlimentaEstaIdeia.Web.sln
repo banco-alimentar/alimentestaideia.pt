@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{97
 		azure-pipelines\developer-debug.yml = azure-pipelines\developer-debug.yml
 		azure-pipelines\core-build.yml = azure-pipelines\core-build.yml
 		azure-pipelines\preprod-release.yml = azure-pipelines\preprod-release.yml
-		azure-pipeline-selenium-ui-tests.yml = azure-pipeline-selenium-ui-tests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Model", "BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj", "{5CCB7AB1-E0B2-4D9A-ADAA-F0A2A63B02C7}"

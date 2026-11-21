@@ -159,7 +159,7 @@ Tools ──► Model, Repository, Sas.*
 
 | Item | Notes |
 |------|--------|
-| **azure-pipeline-core.yml** | Listed in `.sln` under `Pipeline` but **file not present** (only `azure-pipeline-selenium-ui-tests.yml` at repo root). |
+| **azure-pipeline-core.yml** | Legacy filename; current pipeline definitions live under `azure-pipelines/`. |
 | **Commented Azure App Configuration** in `Startup` | `AddFeatureManagement` active; App Config integration disabled. |
 | **Distributed SQL cache** | Commented out in `Startup`. |
 | **Tools `Program.cs`** | Most maintenance entry points commented out. |
@@ -294,7 +294,7 @@ Tools ──► Model, Repository, Sas.*
 
 **Shared:** `Testing.Common` and `Web.TestHost` for `CustomWebApplicationFactory`.
 
-**Selenium prerequisites:** Chrome, user secrets, dev site up. Run via `azure-pipeline-selenium-ui-tests.yml` or locally before release.
+**Selenium prerequisites:** CI uses Chrome/ChromeDriver, Docker Mailpit, and a self-contained host without Azure credentials. Run via `azure-pipelines/developer-debug.yml` or locally before release; live developer-slot tests require separate configuration.
 
 ### 6.2 Gaps
 
@@ -327,7 +327,7 @@ Tools ──► Model, Repository, Sas.*
 | **Publish size** | Large `wwwroot`, tenant themes, PDF generation — `TenantStaticSyncHostedService` for static sync. |
 | **Secrets in repo** | `**/local.settings.json` gitignored; historical secrets still in git objects. |
 
-**CI/CD:** PR validation and dependency audit share `azure-pipeline-selenium-ui-tests.yml`; Core, developer, and preproduction deployment flows remain separate.
+**CI/CD:** `azure-pipelines/developer-debug.yml` consolidates PR/push validation for `developer` and `master`, the weekly dependency audit, and guarded developer-slot deployment. Only trusted `developer` CI/manual runs deploy; Core release packaging and preproduction deployment remain separate.
 
 ---
 

@@ -90,7 +90,7 @@ Drives a **real Chrome browser** against either an isolated local application or
 
 **Best for:** Full payment journeys, subscription donation (authenticated), claim-invoice with real invoice generation, regressions that only show up with real JS and payment providers.
 
-**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration. Azure runs the standalone Selenium pipeline for PRs targeting `developer`; local runs remain available through the command below.
+**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration. Azure runs the consolidated `developer-debug` pipeline for PRs targeting and pushes to `developer`/`master` with a `.cs` change; local runs remain available through the command below.
 
 ### When to use which
 
@@ -141,12 +141,14 @@ dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar
 bash scripts/test-selenium.sh developer
 ```
 
-Azure DevOps [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml)
-runs the solution build and all five test projects for PRs targeting `developer` and on
-manual runs. It also runs offline helpers and self-contained headless Selenium; these browser
+Azure DevOps [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml)
+runs the Release solution build and all five test projects for PRs targeting and pushes to
+`developer` or `master` with a `.cs` change, and on manual runs. It also runs offline helpers and self-contained headless Selenium; these browser
 cases do not target a deployed slot. The pipeline publishes test results and merged Cobertura
-coverage. Core and developer pipelines reuse the Selenium job before trusted packaging and
-deployment. The shared job also runs pipeline/report-policy regression tests and rejects
+coverage. Only trusted `developer` CI/manual contexts proceed to Debug packaging and developer
+deployment after validation succeeds; `master` never deploys through this pipeline. Weekly
+scheduled runs perform only the dependency audit. Core release packaging is unchanged and
+reuses the Selenium job. The shared job also runs pipeline/report-policy regression tests and rejects
 incomplete or duplicate-name TRXs before publishing the unmodified reports. See
 [the pipeline setup](CI-Azure-DevOps.md#pr-validation-and-trusted-branch-builds).
 

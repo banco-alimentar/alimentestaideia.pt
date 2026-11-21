@@ -1,4 +1,4 @@
-# Shared by standalone PR validation and trusted-branch packaging/deployment gates.
+# Shared by developer-debug validation and Core's trusted-branch packaging gate.
 # This job never reads Azure credentials or tests a deployed slot.
 parameters:
   - name: dependsOn
