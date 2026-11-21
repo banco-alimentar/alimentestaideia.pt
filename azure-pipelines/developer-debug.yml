@@ -104,45 +104,27 @@ stages:
 
           - bash: |
               set -uo pipefail
-              log_directory="$AGENT_TEMPDIRECTORY/dotnet-test-logs"
-              mkdir -p "$TEST_RESULTS_DIRECTORY" "$log_directory"
+              mkdir -p "$TEST_RESULTS_DIRECTORY"
               test_failure=0
-              names=()
-              pids=()
 
-              # Each project has its own bin directory, so Coverlet instruments separate copies concurrently.
-              start_test() {
+              # Run sequentially: concurrent web-hosting test projects exhaust the agent user's
+              # inotify instance limit (128) and slow timing-sensitive tests, without reducing wall time.
+              run_test() {
                 local name="$1"
                 local project="$2"
-                echo "Starting $name tests"
-                dotnet test "$project" \
+                echo "##[group]Test $name"
+                if dotnet test "$project" \
                   --configuration Release \
                   --no-build \
                   --verbosity normal \
                   --collect:"XPlat Code Coverage" \
                   --settings coverlet.runsettings \
                   --logger "trx;LogFileName=${name}.trx" \
-                  --results-directory "$TEST_RESULTS_DIRECTORY/$name" \
-                  > "$log_directory/$name.log" 2>&1 &
-                names+=("$name")
-                pids+=("$!")
-              }
-
-              start_test Repository BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
-              start_test SasCore BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
-              start_test Integration BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
-              start_test Function BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
-              start_test CleanProdHarden BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
-
-              for index in "${!names[@]}"; do
-                name="${names[$index]}"
-                if wait "${pids[$index]}"; then
+                  --results-directory "$TEST_RESULTS_DIRECTORY/$name"; then
                   result=0
                 else
                   result=$?
                 fi
-                echo "##[group]Test $name"
-                cat "$log_directory/$name.log"
                 echo '##[endgroup]'
                 if [ "$result" -eq 0 ]; then
                   echo "$name tests passed"
@@ -150,7 +132,13 @@ stages:
                   echo "##[error]$name tests failed with exit code $result"
                   test_failure=1
                 fi
-              done
+              }
+
+              run_test Repository BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.csproj
+              run_test SasCore BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests/BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.csproj
+              run_test Integration BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/BancoAlimentar.AlimentaEstaldeia.Web.Integration.Tests.csproj
+              run_test Function BancoAlimentar.AlimentaEstaIdeia.Function.Tests/BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj
+              run_test CleanProdHarden BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
 
               exit "$test_failure"
             displayName: Run all five test projects and collect coverage
