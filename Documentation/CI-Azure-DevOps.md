@@ -49,9 +49,8 @@ The consolidated **developer-debug** pipeline validates PRs targeting `developer
 and pushes to either branch when at least one changed file matches `**/*.cs`. It also supports
 manual runs. Its secret-free **BrowserRegression** stage first restores/builds the solution in
 Release and runs all five test projects sequentially: Repository, Sas.Core, Integration,
-Function, and CleanProdHarden. Running them concurrently was tried and reverted: the web-hosting
-projects together exhausted the agent user's inotify instance limit (128) and slowed
-timing-sensitive tests, without reducing the step's wall time.
+Function, and CleanProdHarden. Running them concurrently was tried and reverted because it slowed
+timing-sensitive tests without reducing the step's wall time.
 It publishes TRX results and merged Cobertura/HTML coverage.
 The Release validation and Debug packaging builds each restore implicitly in their own job;
 the independent dependency audit retains its explicit force-evaluated restore.

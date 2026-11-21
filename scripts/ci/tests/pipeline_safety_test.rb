@@ -248,7 +248,7 @@ class PipelineSafetyTest < Minitest::Test
       BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
     ].each { |project| assert_includes test_script, project }
     assert_match(/test_failure=1/, test_script, 'A failed test project must fail the validation job')
-    refute_match(/&\s*$/, test_script, 'Concurrent test projects exhaust the agent inotify limit; run them sequentially')
+    refute_match(/&\s*$/, test_script, 'Concurrent test projects slow timing-sensitive tests without reducing wall time')
     assert_includes File.read(File.join(ROOT, 'coverlet.runsettings')), '[BancoAlimentar.AlimentaEstaIdeia.Web.Views]*',
                     'Instrumenting compiled Razor views adds over 10 minutes per test project'
     assert_match(/XPlat Code Coverage/, test_script)

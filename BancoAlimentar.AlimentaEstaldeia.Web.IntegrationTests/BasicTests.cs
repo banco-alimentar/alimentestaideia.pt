@@ -20,10 +20,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.FileProviders;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -182,6 +184,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
                     Assert.All(fileSources, source => Assert.False(source.ReloadOnChange));
                 }));
             using var customizedClient = customizedFactory.CreateClient();
+        }
+
+        /// <summary>
+        /// Checks that test hosts poll their web root instead of allocating Linux inotify instances.
+        /// </summary>
+        [Fact]
+        public void WebRoot_UsesPollingFileWatcherForTestHosts()
+        {
+            // UsePollingFileWatcher reports false after a provider starts watching, so inspect a host that has served no requests.
+            using var freshFactory = this.factory.WithWebHostBuilder(_ => { });
+            IFileProvider webRoot = freshFactory.Services.GetRequiredService<IWebHostEnvironment>().WebRootFileProvider;
+            PhysicalFileProvider[] physicalProviders = (webRoot is CompositeFileProvider composite ? composite.FileProviders : new[] { webRoot })
+                .OfType<PhysicalFileProvider>()
+                .ToArray();
+
+            Assert.NotEmpty(physicalProviders);
+            Assert.All(physicalProviders, provider => Assert.True(provider.UsePollingFileWatcher));
         }
 
         /// <summary>
