@@ -54,7 +54,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             }
 
             SemaphoreSlim initializationLock = this.tenantInitializationLocks.GetOrAdd(tenant.Id, _ => new SemaphoreSlim(1, 1));
-            await initializationLock.WaitAsync(CancellationToken.None);
+            await initializationLock.WaitAsync(context.RequestAborted);
             try
             {
                 if (this.IsTenantInitialized(tenant.Id))
