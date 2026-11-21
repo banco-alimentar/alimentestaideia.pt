@@ -294,7 +294,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 Method = MethodEnum.Cc,
                 Failover = false,
                 MaxCaptures = 0,
-                Retries = 0,
+                Retries = 3,
                 SddMandate = null,
             };
 

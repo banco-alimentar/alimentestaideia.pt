@@ -108,6 +108,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay
                 : SubscriptionTransactionMatchResult.Rejected(validationFailure);
         }
 
+        /// <summary>
+        /// Rejects failed subscription callbacks without authenticated or terminal provider failure evidence.
+        /// The subscription detail response cannot distinguish an unpaid pending capture from a failed capture.
+        /// </summary>
+        /// <param name="subscription">Subscription response from Easypay.</param>
+        /// <param name="notificationId">Identifier supplied in the webhook callback.</param>
+        /// <param name="notificationKey">Merchant transaction key supplied in the callback.</param>
+        /// <param name="notificationStatus">Status supplied in the generic webhook callback.</param>
+        /// <param name="notificationDate">Capture date supplied in the callback.</param>
+        /// <param name="expectedAmount">Donation amount stored locally.</param>
+        /// <returns>A unique verified transaction or a stable rejection reason.</returns>
+        public static SubscriptionTransactionMatchResult SelectFailed(
+            SubscriptionIdGet200Response subscription,
+            Guid notificationId,
+            string notificationKey,
+            NotificationGeneric.StatusEnum notificationStatus,
+            DateTime notificationDate,
+            double expectedAmount)
+        {
+            if (notificationStatus != NotificationGeneric.StatusEnum.Failed)
+            {
+                return SubscriptionTransactionMatchResult.Rejected("subscription_capture_status_not_failed");
+            }
+
+            return SubscriptionTransactionMatchResult.Rejected("subscription_terminal_failure_not_verified");
+        }
+
         private static bool IsValidPaidTransaction(
             SubscriptionIdGet200ResponseTransactionsInner transaction,
             Guid subscriptionId,

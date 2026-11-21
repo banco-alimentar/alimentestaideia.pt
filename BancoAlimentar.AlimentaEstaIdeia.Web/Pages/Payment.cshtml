@@ -81,7 +81,7 @@ else if (Model.PaymentStatusError)
                 <div class="clearSimple height40"></div>
             </div>
             <div class="table2 pay1">
-                <form asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
+                <form class="payment-form" asp-page="./Payment" asp-page-handler="PayWithMultibanco" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
                     <button type="submit" class="payment-action">
@@ -100,7 +100,7 @@ else if (Model.PaymentStatusError)
             <div class="table2 pay2">
                 <h2 class="text5">@Localizer["AgoraTambemJaPodePagarUsandoOSeuCartaoDeCredito"]</h2>
                 <div class="clearSimple height40 size10"></div>
-                <form asp-page="./Payment" asp-page-handler="CreditCard" method="post">
+                <form class="payment-form" asp-page="./Payment" asp-page-handler="CreditCard" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="donationId" value="@Model.Donation.Id" />
                     <button type="submit" class="payment-action">
@@ -120,7 +120,7 @@ else if (Model.PaymentStatusError)
                 <div class="table2 pay3">
                     <h2 class="text5">@Localizer["AgoraTambemJaPodePagarUsandoPayPal"]</h2>
                     <div class="clearSimple height40 size10"></div>
-                    <form asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
+                    <form class="payment-form" asp-page="./Payment" asp-page-handler="PayPal" method="post" id="frmPayPal">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="serviceReference" value="@Model.Donation.User.Nif|@Model.Donation.ServiceReference" />
                         <input type="hidden" name="serviceAmount" value="@Model.Donation.DonationAmount" />

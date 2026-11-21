@@ -39,6 +39,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             services.Configure<EasyPayWebhookVerificationOptions>(
                 configuration.GetSection(EasyPayWebhookVerificationOptions.SectionName));
             services.AddScoped<EasyPayApiCredentialsFactory>();
+            services.AddSingleton<IEasyPayProviderApiFactory, EasyPayProviderApiFactory>();
             services.AddScoped<IEasyPayWebhookVerifier, EasyPayApiWebhookVerifier>();
             services.AddScoped<PayPalBuilder>();
             services.AddScoped<IMail, Mail>();

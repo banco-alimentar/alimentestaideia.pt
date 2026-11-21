@@ -15,5 +15,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         /// Email Notification.
         /// </summary>
         Email = 0,
+
+        /// <summary>
+        /// Notification that a recurring subscription payment failed.
+        /// </summary>
+        SubscriptionPaymentFailureEmail = 1,
     }
 }

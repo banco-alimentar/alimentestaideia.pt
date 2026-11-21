@@ -6,27 +6,72 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry
 {
-    using System.Diagnostics;
-    using OpenTelemetry;
+    using System.Threading.Tasks;
+    using Microsoft.ApplicationInsights.Channel;
+    using Microsoft.ApplicationInsights.DataContracts;
+    using Microsoft.ApplicationInsights.Extensibility;
 
     /// <summary>
     /// This class ignore 404 errors in Application Insights.
     /// </summary>
-    public class RemoveAzureStorageTelemetryFilter : BaseProcessor<Activity>
+    public class RemoveAzureStorageTelemetryFilter : ITelemetryProcessor
     {
-        /// <inheritdoc/>
-        public override void OnEnd(Activity item)
+        private readonly ITelemetryProcessor next;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoveAzureStorageTelemetryFilter"/> class.
+        /// </summary>
+        /// <param name="next">Next telemetry processor.</param>
+        public RemoveAzureStorageTelemetryFilter(ITelemetryProcessor next)
         {
-            if (item.Kind != ActivityKind.Client)
+            this.next = next;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RemoveAzureStorageTelemetryFilter"/> class.
+        /// </summary>
+        public RemoveAzureStorageTelemetryFilter()
+        {
+        }
+
+        /// <inheritdoc/>
+        public void Process(ITelemetry item)
+        {
+            if (!this.Filter(item))
             {
                 return;
             }
 
-            if (item.GetTagItem("az.namespace")?.ToString() == "Microsoft.Storage" ||
-                item.Status != ActivityStatusCode.Error)
+            this.next.Process(item);
+        }
+
+        /// <summary>
+        /// Filters the telemetry.
+        /// </summary>
+        /// <param name="item">Telemetry item.</param>
+        /// <returns>False to be filtered, true otherwise.</returns>
+        private bool Filter(ITelemetry item)
+        {
+            ExceptionTelemetry exceptionTelemetry = item as ExceptionTelemetry;
+            if (exceptionTelemetry != null &&
+                exceptionTelemetry.Exception is TaskCanceledException &&
+                exceptionTelemetry.Properties["RequestPath"] == "/status")
             {
-                item.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
+                return false;
             }
+
+            DependencyTelemetry dependency = item as DependencyTelemetry;
+            if (dependency == null)
+            {
+                return true;
+            }
+
+            if (dependency.Type == "Microsoft.Storage")
+            {
+                return false;
+            }
+
+            return dependency.Success != true;
         }
     }
 }

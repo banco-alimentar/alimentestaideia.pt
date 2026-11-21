@@ -1,0 +1,54 @@
+<dl class="facts">
+    <dt>Delete allowed by environment</dt>
+    <dd class="@(Environment.AllowsDeletion(Evaluation) ? "text-ok" : "text-bad")">@Display.Text(Environment.AllowsDeletion(Evaluation))</dd>
+    <dt>VIEW DEFINITION permission</dt>
+    <dd>@Display.Text(Environment.HasViewDefinitionPermission)</dd>
+    <dt>Unsupported foreign keys</dt>
+    <dd>@(Environment.UnsupportedForeignKeys.Count == 0 ? "none" : string.Join(", ", Environment.UnsupportedForeignKeys))</dd>
+    <dt>Enabled triggers on Payments</dt>
+    <dd>@Environment.EnabledPaymentTriggerCount</dd>
+    <dt>IDs over 50 characters (database)</dt>
+    <dd class="@(Environment.OverlengthProviderIds > 0 ? "text-bad" : null)">@Environment.OverlengthProviderIds</dd>
+    <dt>Conflicting invoice groups (database)</dt>
+    <dd class="@(Environment.ConflictingInvoiceGroups > 0 ? "text-bad" : null)">@Environment.ConflictingInvoiceGroups</dd>
+</dl>
+<h3>Rows that reference these payments</h3>
+@if (Environment.Dependencies.Count == 0)
+{
+    <p class="muted">No foreign key references these payments.</p>
+}
+else
+{
+    <div class="scroll-x">
+        <table class="table compact">
+            <thead><tr><th class="num">Payment</th><th>Referenced from</th><th>On delete</th><th class="num">Rows</th></tr></thead>
+            <tbody>
+                @foreach (PaymentDependency dependency in Environment.Dependencies)
+                {
+                    <tr>
+                        <td class="num">@dependency.PaymentId</td>
+                        <td class="mono small">@dependency.ReferencingTable.@dependency.ReferencingColumn</td>
+                        <td>@dependency.DeleteAction</td>
+                        <td class="num">@dependency.ReferenceCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    /// <summary>
+    /// Gets or sets the environment.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public ExecutionEnvironment Environment { get; set; } = new ExecutionEnvironment();
+
+    /// <summary>
+    /// Gets or sets the evaluation.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public GroupEvaluation Evaluation { get; set; } = new GroupEvaluation();
+}

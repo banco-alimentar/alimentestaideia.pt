@@ -1,0 +1,162 @@
+<section class="card donation">
+    <h3>
+        Donation @Donation.Id
+        @foreach (string relation in Donation.Relations)
+        {
+            <span class="badge info">@relation</span>
+        }
+    </h3>
+    <div class="grid cols-2">
+        <div>
+            <h4>Donor</h4>
+            @if (Donation.Donor == null)
+            {
+                <p class="muted">No user linked.</p>
+            }
+            else
+            {
+                <dl class="facts">
+                    <dt>Name</dt><dd>@Display.Text(Donation.Donor.FullName)</dd>
+                    <dt>Email</dt><dd>@Display.Text(Donation.Donor.Email)</dd>
+                    <dt>NIF</dt><dd>@Display.Text(Donation.Donor.Nif)</dd>
+                    <dt>Phone</dt><dd>@Display.Text(Donation.Donor.PhoneNumber)</dd>
+                    <dt>Company</dt><dd>@Display.Text(Donation.Donor.CompanyName)</dd>
+                    <dt>Anonymous user</dt><dd>@Display.Text(Donation.Donor.IsAnonymous)</dd>
+                    <dt>User ID</dt><dd class="mono small">@Donation.Donor.UserId</dd>
+                </dl>
+            }
+            <p><strong>Food bank:</strong> @Display.Text(Donation.FoodBankName)</p>
+
+            <h4>Items</h4>
+            @if (Donation.Items.Count == 0)
+            {
+                <p class="muted">None.</p>
+            }
+            else
+            {
+                <div class="scroll-x">
+                    <table class="table compact">
+                        <thead><tr><th>Product</th><th class="num">Qty</th><th class="num">Price</th></tr></thead>
+                        <tbody>
+                            @foreach (DonationItemInfo item in Donation.Items)
+                            {
+                                <tr><td>@item.ProductName</td><td class="num">@item.Quantity</td><td class="num">@Display.Amount(item.Price)</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+        <div>
+            <h4>Invoices</h4>
+            @if (Donation.Invoices.Count == 0)
+            {
+                <p class="muted">None.</p>
+            }
+            else
+            {
+                <div class="scroll-x">
+                    <table class="table compact">
+                        <thead><tr><th class="num">Id</th><th>Number</th><th>Created</th><th>Canceled</th><th>Food bank</th></tr></thead>
+                        <tbody>
+                            @foreach (InvoiceInfo invoice in Donation.Invoices)
+                            {
+                                <tr>
+                                    <td class="num">@invoice.Id</td>
+                                    <td class="mono small">@invoice.Number</td>
+                                    <td>@Display.Date(invoice.Created)</td>
+                                    <td>@Display.Text(invoice.IsCanceled)</td>
+                                    <td>@invoice.FoodBankName</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            <h4>Subscriptions</h4>
+            @if (Donation.Subscriptions.Count == 0)
+            {
+                <p class="muted">None.</p>
+            }
+            else
+            {
+                <div class="scroll-x">
+                    <table class="table compact">
+                        <thead><tr><th class="num">Id</th><th>Status</th><th>Type</th><th>Frequency</th><th>Start → expiry</th><th>Initial donation</th><th class="num">Donations</th></tr></thead>
+                        <tbody>
+                            @foreach (SubscriptionInfo subscription in Donation.Subscriptions)
+                            {
+                                <tr>
+                                    <td class="num">@subscription.Id</td>
+                                    <td>@subscription.Status@(subscription.IsDeleted ? " (deleted)" : string.Empty)</td>
+                                    <td>@subscription.SubscriptionType</td>
+                                    <td>@subscription.Frequency</td>
+                                    <td>@Display.Date(subscription.StartTime) → @Display.Date(subscription.ExpirationTime)</td>
+                                    <td>@Display.Text(subscription.InitialDonationId)</td>
+                                    <td class="num">@subscription.DonationCount</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="hint mono small">
+                    @foreach (SubscriptionInfo subscription in Donation.Subscriptions)
+                    {
+                        <span>Subscription @subscription.Id: EasyPay @Display.Text(subscription.EasyPaySubscriptionId), key @Display.Text(subscription.TransactionKey). </span>
+                    }
+                </p>
+            }
+        </div>
+    </div>
+
+    <h4>Every payment for this donation</h4>
+    <div class="scroll-x">
+        <table class="table compact">
+            <thead><tr><th class="num">Id</th><th>Type</th><th>Status</th><th>Created</th><th>Completed</th><th class="num">Paid</th><th>Provider ID</th><th>Transaction key</th><th class="num">DonationId</th></tr></thead>
+            <tbody>
+                @foreach (RelatedPaymentInfo payment in Donation.Payments)
+                {
+                    <tr class="@(GroupPaymentIds.Contains(payment.Id) ? "in-group" : null)">
+                        <td class="num">@payment.Id@(payment.Id == ConfirmedPaymentId() ? " ✓" : string.Empty)</td>
+                        <td>@payment.PaymentType</td>
+                        <td>@Display.Text(payment.Status)</td>
+                        <td>@Display.Date(payment.Created)</td>
+                        <td>@Display.Date(payment.Completed)</td>
+                        <td class="num">@Display.Amount(payment.Paid)</td>
+                        <td class="mono small">@Display.Text(payment.EasyPayPaymentId)</td>
+                        <td class="mono small">@Display.Text(payment.TransactionKey)</td>
+                        <td class="num">@Display.Text(payment.DonationId)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="hint">Highlighted rows belong to this duplicate group. ✓ marks Donations.ConfirmedPaymentId.</p>
+
+    <details class="raw">
+        <summary>Raw Donations row (@Donation.Columns.Count columns)</summary>
+        <KeyValueTable Columns="Donation.Columns" />
+    </details>
+</section>
+
+@code {
+    /// <summary>
+    /// Gets or sets the donation.
+    /// </summary>
+    [Parameter]
+    [EditorRequired]
+    public DonationDetail Donation { get; set; } = new DonationDetail();
+
+    /// <summary>
+    /// Gets or sets the payment IDs in the group.
+    /// </summary>
+    [Parameter]
+    public IReadOnlySet<int> GroupPaymentIds { get; set; } = new HashSet<int>();
+
+    private int? ConfirmedPaymentId()
+    {
+        string? value = Donation.Columns.FirstOrDefault(column => column.Key == "ConfirmedPaymentId").Value;
+        return int.TryParse(value, out int id) ? id : null;
+    }
+}

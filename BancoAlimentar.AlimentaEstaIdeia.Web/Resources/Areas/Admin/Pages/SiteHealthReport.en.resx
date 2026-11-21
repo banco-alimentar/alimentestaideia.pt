@@ -30,8 +30,8 @@
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="Title" xml:space="preserve"><value>Site quality (Application Insights)</value></data>
-  <data name="Description" xml:space="preserve"><value>Summary of the most important Application Insights signals for the current deployment slot. The report is refreshed daily by the Azure Function (production) or manually below.</value></data>
-  <data name="SlotFilter" xml:space="preserve"><value>Filtering telemetry for the {0} slot (AppRoleName: {1}).</value></data>
+  <data name="Description" xml:space="preserve"><value>Application Insights overview for the deployment slot serving this page. Each slot includes telemetry only from its own Application Insights role. The report is refreshed daily in production or manually below.</value></data>
+  <data name="SlotFilter" xml:space="preserve"><value>Showing {0} slot telemetry only (AppRoleName: {1}).</value></data>
   <data name="ReportSlotMismatch" xml:space="preserve"><value>The saved report is for the {0} slot, but this page is running on {1}. Use Refresh report to generate data for the current slot.</value></data>
   <data name="RefreshBackground" xml:space="preserve"><value>Refresh report in background</value></data>
   <data name="RefreshProgress" xml:space="preserve"><value>Refresh progress</value></data>

@@ -9,8 +9,9 @@ This solution uses several test projects at different layers: fast unit tests ne
 | `BancoAlimentar.AlimentaEstaIdeia.Repository.Tests` | Unit | Data access and repository business rules | 272 |
 | `BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests` | Unit | Multi-tenant core, payment builders, middleware | ~13 |
 | `BancoAlimentar.AlimentaEstaIdeia.Function.Tests` | Unit | Azure Functions (subscriptions, multibanco reminders) | 49 |
-| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host and isolated capture fixtures | 301 |
-| `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI + offline helpers | Real browser against **local/dev** + DB verification | 67 browser + 109 offline |
+| `BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests` | Integration | Full web app via in-memory test host and isolated capture fixtures | 316 |
+| `BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests` | Unit + SQL Server dry-run | Reconciliation safeguards; SQL-backed dry-run coverage | 88 (4 SQL cases skipped without a test database) |
+| `BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest` | UI + offline helpers | Real browser against **local/dev** + DB verification | 67 browser (60 local CI + 7 dev-only) + 109 offline |
 
 **Supporting projects (not test runners):**
 
@@ -67,6 +68,7 @@ Integration and Selenium both exercise the **web app from the outside**, but the
 Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening a browser.
 
 - Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB** (unique database per test host), test tenant config, and seeded data.
+- Disables configuration-file reloads through host configuration before startup builds the default providers, avoiding unnecessary inotify watchers on shared Linux runners. Normal application configuration reloads remain enabled.
 - Sends HTTP requests with `HttpClient`; submits forms via **AngleSharp** (same idea as a browser POST, but no JavaScript execution).
 - Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
 - **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.
@@ -88,7 +90,7 @@ Drives a **real Chrome browser** against either an isolated local application or
 
 **Best for:** Full payment journeys, subscription donation (authenticated), claim-invoice with real invoice generation, regressions that only show up with real JS and payment providers.
 
-**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration.
+**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration. Azure runs the consolidated `developer-debug` pipeline for PRs targeting and pushes to `developer`/`master` with a `.cs` change; local runs remain available through the command below.
 
 ### When to use which
 
@@ -139,17 +141,16 @@ dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar
 bash scripts/test-selenium.sh developer
 ```
 
-GitHub Actions (`.github/workflows/alimentestaideia.yaml`) runs Repository, Sas.Core, Integration,
-and Function tests for PRs targeting `developer`/`master`, pushes to both branches, and manual runs.
-Documentation-only PRs also run; **Required build and tests** aggregates the build/test outcomes.
-GitHub does not duplicate browser execution.
-
-The standalone Azure pipeline [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml)
-runs offline helpers and self-contained headless Selenium for PRs targeting either branch and
-manual runs. Core and developer pipelines reuse its shared job before trusted-branch packaging
-and deployment. These browser cases do not target a deployed slot. The shared job also runs
-pipeline/report-policy regression tests and rejects incomplete or duplicate-name TRXs before
-publishing the unmodified reports. See [the pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
+Azure DevOps [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml)
+runs the Release solution build and all five test projects for PRs targeting and pushes to
+`developer` or `master` with a `.cs` change, and on manual runs. It also runs offline helpers and self-contained headless Selenium; these browser
+cases do not target a deployed slot. The pipeline publishes test results and merged Cobertura
+coverage. Only trusted `developer` CI/manual contexts proceed to Debug packaging and developer
+deployment after validation succeeds; `master` never deploys through this pipeline. Weekly
+scheduled runs perform only the dependency audit. Core release packaging is unchanged and
+reuses the Selenium job. The shared job also runs pipeline/report-policy regression tests and rejects
+incomplete or duplicate-name TRXs before publishing the unmodified reports. See
+[the pipeline setup](CI-Azure-DevOps.md#pr-validation-and-trusted-branch-builds).
 
 ---
 
@@ -223,13 +224,13 @@ Bridges repository logic and user-facing pages without hitting dev or real Easyp
 
 ## Code coverage (CI)
 
-GitHub Actions collects Cobertura reports using `coverlet.runsettings` at the repository root. The settings:
+Azure DevOps collects Cobertura reports using `coverlet.runsettings` at the repository root. The settings:
 
 - **Include** only `BancoAlimentar.AlimentaEstaIdeia.*` production assemblies
 - **Exclude** `*.Tests` projects and `*.Integration.Tests`
 - **ExcludeByFile** EF migrations and `*Designer.cs`
 
-Download the **code-coverage** artifact from a workflow run to inspect per-assembly numbers without test-project noise. Visual Studio solution-wide totals still mix in Web Razor Pages and migrations unless you filter the report the same way.
+Download the **code-coverage** pipeline artifact or inspect the run's Code Coverage tab to review per-assembly numbers without test-project noise. Visual Studio solution-wide totals still mix in Web Razor Pages and migrations unless you filter the report the same way.
 
 ---
 
@@ -288,7 +289,7 @@ dotnet test BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest/BancoAlimentar.A
 
 These referral tests do not submit donations, invoke payment providers, or inspect delivered email. They create uniquely identified temporary campaigns and opening events in staging. Cleanup is restricted to those test-owned records and refuses to remove a campaign with associated donations. The configured admin sample and all financial records remain unchanged. If a run is interrupted, temporary test records may remain and need inspection before removal.
 
-The seven existing live payment cases remain separate and may submit sandbox payments or generate invoices when selected for Developer. Neither GitHub Actions nor the self-contained Azure Selenium pipeline executes these live cases. The Azure pipeline uses the same `offline` and `local` runner selections documented in [Local-Email-Tests.md](Local-Email-Tests.md#run-on-an-azure-build-agent).
+The seven existing live payment cases remain separate and may submit sandbox payments or generate invoices when selected for Developer. Neither the PR pipeline nor the self-contained Azure Selenium pipeline executes these live cases. The Azure pipeline uses the same `offline` and `local` runner selections documented in [Local-Email-Tests.md](Local-Email-Tests.md#run-on-an-azure-build-agent).
 
 ---
 

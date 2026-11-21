@@ -19,8 +19,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure.Core.Pipeline;
-    using Azure.Monitor.OpenTelemetry.Exporter;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
@@ -33,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Channel;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.AspNetCore.Hosting;
@@ -44,8 +43,6 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.Hosting;
-    using OpenTelemetry;
-    using OpenTelemetry.Trace;
     using Xunit;
 
     /// <summary>
@@ -107,33 +104,23 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         {
             var configuration = CreateConfiguration();
             configuration["LocalEmailCapture:Enabled"] = captureEnabled.ToString(CultureInfo.InvariantCulture);
-            using var exporter = new CountingRequestExporter();
-            using var transport = new HttpClient(new NoNetworkTelemetryHandler());
+            using var channel = new CountingRequestChannel();
             using var telemetry = new TelemetryConfiguration
             {
                 ConnectionString = "InstrumentationKey=00000000-0000-0000-0000-000000000001;IngestionEndpoint=https://inherited.telemetry.invalid/",
-                SamplingRatio = 1,
-                EnableLiveMetrics = false,
-                DisableOfflineStorage = true,
+                TelemetryChannel = channel,
             };
-            telemetry.ConfigureOpenTelemetryBuilder(builder =>
-            {
-                builder.WithTracing(tracing => tracing.AddProcessor(new SimpleActivityExportProcessor(exporter)));
-
-                // Keep the real SDK/export pipeline, but never let this offline test send HTTP.
-                builder.Services.Configure<AzureMonitorExporterOptions>(options => options.Transport = new HttpClientTransport(transport));
-            });
             LocalEmailCapture.ConfigureTelemetry(configuration, telemetry);
             var client = new TelemetryClient(telemetry);
             client.TrackRequest(new RequestTelemetry
             {
-                Name = exporter.RequestName,
+                Name = channel.RequestName,
                 Url = new Uri("https://localhost:5051/Identity/Account/ResetPassword?code=synthetic-token"),
                 ResponseCode = "200",
                 Success = true,
             });
             Assert.Equal(captureEnabled, telemetry.DisableTelemetry);
-            Assert.Equal(expectedRequests, exporter.RequestCount);
+            Assert.Equal(expectedRequests, channel.RequestCount);
         }
 
         /// <summary>A local browser request must not initialize or migrate an unprepared schema.</summary>
@@ -743,34 +730,30 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             public string Debug => this.Layout;
         }
 
-        private sealed class CountingRequestExporter : BaseExporter<Activity>
+        private sealed class CountingRequestChannel : ITelemetryChannel
         {
             public string RequestName { get; } = "Local password reset " + Guid.NewGuid();
 
             public int RequestCount { get; private set; }
 
-            public override ExportResult Export(in Batch<Activity> batch)
+            public bool? DeveloperMode { get; set; }
+
+            public string EndpointAddress { get; set; }
+
+            public void Send(ITelemetry telemetry)
             {
-                foreach (Activity activity in batch)
+                if (telemetry is RequestTelemetry request && request.Name == this.RequestName)
                 {
-                    if (activity.DisplayName == this.RequestName)
-                    {
-                        this.RequestCount++;
-                    }
+                    this.RequestCount++;
                 }
-
-                return ExportResult.Success;
             }
-        }
 
-        private sealed class NoNetworkTelemetryHandler : HttpMessageHandler
-        {
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            public void Flush()
             {
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"itemsReceived\":1,\"itemsAccepted\":1,\"errors\":[]}"),
-                });
+            }
+
+            public void Dispose()
+            {
             }
         }
 

@@ -159,7 +159,7 @@ Tools ──► Model, Repository, Sas.*
 
 | Item | Notes |
 |------|--------|
-| **azure-pipeline-core.yml** | Listed in `.sln` under `Pipeline` but **file not present** (only `azure-pipeline-selenium-ui-tests.yml` at repo root). |
+| **azure-pipeline-core.yml** | Legacy filename; current pipeline definitions live under `azure-pipelines/`. |
 | **Commented Azure App Configuration** in `Startup` | `AddFeatureManagement` active; App Config integration disabled. |
 | **Distributed SQL cache** | Commented out in `Startup`. |
 | **Tools `Program.cs`** | Most maintenance entry points commented out. |
@@ -294,14 +294,14 @@ Tools ──► Model, Repository, Sas.*
 
 **Shared:** `Testing.Common` and `Web.TestHost` for `CustomWebApplicationFactory`.
 
-**Selenium prerequisites:** Chrome, user secrets, dev site up. Run via `azure-pipeline-selenium-ui-tests.yml` or locally before release.
+**Selenium prerequisites:** CI uses Chrome/ChromeDriver, Docker Mailpit, and a self-contained host without Azure credentials. Run via `azure-pipelines/developer-debug.yml` or locally before release; live developer-slot tests require separate configuration.
 
 ### 6.2 Gaps
 
 - No dedicated tests for `Sas.ConfigurationProvider`, **Function** triggers, or **Paypal** project.
 - **Payment webhooks** — limited automated contract/security tests (not enough evidence of full EasyPay signature coverage).
 - **TenantManagement** — no test project.
-- **GitHub Actions** — `dotnet test` **commented out**.
+- **CI tests** — Azure DevOps runs the test projects and Selenium checks for PRs.
 - Repository/SAS tests depend on **full Web** project.
 
 ### 6.3 Highest-value tests to add first
@@ -321,13 +321,13 @@ Tools ──► Model, Repository, Sas.*
 | **Target frameworks** | Almost all **net9.0**; **Easypay.Rest.Client** is **net8.0**. |
 | **Warnings as errors** | Most projects; undermined on `Sas.ConfigurationProvider` (`WarningLevel` 0). |
 | **Missing pipeline file** | `azure-pipeline-core.yml` in solution, absent on disk. |
-| **GitHub Actions** | `checkout@v5`, `setup-dotnet@v5` (Node 24); **build only**, no test gate. |
+| **Azure DevOps** | PR build, five test projects, Selenium, coverage, and scheduled NuGet audit on the `Default` Linux pool. |
 | **Package drift** | `Microsoft.AspNetCore.Http.Abstractions` **2.3.0** on some net9 projects alongside `FrameworkReference`. |
 | **Migrations** | Two contexts, two migration assemblies — deploy must run both. |
 | **Publish size** | Large `wwwroot`, tenant themes, PDF generation — `TenantStaticSyncHostedService` for static sync. |
 | **Secrets in repo** | `**/local.settings.json` gitignored; historical secrets still in git objects. |
 
-**CI/CD:** Selenium pipeline separate (`azure-pipeline-selenium-ui-tests.yml`); core build/test/release path fragmented.
+**CI/CD:** `azure-pipelines/developer-debug.yml` consolidates PR/push validation for `developer` and `master`, the weekly dependency audit, and guarded developer-slot deployment. Only trusted `developer` CI/manual runs deploy; Core release packaging and preproduction deployment remain separate.
 
 ---
 
@@ -370,7 +370,7 @@ Tools ──► Model, Repository, Sas.*
 | 3 | Upgrade GitHub Actions to v5 / Node 24 | Deprecation warnings | CI longevity | **Done** |
 | 4 | Gitignore **Function `local.settings.json`** | Secret commits | Safer dev | **Done** |
 | 5 | Fix **DocumentationFile** net9.0 path | Stale tooling | Clean builds | **Done** |
-| 6 | Enable **`dotnet test`** in GitHub Actions | No test gate | Catch regressions | Open |
+| 6 | Consolidate PR build/test validation in Azure DevOps | CI split across GitHub Actions and Azure Pipelines | One self-hosted agent and one PR gate | In progress |
 | 7 | Keep **PayPal sandbox credentials** in user secrets / CI only (removed Playwright E2E project that had hardcoded password) | Credential in git | Rotatable secrets | Done (E2E removed) |
 | 8 | **Rotate + purge** historical secrets (Unicre, storage keys, etc.) | Git history exposure | Compliance | Open |
 | 9 | Restore or remove broken **`azure-pipeline-core.yml`** solution link | Broken solution items | Cleaner repo | Open |

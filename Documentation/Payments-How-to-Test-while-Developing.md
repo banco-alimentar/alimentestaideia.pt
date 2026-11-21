@@ -149,3 +149,17 @@
 Use the "Donation History" section to manager your donations and payments.
 
 ![Managing Payments](images/payments/payment-0000.png)
+
+## Subscription webhook verification
+
+Successful subscription captures require a unique matching paid transaction from the EasyPay API.
+Failed subscription callbacks currently return `403` with the telemetry reason
+`subscription_terminal_failure_not_verified`: the API's subscription transaction model has no
+per-capture failure status, and an unsigned callback plus a zero-paid transaction can still describe
+a pending capture. These callbacks do not change donations or send failure alerts. Authenticate the
+callback or obtain terminal provider failure evidence before enabling failure processing.
+
+The in-process integration verifier simulates verified failures to exercise persistence and email
+delivery safeguards; those tests do not prove production-provider failure verification. In that flow,
+rejected captures cannot send an alert, sent emails are acknowledged without duplication, and unsent
+pending claims return `503` so retries continue. A pending claim can be reclaimed after 15 minutes.

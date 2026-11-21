@@ -10,7 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{97
 		azure-pipelines\developer-debug.yml = azure-pipelines\developer-debug.yml
 		azure-pipelines\core-build.yml = azure-pipelines\core-build.yml
 		azure-pipelines\preprod-release.yml = azure-pipelines\preprod-release.yml
-		azure-pipeline-selenium-ui-tests.yml = azure-pipeline-selenium-ui-tests.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BancoAlimentar.AlimentaEstaIdeia.Model", "BancoAlimentar.AlimentaEstaIdeia.Model\BancoAlimentar.AlimentaEstaIdeia.Model.csproj", "{5CCB7AB1-E0B2-4D9A-ADAA-F0A2A63B02C7}"
@@ -63,6 +62,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Web.TestHost", "BancoAlimentar.AlimentaEstaIdeia.Web.TestHost\BancoAlimentar.AlimentaEstaIdeia.Web.TestHost.csproj", "{471E601F-91B9-48A4-9043-3762577D37C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Function.Tests", "BancoAlimentar.AlimentaEstaIdeia.Function.Tests\BancoAlimentar.AlimentaEstaIdeia.Function.Tests.csproj", "{64EAE123-053F-4BD1-BC16-CCAE63978844}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden", "BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden\BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.csproj", "{B822DF65-A856-4837-A712-08FD589F75DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests", "BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests\BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj", "{04693808-52F5-4336-9D80-8F1D32C261DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -314,6 +317,30 @@ Global
 		{64EAE123-053F-4BD1-BC16-CCAE63978844}.Release|x64.Build.0 = Release|Any CPU
 		{64EAE123-053F-4BD1-BC16-CCAE63978844}.Release|x86.ActiveCfg = Release|Any CPU
 		{64EAE123-053F-4BD1-BC16-CCAE63978844}.Release|x86.Build.0 = Release|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Debug|x64.Build.0 = Debug|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Release|x64.ActiveCfg = Release|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Release|x64.Build.0 = Release|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{B822DF65-A856-4837-A712-08FD589F75DD}.Release|x86.Build.0 = Release|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Debug|x64.Build.0 = Debug|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Debug|x86.Build.0 = Debug|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Release|x64.ActiveCfg = Release|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Release|x64.Build.0 = Release|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Release|x86.ActiveCfg = Release|Any CPU
+		{04693808-52F5-4336-9D80-8F1D32C261DF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -334,6 +361,8 @@ Global
 		{7D6D0AAD-A3B5-482A-AC3B-4C3C63DA881A} = {4A6FC157-2864-46B0-AC5A-AE7A84E36C0E}
 		{471E601F-91B9-48A4-9043-3762577D37C2} = {45FB6057-937E-4923-A434-44AA0E961722}
 		{64EAE123-053F-4BD1-BC16-CCAE63978844} = {45FB6057-937E-4923-A434-44AA0E961722}
+		{B822DF65-A856-4837-A712-08FD589F75DD} = {FBCBF871-A943-4559-BD9B-1862231A457F}
+		{04693808-52F5-4336-9D80-8F1D32C261DF} = {45FB6057-937E-4923-A434-44AA0E961722}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A2FA89D7-CB04-426E-A6AD-E1346C3638E8}

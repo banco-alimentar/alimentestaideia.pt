@@ -30,6 +30,11 @@ docker compose -f compose.mailpit.yml up -d
 
 Open the [local inbox](http://127.0.0.1:8025). SMTP listens on loopback port 1025; the inbox and API listen on loopback port 8025. The Compose definition pins [Mailpit v1.32.0](https://github.com/axllent/mailpit/releases/tag/v1.32.0), exposes no public ports, and configures no forwarding or relay. See the [Mailpit Docker documentation](https://mailpit.axllent.org/docs/install/docker/).
 
+These remain the local defaults. The shared CI job sets `MAILPIT_SMTP_PORT=0`
+and `MAILPIT_HTTP_PORT=0` to request Docker-assigned loopback ports, discovers
+them with `docker compose port`, and passes them to readiness checks and tests.
+This keeps concurrent CI jobs from competing for the default host ports.
+
 Captured messages contain live test-account security links. Do not expose the inbox to a public network or use real users for these tests.
 
 ## Run self-contained local browser tests
@@ -85,15 +90,17 @@ bash scripts/test-selenium.sh local --list-tests
 
 ## Run on an Azure build agent
 
-[`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) runs the `offline` checks followed by all self-contained `local` browser cases with headless Chrome. It installs .NET 10, uses the hosted Ubuntu agent's Chrome and ChromeDriver, starts the pinned Mailpit container on loopback, publishes TRX results, and removes the container and temporary inbox afterward. Docker is needed only on the hosted agent, not on your Mac.
+[`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) runs the `offline` checks followed by all self-contained `local` browser cases with headless Chrome. It installs .NET 10, uses Chrome and ChromeDriver on the Linux agent in the Azure DevOps `Default` pool, starts the pinned Mailpit container on loopback, publishes TRX results, and removes the container and temporary inbox afterward. Docker must be available to the self-hosted agent account.
 
 Here, `local` means local to the Azure agent. The application, SQLite memory databases, simulated payment provider, and catcher run there; development, preproduction, and production slots are not contacted. No Azure credentials, shared SQL connection, or real email recipients are required. The captured mailbox is not uploaded as an artifact.
 
-The standalone YAML validates PRs targeting `developer` and `master`, and supports manual runs.
-It does not trigger on branch pushes: Core/developer pipelines reuse the same job as a required
-stage before trusted packaging/deployment. PR and feature-branch contexts omit credentialed stages;
-the standalone check blocks merges only after it is made required in GitHub. See
-[the Azure pipeline setup](CI-Azure-DevOps.md#self-contained-selenium-pipeline).
+The consolidated YAML validates PRs targeting and pushes to `developer` and `master` with a
+`.cs` change, and supports manual runs. Weekly scheduled runs only audit dependencies.
+Core reuses the same browser job before trusted packaging. PR, feature-branch, and `master`
+contexts omit developer packaging/deployment; trusted `developer` CI/manual runs can deploy
+after validation succeeds. The consolidated check blocks merges only after it is made required
+in GitHub for both protected branches. See
+[the Azure pipeline setup](CI-Azure-DevOps.md#pr-validation-and-trusted-branch-builds).
 
 The shared job verifies that both TRXs contain complete passing results with consistent counters
 and unique display names. In hosted run 2412, all 169 cases executed, but Azure displayed 162 because
@@ -125,7 +132,7 @@ Startup rejects capture outside Development, non-loopback application URLs, and 
 
 Capture mode disables Application Insights telemetry, even if credentials are inherited, so emailed reset tokens are not exported in request URLs. The launch profile also suppresses informational hosting request logs. Local capture refuses pending tenant migrations instead of applying them on the first request; prepare the schema explicitly before running tests.
 
-Other launch profiles and Azure slot settings are unchanged. Choose `LocalMailpit` explicitly when running local email tests.
+The regular `BancoAlimentar.AlimentaEstaIdeia.Web` profile is the first supported `Project` profile, so plain `dotnet run` uses the normal local-development settings. Choose `LocalMailpit` explicitly only when running the SQL-backed local email tests. Azure slot settings are unchanged.
 
 If you explicitly disable `LocalEmailCapture:UseInMemoryInfrastructure` while capture remains enabled, you must configure a dedicated infrastructure SQL connection and matching `LocalEmailCapture:ExpectedInfrastructureDatabase`, also ending in `_selenium`. Shared infrastructure databases are still rejected in that mode.
 

@@ -14,6 +14,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Threading.Tasks;
     using AngleSharp.Html.Parser;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
+    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
@@ -23,6 +24,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +51,53 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         public PaymentConfirmationEmailTests(CustomWebApplicationFactory factory)
         {
             this.factory = factory;
+        }
+
+        /// <summary>
+        /// Failed-subscription email renders escaped donor details and links to the donor's subscription.
+        /// </summary>
+        [Fact]
+        public void FailedSubscriptionEmail_RendersEscapedDetailsAndSubscriptionLink()
+        {
+            var tracker = new StubMailTracker();
+            using var webFactory = this.factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureAppConfiguration((context, configuration) =>
+                {
+                    configuration.AddInMemoryCollection(new Dictionary<string, string>
+                    {
+                        ["Email.Subscription.PaymentFailed.Subject"] = "Subscription payment failed",
+                        ["Email.Subscription.PaymentFailed.Body.Path"] = "Email.Subscription.PaymentFailed.htm",
+                    });
+                });
+            });
+
+            using var scope = webFactory.Services.CreateScope();
+            var donation = new Donation
+            {
+                DonationAmount = 12.5,
+                User = new WebUser
+                {
+                    UserName = "<Donor & supporter>",
+                    Email = "donor@example.test",
+                },
+            };
+            var request = new DefaultHttpContext().Request;
+            request.Scheme = "https";
+            request.Host = new HostString("donations.example.test");
+            var subscriptionId = Guid.NewGuid();
+
+            bool sent = new CapturingMail(scope.ServiceProvider, tracker, wantsReceipt: false)
+                .SendSubscriptionPaymentFailedEmail(donation, subscriptionId, request, paymentId: 42);
+
+            Assert.True(sent);
+            Assert.Equal("Subscription payment failed", tracker.LastSubject);
+            Assert.Equal("donor@example.test", tracker.LastRecipient);
+            Assert.Contains("&lt;Donor &amp; supporter&gt;", tracker.LastBody);
+            Assert.Contains("12,50 €", tracker.LastBody);
+            Assert.Contains($"https://donations.example.test/Identity/Account/Manage/Subscriptions/Details?publicId={subscriptionId}", tracker.LastBody);
+            Assert.DoesNotContain("{donorName}", tracker.LastBody);
+            Assert.DoesNotContain("{subscriptionUrl}", tracker.LastBody);
         }
 
         /// <summary>
