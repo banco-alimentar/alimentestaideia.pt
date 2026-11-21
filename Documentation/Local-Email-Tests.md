@@ -90,14 +90,16 @@ bash scripts/test-selenium.sh local --list-tests
 
 ## Run on an Azure build agent
 
-[`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml) runs the `offline` checks followed by all self-contained `local` browser cases with headless Chrome. It installs .NET 10, uses Chrome and ChromeDriver on the Linux agent in the Azure DevOps `Default` pool, starts the pinned Mailpit container on loopback, publishes TRX results, and removes the container and temporary inbox afterward. Docker must be available to the self-hosted agent account.
+[`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml) runs the `offline` checks followed by all self-contained `local` browser cases with headless Chrome. It installs .NET 10, uses Chrome and ChromeDriver on the Linux agent in the Azure DevOps `Default` pool, starts the pinned Mailpit container on loopback, publishes TRX results, and removes the container and temporary inbox afterward. Docker must be available to the self-hosted agent account.
 
 Here, `local` means local to the Azure agent. The application, SQLite memory databases, simulated payment provider, and catcher run there; development, preproduction, and production slots are not contacted. No Azure credentials, shared SQL connection, or real email recipients are required. The captured mailbox is not uploaded as an artifact.
 
-The standalone YAML validates PRs targeting `developer` and `master`, and supports manual runs.
-It does not trigger on branch pushes: Core/developer pipelines reuse the same job as a required
-stage before trusted packaging/deployment. PR and feature-branch contexts omit credentialed stages;
-the standalone check blocks merges only after it is made required in GitHub. See
+The consolidated YAML validates PRs targeting and pushes to `developer` and `master` with a
+`.cs` change, and supports manual runs. Weekly scheduled runs only audit dependencies.
+Core reuses the same browser job before trusted packaging. PR, feature-branch, and `master`
+contexts omit developer packaging/deployment; trusted `developer` CI/manual runs can deploy
+after validation succeeds. The consolidated check blocks merges only after it is made required
+in GitHub for both protected branches. See
 [the Azure pipeline setup](CI-Azure-DevOps.md#pr-validation-and-trusted-branch-builds).
 
 The shared job verifies that both TRXs contain complete passing results with consistent counters
