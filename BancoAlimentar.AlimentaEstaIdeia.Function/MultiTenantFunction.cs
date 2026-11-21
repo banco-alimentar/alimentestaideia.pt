@@ -186,6 +186,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                         keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id) ?? new Dictionary<string, string>());
                     tenantConfiguration["Tenant:NormalizedName"] = tenant.NormalizedName;
                     tenantConfiguration["Tenant:Name"] = tenant.Name;
+                    tenantConfiguration["Tenant:PaymentStrategy"] = tenant.PaymentStrategy.ToString();
                     var memoryConfigurationSource = new MemoryConfigurationSource
                     {
                         InitialData = tenantConfiguration,

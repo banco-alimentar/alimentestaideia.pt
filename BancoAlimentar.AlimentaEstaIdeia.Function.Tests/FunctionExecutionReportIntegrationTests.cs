@@ -139,22 +139,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
         }
 
         /// <summary>
-        /// The subscriptions placeholder must explicitly report that no synchronization occurred.
+        /// Subscription retry reconciliation must report its examined and updated records.
         /// </summary>
         [Fact]
-        public async Task UpdateSubscriptions_ReportsNoOpWithoutClaimingChanges()
+        public async Task UpdateSubscriptions_ReportsSynchronizationActivity()
         {
             var store = new RecordingExecutionReportStore();
             var reporter = new FakeFunctionExecutionReportCoordinator(store);
-
-            await reporter.RecordOutcomeAsync(
+            var execution = reporter.Begin(
                 "UpdateSubscriptions",
-                FunctionExecutionReportOutcome.Succeeded,
-                "No subscription synchronization was performed; this function is currently a placeholder.");
+                new FunctionExecutionReportScope("production", "alimentestaideia"));
+
+            execution.RecordActivity(
+                "subscription-synchronization",
+                FunctionExecutionReportActivitySeverity.Information,
+                "Examined 2 active credit-card subscriptions; updated retry settings for 1 and failed 0.");
+            execution.SetCounter("subscriptionsExamined", 2);
+            execution.SetCounter("subscriptionsUpdated", 1);
+            await execution.CompleteAsync(FunctionExecutionReportOutcome.Succeeded, businessDataChanged: true);
 
             FunctionExecutionReport report = Assert.Single(store.Reports);
-            Assert.False(report.BusinessDataChanged);
-            Assert.Contains(report.Activities, activity => activity.Message.Contains("no subscription synchronization", StringComparison.OrdinalIgnoreCase));
+            Assert.True(report.BusinessDataChanged);
+            Assert.Contains(report.Activities, activity => activity.ActivityKey == "subscription-synchronization");
+            Assert.Equal(2, report.Summary.Counters["subscriptionsExamined"]);
+            Assert.Equal(1, report.Summary.Counters["subscriptionsUpdated"]);
         }
 
         /// <summary>
