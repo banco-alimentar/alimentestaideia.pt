@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using System.Threading;
 
     /// <summary>
     /// Loads and managed the configuration from Azure Key Vault for each Tenant.
@@ -18,8 +19,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// </summary>
         /// <param name="tenantId">Tenant id.</param>
         /// <param name="developmentOptions">Tenant development options.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
+        /// <returns>
+        /// True when this call populates the cache; false when already cached or loading fails.
+        /// Use <see cref="GetTenantConfiguration"/> and diagnostics to check configuration readiness.
+        /// This result does not indicate whether database initialization is needed.
+        /// </returns>
         Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions);
+
+        /// <summary>Loads tenant secrets asynchronously with cancellation and a bounded deadline.</summary>
+        /// <param name="tenantId">Tenant identifier.</param>
+        /// <param name="developmentOptions">Development overrides.</param>
+        /// <param name="cancellationToken">Caller cancellation.</param>
+        /// <returns>Whether this call populated the cache.</returns>
+        Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the specific tenant configuration that has more priority that normal configuration.
@@ -33,6 +45,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// </summary>
         /// <returns>True if the configuration is loaded, false otherwise.</returns>
         bool LoadTenantConfiguration();
+
+        /// <summary>Loads shared metadata asynchronously without blocking request threads.</summary>
+        /// <param name="cancellationToken">Caller cancellation.</param>
+        /// <returns>Whether shared configuration is available; individual tenant failures are isolated.</returns>
+        Task<bool> LoadTenantConfigurationAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets diagnostics for the most recent failed <see cref="LoadTenantConfiguration"/> call.

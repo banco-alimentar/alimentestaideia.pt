@@ -71,7 +71,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
             {
                 if (item.IsBlob)
                 {
-                    yield return new TenantStaticFileInfo(this.container.GetBlobClient(item.Blob.Name));
+                    yield return new TenantStaticFileInfo(
+                        this.container.GetBlobClient(item.Blob.Name),
+                        BlobsModelFactory.BlobProperties(contentLength: item.Blob.Properties.ContentLength ?? 0, lastModified: item.Blob.Properties.LastModified ?? default));
                 }
             }
         }

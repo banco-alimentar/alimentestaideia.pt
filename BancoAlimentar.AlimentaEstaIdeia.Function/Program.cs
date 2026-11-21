@@ -101,6 +101,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             builder.Services.AddTransient<MultiBancoPaymentNotificationFunction>();
             builder.Services.AddTransient<UpdateSubscriptions>();
             builder.Services.AddTransient<AdminFunctionExecutionQueueTrigger>();
+            builder.Services.AddSingleton<KeyVaultConfigurationCache>();
+            builder.Services.AddSingleton<Sas.ConfigurationProvider.TenantConfiguration.InMemoryCacheService>();
+            builder.Services.AddSingleton<RuntimeCacheInvalidationService>();
+            builder.Services.AddHostedService<RuntimeCacheInvalidationHostedService>();
+            builder.Services.AddSingleton(TimeProvider.System);
+            builder.Services.AddOptions<TenantRuntimeOptions>()
+                .Bind(Configuration.GetSection("TenantRuntime"))
+                .Validate(options => options.IsValid(), "Tenant runtime intervals must be positive and bounded.")
+                .ValidateOnStart();
             builder.Services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             builder.Services.AddDbContext<InfrastructureDbContext>(options =>
                 options.UseSqlServer(

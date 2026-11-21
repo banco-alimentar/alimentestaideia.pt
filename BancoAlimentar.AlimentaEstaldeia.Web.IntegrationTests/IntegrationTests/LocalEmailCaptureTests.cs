@@ -709,6 +709,10 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions) => Task.FromResult(true);
 
+            public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions, CancellationToken cancellationToken) => Task.FromResult(true);
+
+            public Task<bool> LoadTenantConfigurationAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
+
             public Dictionary<string, string> GetTenantConfiguration(int tenantId) => this.values;
 
             public bool LoadTenantConfiguration() => true;

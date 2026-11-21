@@ -7,13 +7,14 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
 {
     using System;
-    using System.Collections.Generic;
+    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Initializer;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using Microsoft.ApplicationInsights;
@@ -29,8 +30,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
     /// </summary>
     public class TenantInitializationService
     {
-        private static readonly object SharedLock = new object();
-        private Dictionary<int, bool> tenantInitializationStatus = new Dictionary<int, bool>();
+        private readonly ConcurrentDictionary<int, SemaphoreSlim> tenantInitializationLocks = new ConcurrentDictionary<int, SemaphoreSlim>();
+        private readonly ConcurrentDictionary<int, TenantInitializationStatus> tenantInitializationStatus = new ConcurrentDictionary<int, TenantInitializationStatus>();
+
+        /// <summary>Reads initialization status without including exception messages or credentials.</summary>
+        /// <param name="tenantId">Tenant identifier.</param>
+        /// <returns>Current initialization status.</returns>
+        public TenantInitializationStatus GetStatus(int tenantId)
+        {
+            return this.tenantInitializationStatus.TryGetValue(tenantId, out TenantInitializationStatus? status)
+                ? status : new TenantInitializationStatus();
+        }
 
         /// <summary>
         /// Initializes the tenant database configuration.
@@ -43,22 +53,30 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 return;
             }
 
-            bool isLockTaken = false;
+            SemaphoreSlim initializationLock = this.tenantInitializationLocks.GetOrAdd(tenant.Id, _ => new SemaphoreSlim(1, 1));
+            await initializationLock.WaitAsync(context.RequestAborted);
             try
             {
-                Monitor.Enter(SharedLock, ref isLockTaken);
                 if (this.IsTenantInitialized(tenant.Id))
                 {
                     return;
                 }
 
+                this.tenantInitializationStatus[tenant.Id] = new TenantInitializationStatus
+                {
+                    InProgress = true,
+                    LastAttemptAt = DateTimeOffset.UtcNow,
+                };
                 using (Timing? timing = MiniProfiler.Current.Step("SeedAndMigrationsTenantDatabase"))
                 {
                     root?.AddChild(timing!);
                     IServiceProvider currentServiceProvider = context.RequestServices;
                     ApplicationDbContext applicationDbContext = currentServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-                    if (configuration.GetSection("LocalEmailCapture").GetValue<bool>("Enabled"))
+                    IConfiguration hostConfiguration = configuration is TenantConfigurationRoot tenantConfiguration
+                        ? tenantConfiguration.HostConfiguration
+                        : configuration;
+                    if (hostConfiguration.GetSection("LocalEmailCapture").GetValue<bool>("Enabled"))
                     {
                         if (applicationDbContext.Database.IsRelational() && applicationDbContext.Database.GetPendingMigrations().Any())
                         {
@@ -81,21 +99,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                         currentServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>(),
                         configuration);
 
-                    this.tenantInitializationStatus[tenant.Id] = true;
+                    this.tenantInitializationStatus[tenant.Id] = this.GetStatus(tenant.Id) with
+                    {
+                        Initialized = true,
+                        InProgress = false,
+                        LastSuccessAt = DateTimeOffset.UtcNow,
+                    };
                 }
+            }
+            catch (Exception exception)
+            {
+                this.tenantInitializationStatus[tenant.Id] = this.GetStatus(tenant.Id) with
+                {
+                    InProgress = false,
+                    LastFailureType = exception.GetType().Name,
+                };
+                throw;
             }
             finally
             {
-                if (isLockTaken && Monitor.IsEntered(SharedLock))
-                {
-                    Monitor.Exit(SharedLock);
-                }
+                initializationLock.Release();
             }
         }
 
         private bool IsTenantInitialized(int tenantId)
         {
-            return this.tenantInitializationStatus.TryGetValue(tenantId, out bool initialized) && initialized;
+            return this.GetStatus(tenantId).Initialized;
         }
     }
 }

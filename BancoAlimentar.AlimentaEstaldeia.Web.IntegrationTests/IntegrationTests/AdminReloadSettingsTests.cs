@@ -10,10 +10,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     using System.Net;
     using System.Threading.Tasks;
     using AngleSharp.Html.Dom;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.TestHost;
+    using Microsoft.ApplicationInsights;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging.Abstractions;
     using Xunit;
 
     /// <summary>
@@ -74,6 +81,9 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var html = await response.Content.ReadAsStringAsync();
             Assert.Contains("Reload Runtime Settings", html);
             Assert.Contains("Reload settings", html);
+            Assert.Contains("Runtime status (this instance)", html);
+            Assert.Contains("Cache generation", html);
+            Assert.Contains("Last successful asset refresh", html);
         }
 
         /// <summary>
@@ -93,6 +103,22 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
                 SuperAdminEmail,
                 SuperAdminPassword);
 
+            using var configurationScope = this.factory.Services.CreateScope();
+            var tenantConfiguration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "Test:Setting", "cached" },
+            }).Build();
+            var manager = new KeyVaultConfigurationManager(
+                configurationScope.ServiceProvider.GetRequiredService<InfrastructureDbContext>(),
+                configurationScope.ServiceProvider.GetRequiredService<IWebHostEnvironment>(),
+                configurationScope.ServiceProvider.GetRequiredService<TelemetryClient>(),
+                configurationScope.ServiceProvider.GetRequiredService<KeyVaultConfigurationCache>(),
+                tenantConfiguration,
+                NullLogger<KeyVaultConfigurationManager>.Instance);
+            const int cachedTenantId = -1;
+            Assert.True(await manager.EnsureTenantConfigurationLoaded(cachedTenantId, new TenantDevelopmentOptions { UseSecrets = true }));
+            Assert.NotNull(manager.GetTenantConfiguration(cachedTenantId));
+
             var getResponse = await client.GetAsync("/Admin/ReloadSettings");
             getResponse.EnsureSuccessStatusCode();
             var content = await HtmlHelpers.GetDocumentAsync(getResponse);
@@ -106,6 +132,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             postResponse.EnsureSuccessStatusCode();
             var html = await postResponse.Content.ReadAsStringAsync();
             Assert.Contains("In-memory settings cache cleared", html);
+            Assert.Null(manager.GetTenantConfiguration(cachedTenantId));
         }
     }
 }
