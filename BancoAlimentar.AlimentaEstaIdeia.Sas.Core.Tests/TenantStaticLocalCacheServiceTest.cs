@@ -95,6 +95,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             Mock<BlobContainerClient> container = CreateContainer(blobs, blobClient.Object);
             var service = new TenantStaticLocalCacheService((connection, name) => container.Object);
             await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            TenantStaticSyncStatus successfulStatus = service.GetStatus(this.tenantId);
             blobs[0] = CreateBlob("v2", 4);
             blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
                 .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
@@ -107,6 +108,145 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             string target = StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(this.tenantId, "wwwroot/site.css");
             Assert.Equal("aaaa", await File.ReadAllTextAsync(target));
             Assert.Empty(Directory.EnumerateFiles(StaticFileConfigurationManager.GetTenantLocalCacheRootPath(this.tenantId), "*.download", SearchOption.AllDirectories));
+            TenantStaticSyncStatus failedStatus = service.GetStatus(this.tenantId);
+            Assert.Equal(successfulStatus.LastSuccessAt, failedStatus.LastSuccessAt);
+            Assert.True(failedStatus.LastAttemptAt >= successfulStatus.LastAttemptAt);
+            Assert.Equal("LocalIO", failedStatus.LastFailureType);
+        }
+
+        /// <summary>
+        /// A later failure must not replace earlier known-good assets or their manifest.
+        /// </summary>
+        /// <param name="failDuringPublication">Whether the failure occurs after downloads complete.</param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task FailedPassPreservesAllAssetsAndManifest(bool failDuringPublication)
+        {
+            var blobs = new List<BlobItem> { CreateBlob("v1", 4) };
+            var blobClient = new Mock<BlobClient>();
+            blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                {
+                    await File.WriteAllTextAsync(path, "aaaa", cancellationToken);
+                    return Mock.Of<Response>();
+                });
+            Mock<BlobContainerClient> container = CreateContainer(blobs, blobClient.Object);
+            var service = new TenantStaticLocalCacheService((connection, name) => container.Object);
+            await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            string root = StaticFileConfigurationManager.GetTenantLocalCacheRootPath(this.tenantId);
+            string manifest = await File.ReadAllTextAsync(Path.Combine(root, ".tenant-static-versions.json"));
+            string obsolete = Path.Combine(root, "wwwroot", "obsolete.css");
+            await File.WriteAllTextAsync(obsolete, "known-good");
+            blobs[0] = CreateBlob("v2", 4);
+            blobs.Add(BlobsModelFactory.BlobItem("wwwroot/later.css", properties: BlobsModelFactory.BlobItemProperties(accessTierInferred: false, contentLength: 4, eTag: new ETag("v2"))));
+            var laterBlob = new Mock<BlobClient>();
+            if (failDuringPublication)
+            {
+                Directory.CreateDirectory(Path.Combine(root, "wwwroot", "later.css"));
+                laterBlob.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                    .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                    {
+                        await File.WriteAllTextAsync(path, "dddd", cancellationToken);
+                        return Mock.Of<Response>();
+                    });
+            }
+            else
+            {
+                laterBlob.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                    .ThrowsAsync(new RequestFailedException(503, "Synthetic private storage detail."));
+            }
+
+            container.Setup(item => item.GetBlobClient("wwwroot/later.css")).Returns(laterBlob.Object);
+            blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                {
+                    await File.WriteAllTextAsync(path, "bbbb", cancellationToken);
+                    return Mock.Of<Response>();
+                });
+
+            if (failDuringPublication)
+            {
+                await Assert.ThrowsAsync<IOException>(() => service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true));
+            }
+            else
+            {
+                await Assert.ThrowsAsync<RequestFailedException>(() => service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true));
+            }
+
+            Assert.Equal("aaaa", await File.ReadAllTextAsync(Path.Combine(root, "wwwroot", "site.css")));
+            Assert.Equal("known-good", await File.ReadAllTextAsync(obsolete));
+            Assert.Equal(manifest, await File.ReadAllTextAsync(Path.Combine(root, ".tenant-static-versions.json")));
+            Assert.Equal(failDuringPublication ? "LocalIO" : "StorageUnavailable", service.GetStatus(this.tenantId).LastFailureType);
+            Assert.Empty(Directory.EnumerateFiles(root, "*.download", SearchOption.AllDirectories));
+            Assert.Empty(Directory.EnumerateFiles(root, "*.backup", SearchOption.AllDirectories));
+        }
+
+        /// <summary>
+        /// Missing storage is a failed refresh and cannot replace a previous success.
+        /// </summary>
+        [Fact]
+        public async Task MissingContainerPreservesSuccessfulStatusAndFiles()
+        {
+            var blobs = new List<BlobItem> { CreateBlob("v1", 4) };
+            var blobClient = new Mock<BlobClient>();
+            blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                {
+                    await File.WriteAllTextAsync(path, "aaaa", cancellationToken);
+                    return Mock.Of<Response>();
+                });
+            Mock<BlobContainerClient> container = CreateContainer(blobs, blobClient.Object);
+            var service = new TenantStaticLocalCacheService((connection, name) => container.Object);
+            await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            DateTimeOffset? successAt = service.GetStatus(this.tenantId).LastSuccessAt;
+            container.Setup(item => item.ExistsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(Response.FromValue(false, Mock.Of<Response>()));
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true));
+
+            Assert.Equal(successAt, service.GetStatus(this.tenantId).LastSuccessAt);
+            Assert.Equal("ConfigurationUnavailable", service.GetStatus(this.tenantId).LastFailureType);
+            Assert.Equal("aaaa", await File.ReadAllTextAsync(StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(this.tenantId, "wwwroot/site.css")));
+        }
+
+        /// <summary>
+        /// Cancellation cleans staging, retains the successful snapshot and releases the lock.
+        /// </summary>
+        [Fact]
+        public async Task CanceledDownloadRetainsAssetsAndAllowsRetry()
+        {
+            var blobs = new List<BlobItem> { CreateBlob("v1", 4) };
+            var blobClient = new Mock<BlobClient>();
+            blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                {
+                    await File.WriteAllTextAsync(path, "aaaa", cancellationToken);
+                    return Mock.Of<Response>();
+                });
+            Mock<BlobContainerClient> container = CreateContainer(blobs, blobClient.Object);
+            var service = new TenantStaticLocalCacheService((connection, name) => container.Object);
+            await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            DateTimeOffset? successAt = service.GetStatus(this.tenantId).LastSuccessAt;
+            using var cancellation = new CancellationTokenSource();
+            blobs[0] = CreateBlob("v2", 4);
+            blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                {
+                    await File.WriteAllTextAsync(path, "partial", cancellationToken);
+                    cancellation.Cancel();
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return Mock.Of<Response>();
+                });
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true, cancellation.Token));
+
+            Assert.Equal(successAt, service.GetStatus(this.tenantId).LastSuccessAt);
+            Assert.Equal("Canceled", service.GetStatus(this.tenantId).LastFailureType);
+            Assert.Equal("aaaa", await File.ReadAllTextAsync(StaticFileConfigurationManager.GetTenantLocalTemporalFilePath(this.tenantId, "wwwroot/site.css")));
+            Assert.Empty(Directory.EnumerateFiles(StaticFileConfigurationManager.GetTenantLocalCacheRootPath(this.tenantId), "*.download", SearchOption.AllDirectories));
+            blobs.Clear();
+            await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            Assert.Null(service.GetStatus(this.tenantId).LastFailureType);
         }
 
         /// <summary>

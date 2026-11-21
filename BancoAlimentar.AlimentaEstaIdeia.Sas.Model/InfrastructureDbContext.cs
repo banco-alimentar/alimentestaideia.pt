@@ -58,6 +58,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
         /// </summary>
         public DbSet<TenantConfiguration> TenantConfigurations { get; set; }
 
+        /// <summary>Gets or sets shared runtime cache invalidation revisions.</summary>
+        public DbSet<RuntimeCacheRevision> RuntimeCacheRevisions { get; set; }
+
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -71,6 +74,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model
                 entity.Property(item => item.DomainName).HasMaxLength(253).IsRequired();
                 entity.Property(item => item.Environment).HasMaxLength(64).IsRequired();
                 entity.HasIndex(item => new { item.DomainName, item.Environment }).IsUnique();
+            });
+            builder.Entity<RuntimeCacheRevision>(entity =>
+            {
+                entity.HasKey(item => item.Environment);
+                entity.Property(item => item.Environment).HasMaxLength(64).IsRequired();
             });
         }
 

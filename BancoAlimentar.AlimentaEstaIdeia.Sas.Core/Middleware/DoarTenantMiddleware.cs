@@ -53,7 +53,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             IConfiguration configuration)
         {
             Timing? root = MiniProfiler.Current.Step("MultitenantMiddleware");
-            bool configurationLoaded = keyVaultConfigurationManager.LoadTenantConfiguration();
+            bool configurationLoaded = await keyVaultConfigurationManager.LoadTenantConfigurationAsync(context.RequestAborted);
             if (!configurationLoaded)
             {
                 await WriteConfigurationFailureAsync(
@@ -77,13 +77,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
             context.Items[typeof(IKeyVaultConfigurationManager).Name] = keyVaultConfigurationManager;
             timing?.Stop();
 
-            bool shouldInitializeTenant;
             using (timing = MiniProfiler.Current.Step("EnsureTenantConfigurationLoaded"))
             {
                 root?.AddChild(timing!);
-                shouldInitializeTenant = await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
+                await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(
                     tenant.Id,
-                    tenantData.TenantDevelopmentOptions);
+                    tenantData.TenantDevelopmentOptions,
+                    context.RequestAborted);
             }
 
             Dictionary<string, string>? tenantConfiguration = keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id);
@@ -103,13 +103,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 return;
             }
 
-            if (shouldInitializeTenant)
-            {
-                await context.RequestServices
-                    .GetRequiredService<TenantInitializationService>()
-                    .InitializeTenant(context, tenant, root, configuration)
-                    .ConfigureAwait(false);
-            }
+            await context.RequestServices
+                .GetRequiredService<TenantInitializationService>()
+                .InitializeTenant(context, tenant, root, configuration)
+                .ConfigureAwait(false);
 
             StaticFileConfigurationManager.CreateBlobServiceClient(context, configuration, tenant.NormalizedName, tenant.PublicId);
 

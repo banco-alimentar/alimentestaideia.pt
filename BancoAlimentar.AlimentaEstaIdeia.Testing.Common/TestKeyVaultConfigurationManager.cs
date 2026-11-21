@@ -8,6 +8,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
@@ -33,6 +34,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Testing.Common
 
         /// <inheritdoc/>
         public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions)
+        {
+            return Task.FromResult(true);
+        }
+
+        /// <inheritdoc/>
+        public Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions, CancellationToken cancellationToken)
+        {
+            return this.EnsureTenantConfigurationLoaded(tenantId, developmentOptions);
+        }
+
+        /// <inheritdoc/>
+        public Task<bool> LoadTenantConfigurationAsync(CancellationToken cancellationToken = default)
         {
             return Task.FromResult(true);
         }

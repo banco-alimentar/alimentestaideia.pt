@@ -16,6 +16,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
     public interface ITenantStaticLocalCacheService
     {
         /// <summary>
+        /// Gets a safe snapshot of a tenant's refresh status.
+        /// </summary>
+        /// <param name="tenantPublicId">Tenant public ID.</param>
+        /// <returns>Refresh status.</returns>
+        TenantStaticSyncStatus GetStatus(Guid tenantPublicId);
+
+        /// <summary>
+        /// Records a failure before storage synchronization could begin.
+        /// </summary>
+        /// <param name="tenantPublicId">Tenant public ID.</param>
+        /// <param name="exception">Failure; only its category is retained.</param>
+        void RecordFailure(Guid tenantPublicId, Exception exception);
+
+        /// <summary>
+        /// Updates the background refresh schedule without changing the latest outcome.
+        /// </summary>
+        /// <param name="tenantPublicId">Tenant public ID.</param>
+        /// <param name="nextAttemptAt">Next attempt, or null when no attempt is scheduled.</param>
+        void SetNextAttempt(Guid tenantPublicId, DateTimeOffset? nextAttemptAt);
+
+        /// <summary>
         /// Deletes all locally cached static files for a tenant.
         /// </summary>
         /// <param name="tenantPublicId">Tenant public ID.</param>

@@ -2,6 +2,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using Microsoft.AspNetCore.Authentication.OAuth;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Options;
@@ -13,7 +15,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     public class TenantAuthenticationOptionsCache<TOptions> : IOptionsMonitorCache<TOptions>, ITenantAuthenticationOptionsCache
         where TOptions : class, new()
     {
-        private readonly ConcurrentDictionary<int, OptionsCache<TOptions>> caches = new ConcurrentDictionary<int, OptionsCache<TOptions>>();
+        private readonly ConcurrentDictionary<int, CacheEntry> caches = new ConcurrentDictionary<int, CacheEntry>();
         private readonly IHttpContextAccessor context;
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         public TOptions GetOrAdd(string? name, Func<TOptions> createOptions)
         {
             int tenantId = this.GetTenantId();
-            return this.caches.GetOrAdd(tenantId, _ => new OptionsCache<TOptions>()).GetOrAdd(name, () =>
+            return this.GetCurrentCache().GetOrAdd(name, () =>
             {
                 TOptions options = createOptions();
                 if (options is OAuthOptions oauthOptions && oauthOptions.StateDataFormat != null)
@@ -56,9 +58,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
             }
 
             bool removed = false;
-            foreach (OptionsCache<TOptions> cache in this.caches.Values)
+            foreach (CacheEntry cache in this.caches.Values)
             {
-                removed = cache.TryRemove(name) || removed;
+                removed = cache.Options.TryRemove(name) || removed;
             }
 
             return removed;
@@ -72,12 +74,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
 
         private OptionsCache<TOptions> GetCurrentCache()
         {
-            return this.caches.GetOrAdd(this.GetTenantId(), _ => new OptionsCache<TOptions>());
+            IDictionary<string, string>? source = this.context.HttpContext?.GetTenantSpecificConfiguration();
+            return this.caches.AddOrUpdate(
+                this.GetTenantId(),
+                _ => new CacheEntry(source),
+                (_, existing) => ReferenceEquals(existing.Source, source) ? existing : new CacheEntry(source)).Options;
         }
 
         private int GetTenantId()
         {
             return this.context.HttpContext?.Features.Get<Model.Tenant>()?.Id ?? 0;
+        }
+
+        private sealed class CacheEntry
+        {
+            public CacheEntry(IDictionary<string, string>? source)
+            {
+                this.Source = source;
+            }
+
+            public IDictionary<string, string>? Source { get; }
+
+            public OptionsCache<TOptions> Options { get; } = new OptionsCache<TOptions>();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.14")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -106,6 +106,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("KeyVaultConfigurations");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.RuntimeCacheRevision", b =>
+                {
+                    b.Property<string>("Environment")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("PublishedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("Revision")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Environment");
+
+                    b.ToTable("RuntimeCacheRevisions");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant", b =>

@@ -124,7 +124,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         public async Task BootstrapFailureReturnsServiceUnavailable()
         {
             var manager = new Mock<IKeyVaultConfigurationManager>(MockBehavior.Strict);
-            manager.Setup(item => item.LoadTenantConfiguration()).Returns(false);
+            manager.Setup(item => item.LoadTenantConfigurationAsync(It.IsAny<CancellationToken>())).ReturnsAsync(false);
             manager.Setup(item => item.GetLastLoadDiagnostics()).Returns(new KeyVaultConfigurationLoadDiagnostics
             {
                 Stage = "SasCoreKeyVaultLoadFailed",
@@ -150,7 +150,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         public async Task UnknownTenantPreservesResponse()
         {
             var manager = new Mock<IKeyVaultConfigurationManager>(MockBehavior.Strict);
-            manager.Setup(item => item.LoadTenantConfiguration()).Returns(true);
+            manager.Setup(item => item.LoadTenantConfigurationAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
             var next = new Mock<RequestDelegate>();
 
             HttpContext context = await this.InvokeMiddlewareAsync(manager, next, "missing.example");
@@ -173,8 +173,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         public async Task MissingTenantConfigurationReturnsServiceUnavailable(bool hasDiagnostics)
         {
             var manager = new Mock<IKeyVaultConfigurationManager>(MockBehavior.Strict);
-            manager.Setup(item => item.LoadTenantConfiguration()).Returns(true);
-            manager.Setup(item => item.EnsureTenantConfigurationLoaded(It.IsAny<int>(), TenantDevelopmentOptions.ProductionOptions))
+            manager.Setup(item => item.LoadTenantConfigurationAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            manager.Setup(item => item.EnsureTenantConfigurationLoaded(It.IsAny<int>(), TenantDevelopmentOptions.ProductionOptions, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
             manager.Setup(item => item.GetTenantConfiguration(It.IsAny<int>())).Returns((Dictionary<string, string>)null);
             manager.Setup(item => item.GetLastLoadDiagnostics()).Returns(hasDiagnostics
@@ -202,14 +202,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         }
 
         /// <summary>
-        /// Existing configuration proceeds without resolving the initialization service.
+        /// Cached configuration still initializes the tenant before proceeding.
         /// </summary>
         [Fact]
-        public async Task ExistingConfigurationProceedsWhenNoInitializationIsRequested()
+        public async Task CachedConfigurationInitializesTenantBeforeProceeding()
         {
             var manager = new Mock<IKeyVaultConfigurationManager>(MockBehavior.Strict);
-            manager.Setup(item => item.LoadTenantConfiguration()).Returns(true);
-            manager.Setup(item => item.EnsureTenantConfigurationLoaded(It.IsAny<int>(), TenantDevelopmentOptions.ProductionOptions))
+            manager.Setup(item => item.LoadTenantConfigurationAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            manager.Setup(item => item.EnsureTenantConfigurationLoaded(It.IsAny<int>(), TenantDevelopmentOptions.ProductionOptions, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(false);
             manager.Setup(item => item.GetTenantConfiguration(It.IsAny<int>())).Returns(new Dictionary<string, string>());
             var next = new Mock<RequestDelegate>();
@@ -252,31 +252,92 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 
                 return true;
             });
-            using ServiceProvider services = new ServiceCollection()
-                .AddSingleton(database)
-                .AddSingleton(this.fixture.UserManager)
-                .AddSingleton(roleManager.Object)
-                .BuildServiceProvider();
-            IConfiguration configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+            using ServiceProvider services = this.CreateInitializationServices(database, roleManager.Object);
+            Mock<IKeyVaultConfigurationManager> manager = CreateCachedConfigurationManager();
+            var next = new Mock<RequestDelegate>();
+            next.Setup(item => item(It.IsAny<HttpContext>())).Returns(Task.CompletedTask);
+            Task<HttpContext> first = this.InvokeMiddlewareAsync(manager, next, requestServices: services);
+            Task<HttpContext> second;
+            try
             {
-                { "LocalEmailCapture:Enabled", "true" },
-                { "AzureStorage:FoodBankSourceBlobName", string.Empty },
-                { "AzureStorage:FoodBankSourceContainerName", string.Empty },
-            }).Build();
-            var initializer = new TenantInitializationService();
-            var tenant = new Model.Tenant { Id = 42 };
-            var firstContext = new DefaultHttpContext { RequestServices = services };
-            var secondContext = new DefaultHttpContext { RequestServices = services };
-
-            Task first = initializer.InitializeTenant(firstContext, tenant, null, configuration);
-            await seedEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
-            Task second = initializer.InitializeTenant(secondContext, tenant, null, configuration);
-            Assert.False(second.IsCompleted);
-            releaseSeed.SetResult();
+                await seedEntered.Task.WaitAsync(TimeSpan.FromSeconds(5));
+                second = this.InvokeMiddlewareAsync(manager, next, requestServices: services);
+                Assert.False(second.IsCompleted);
+                next.Verify(item => item(It.IsAny<HttpContext>()), Times.Never);
+            }
+            finally
+            {
+                releaseSeed.TrySetResult();
+            }
 
             await Task.WhenAll(first, second).WaitAsync(TimeSpan.FromSeconds(5));
-            await initializer.InitializeTenant(secondContext, tenant, null, configuration);
             Assert.Equal(1, seedCalls);
+            next.Verify(item => item(It.IsAny<HttpContext>()), Times.Exactly(2));
+        }
+
+        /// <summary>
+        /// A later request retries failed seeding even though secrets are already cached.
+        /// </summary>
+        [Fact]
+        public async Task CachedConfigurationRetriesFailedInitialization()
+        {
+            using var database = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(nameof(this.CachedConfigurationRetriesFailedInitialization)).Options);
+            Mock<RoleManager<ApplicationRole>> roleManager = CreateRoleManager();
+            int attempts = 0;
+            roleManager.Setup(item => item.RoleExistsAsync(It.IsAny<string>())).Returns<string>(role =>
+            {
+                if (role == UserRoles.SuperAdmin.ToString() && Interlocked.Increment(ref attempts) == 1)
+                {
+                    return Task.FromException<bool>(new IOException("Synthetic seeding failure."));
+                }
+
+                return Task.FromResult(true);
+            });
+            using ServiceProvider services = this.CreateInitializationServices(database, roleManager.Object);
+            Mock<IKeyVaultConfigurationManager> manager = CreateCachedConfigurationManager();
+            var next = new Mock<RequestDelegate>();
+            next.Setup(item => item(It.IsAny<HttpContext>())).Returns(Task.CompletedTask);
+
+            await Assert.ThrowsAsync<IOException>(() => this.InvokeMiddlewareAsync(manager, next, requestServices: services));
+            next.Verify(item => item(It.IsAny<HttpContext>()), Times.Never);
+            HttpContext context = await this.InvokeMiddlewareAsync(manager, next, requestServices: services);
+
+            Assert.Equal(StatusCodes.Status200OK, context.Response.StatusCode);
+            Assert.Equal(2, attempts);
+            next.Verify(item => item(context), Times.Once);
+        }
+
+        private static Mock<RoleManager<ApplicationRole>> CreateRoleManager()
+        {
+            var manager = new Mock<RoleManager<ApplicationRole>>(
+                Mock.Of<IRoleStore<ApplicationRole>>(),
+                Array.Empty<IRoleValidator<ApplicationRole>>(),
+                new UpperInvariantLookupNormalizer(),
+                new IdentityErrorDescriber(),
+                NullLogger<RoleManager<ApplicationRole>>.Instance);
+            manager.Setup(item => item.RoleExistsAsync(It.IsAny<string>())).ReturnsAsync(true);
+            return manager;
+        }
+
+        private static Mock<IKeyVaultConfigurationManager> CreateCachedConfigurationManager()
+        {
+            var manager = new Mock<IKeyVaultConfigurationManager>(MockBehavior.Strict);
+            manager.Setup(item => item.LoadTenantConfigurationAsync(It.IsAny<CancellationToken>())).ReturnsAsync(true);
+            manager.Setup(item => item.EnsureTenantConfigurationLoaded(It.IsAny<int>(), TenantDevelopmentOptions.ProductionOptions, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+            manager.Setup(item => item.GetTenantConfiguration(It.IsAny<int>())).Returns(new Dictionary<string, string>());
+            return manager;
+        }
+
+        private ServiceProvider CreateInitializationServices(ApplicationDbContext database, RoleManager<ApplicationRole> roleManager)
+        {
+            return new ServiceCollection()
+                .AddSingleton<TenantInitializationService>()
+                .AddSingleton(database)
+                .AddSingleton(this.fixture.UserManager)
+                .AddSingleton(roleManager)
+                .BuildServiceProvider();
         }
 
         private static async Task<string> ReadResponseAsync(HttpContext context)
@@ -289,12 +350,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         private async Task<HttpContext> InvokeMiddlewareAsync(
             Mock<IKeyVaultConfigurationManager> manager,
             Mock<RequestDelegate> next,
-            string tenantName = "dev.alimentestaideia.pt")
+            string tenantName = "dev.alimentestaideia.pt",
+            IServiceProvider requestServices = null)
         {
-            using ServiceProvider requestServices = new ServiceCollection().BuildServiceProvider();
+            using var database = new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString()).Options);
+            using ServiceProvider defaultServices = this.CreateInitializationServices(database, CreateRoleManager().Object);
             var context = new DefaultHttpContext
             {
-                RequestServices = requestServices,
+                RequestServices = requestServices ?? defaultServices,
             };
             context.Response.Body = new MemoryStream();
             var tenantProvider = new Mock<ITenantProvider>(MockBehavior.Strict);
@@ -303,6 +367,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
                 .AddInMemoryCollection(new Dictionary<string, string>
                 {
                     { "AzureStorage:ConnectionString", "UseDevelopmentStorage=true" },
+                    { "LocalEmailCapture:Enabled", "true" },
+                    { "AzureStorage:FoodBankSourceBlobName", string.Empty },
+                    { "AzureStorage:FoodBankSourceContainerName", string.Empty },
                 })
                 .Build();
 

@@ -7,9 +7,9 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Azure;
     using Azure.Core;
@@ -22,10 +22,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     using Microsoft.ApplicationInsights;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// This class loads and managed the configuration from Azure Key Vault for each Tenant.
@@ -33,17 +33,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     public class KeyVaultConfigurationManager : IKeyVaultConfigurationManager
     {
         private const string SasCoreKeyVaultName = "doar-sas-core";
-        private static KeyVaultConfigurationLoadDiagnostics? lastLoadDiagnostics;
-        private static ConcurrentDictionary<int, SecretClient> tenantSecretClient = new ConcurrentDictionary<int, SecretClient>();
-        private static ConcurrentDictionary<int, Dictionary<string, string>> tenantSecretValue = new ConcurrentDictionary<int, Dictionary<string, string>>();
-        private static ReaderWriterLockSlim rwls = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+        private KeyVaultConfigurationLoadDiagnostics? lastLoadDiagnostics;
         private readonly InfrastructureDbContext context;
         private readonly IWebHostEnvironment environment;
         private readonly TelemetryClient telemetryClient;
-        private readonly IMemoryCache memoryCache;
+        private readonly KeyVaultConfigurationCache cache;
         private readonly IConfiguration configuration;
         private readonly ILogger<KeyVaultConfigurationManager> logger;
-        private readonly Dictionary<string, string> sasCoreSecrets = new Dictionary<string, string>();
+        private readonly TenantRuntimeOptions runtimeOptions;
+        private readonly TimeProvider clock;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KeyVaultConfigurationManager"/> class.
@@ -51,23 +49,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <param name="context">A reference to the infrastructure context.</param>
         /// <param name="environment">Web host environment.</param>
         /// <param name="telemetryClient">Telemetry Client.</param>
-        /// <param name="memoryCache">Distributed cache.</param>
+        /// <param name="cache">Host-wide configuration cache.</param>
         /// <param name="configuration">Configuration.</param>
         /// <param name="logger">Logger.</param>
+        /// <param name="runtimeOptions">Host-level load limits.</param>
+        /// <param name="clock">Clock used for deadlines and retries.</param>
         public KeyVaultConfigurationManager(
             InfrastructureDbContext context,
             IWebHostEnvironment environment,
             TelemetryClient telemetryClient,
-            IMemoryCache memoryCache,
+            KeyVaultConfigurationCache cache,
             IConfiguration configuration,
-            ILogger<KeyVaultConfigurationManager> logger)
+            ILogger<KeyVaultConfigurationManager> logger,
+            IOptions<TenantRuntimeOptions>? runtimeOptions = null,
+            TimeProvider? clock = null)
         {
             this.context = context;
             this.environment = environment;
             this.telemetryClient = telemetryClient;
-            this.memoryCache = memoryCache;
+            this.cache = cache;
             this.configuration = configuration;
             this.logger = logger;
+            this.runtimeOptions = runtimeOptions?.Value ?? new TenantRuntimeOptions();
+            this.clock = clock ?? TimeProvider.System;
+            if (!this.runtimeOptions.IsValid())
+            {
+                throw new ArgumentException("Tenant runtime intervals must be positive and bounded.", nameof(runtimeOptions));
+            }
         }
 
         /// <inheritdoc/>
@@ -79,27 +87,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         public bool LoadTenantConfiguration()
         {
-            if (tenantSecretClient.Count != 0)
-            {
-                return true;
-            }
+            return this.LoadTenantConfigurationAsync().GetAwaiter().GetResult();
+        }
 
-            Monitor.Enter(this);
+        /// <inheritdoc/>
+        public async Task<bool> LoadTenantConfigurationAsync(CancellationToken cancellationToken = default)
+        {
+            KeyVaultConfigurationCache.State state = this.cache.Current;
+            using var deadline = new CancellationTokenSource(this.runtimeOptions.ConfigurationLoadTimeout, this.clock);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
+            bool acquired = false;
             try
             {
-                if (tenantSecretClient.Count != 0)
+                await state.BootstrapLock.WaitAsync(linked.Token);
+                acquired = true;
+                if (state.Initialized)
                 {
+                    this.lastLoadDiagnostics = null;
+                    return true;
+                }
+
+                if (state.BootstrapFailure is { } previous && previous.RetryAt > this.clock.GetUtcNow())
+                {
+                    this.lastLoadDiagnostics = previous.Diagnostics;
                     return false;
                 }
 
-                lastLoadDiagnostics = null;
+                this.lastLoadDiagnostics = null;
+                var coreSecrets = new Dictionary<string, string>();
                 string credentialMode = this.environment.IsDevelopment() ? "AzureCliCredential" : "ManagedIdentityCredential";
-                Task<bool> loadKeyVaultConfiguration = this.LoadSasKeyVaultConfiguration(credentialMode);
-                loadKeyVaultConfiguration.Wait();
-
-                if (!loadKeyVaultConfiguration.Result)
+                if (!await this.LoadSasKeyVaultConfiguration(credentialMode, coreSecrets, linked.Token))
                 {
-                    if (lastLoadDiagnostics == null)
+                    if (this.lastLoadDiagnostics == null)
                     {
                         this.SetLoadDiagnostics(
                             "SasCoreKeyVaultLoadFailed",
@@ -110,32 +129,37 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                             null);
                     }
 
+                    this.RecordFailure(state, null);
                     return false;
                 }
 
-                List<Tenant> allTenants = this.context.Tenants
+                List<Tenant> allTenants = await this.context.Tenants
+                    .AsNoTracking()
                     .Include(p => p.KeyVaultConfigurations)
-                    .ToList();
+                    .ToListAsync(linked.Token);
+                state.CoreSecrets = coreSecrets;
                 foreach (Tenant tenant in allTenants)
                 {
-                    foreach (KeyVaultConfiguration configurationItem in tenant.KeyVaultConfigurations)
-                    {
-                        if (this.environment.EnvironmentName != configurationItem.Environment)
-                        {
-                            continue;
-                        }
-
-                        if (!this.TryInitializeTenantClient(tenant, configurationItem, credentialMode))
-                        {
-                            return false;
-                        }
-                    }
+                    state.Tenants[tenant.Id] = tenant;
+                    this.TryInitializeTenant(state, tenant);
                 }
 
-                lastLoadDiagnostics = null;
+                state.Initialized = true;
+                state.BootstrapFailure = null;
+                this.lastLoadDiagnostics = null;
                 return true;
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                this.SetTimeoutDiagnostics("ConfigurationBootstrapTimedOut");
+                if (acquired)
+                {
+                    this.RecordFailure(state, null);
+                }
+
+                return false;
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 this.logger.LogError(
                     ex,
@@ -153,99 +177,202 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     null,
                     null,
                     ex);
+                this.RecordFailure(state, null);
                 return false;
             }
             finally
             {
-                Monitor.Exit(this);
+                if (acquired)
+                {
+                    state.BootstrapLock.Release();
+                }
             }
         }
 
         /// <inheritdoc/>
         public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions)
         {
-            bool result = false;
-            rwls.EnterReadLock();
-            bool needUpdate = false;
+            return await this.EnsureTenantConfigurationLoaded(tenantId, developmentOptions, CancellationToken.None);
+        }
+
+        /// <inheritdoc/>
+        public async Task<bool> EnsureTenantConfigurationLoaded(int tenantId, TenantDevelopmentOptions developmentOptions, CancellationToken cancellationToken)
+        {
+            KeyVaultConfigurationCache.State state = this.cache.Current;
+            SemaphoreSlim tenantLock = state.TenantLocks.GetOrAdd(tenantId, _ => new SemaphoreSlim(1, 1));
+            using var deadline = new CancellationTokenSource(this.runtimeOptions.ConfigurationLoadTimeout, this.clock);
+            using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
+            bool acquired = false;
             try
             {
-                if (developmentOptions == TenantDevelopmentOptions.ProductionOptions)
+                await tenantLock.WaitAsync(linked.Token);
+                acquired = true;
+                this.lastLoadDiagnostics = null;
+                if (state.Values.ContainsKey(tenantId))
                 {
-                    // check if we can find
-                    if (!tenantSecretValue.ContainsKey(tenantId) && tenantSecretClient.ContainsKey(tenantId))
+                    return false;
+                }
+
+                if (state.Failures.TryGetValue(tenantId, out KeyVaultConfigurationCache.Failure? previous)
+                    && previous.RetryAt > this.clock.GetUtcNow())
+                {
+                    this.lastLoadDiagnostics = previous.Diagnostics;
+                    return false;
+                }
+
+                var secrets = new Dictionary<string, string>();
+                if (developmentOptions == TenantDevelopmentOptions.ProductionOptions || !developmentOptions.UseSecrets)
+                {
+                    if (!state.Clients.TryGetValue(tenantId, out SecretClient? client))
                     {
-                        result = true;
-                        needUpdate = true;
+                        if (state.Tenants.TryGetValue(tenantId, out Tenant? tenant))
+                        {
+                            if (!this.TryInitializeTenant(state, tenant))
+                            {
+                                return false;
+                            }
+
+                            state.Clients.TryGetValue(tenantId, out client);
+                        }
+                    }
+
+                    if (client == null)
+                    {
+                        this.SetLoadDiagnostics(
+                            "TenantKeyVaultClientMissing",
+                            $"No Key Vault client is configured for tenant {tenantId}.",
+                            this.environment.IsDevelopment() ? "AzureCliCredential" : "ManagedIdentityCredential",
+                            null,
+                            null,
+                            null);
+                        this.logger.LogError("No Key Vault client is configured for tenant {TenantId}", tenantId);
+                        this.RecordFailure(state, tenantId);
+                        return false;
+                    }
+
+                    if (!await this.TryLoadTenantSecretsAsync(tenantId, client, state, secrets, linked.Token))
+                    {
+                        this.RecordFailure(state, tenantId);
+                        return false;
                     }
                 }
                 else
                 {
-                    if (!tenantSecretValue.ContainsKey(tenantId))
-                    {
-                        needUpdate = true;
-                    }
+                    this.ApplyConfigurationOverrides(secrets);
                 }
+
+                state.Values[tenantId] = secrets;
+                state.LoadedAt[tenantId] = this.clock.GetUtcNow();
+                state.Failures.TryRemove(tenantId, out _);
+                return true;
+            }
+            catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+            {
+                this.SetTimeoutDiagnostics("TenantConfigurationLoadTimedOut");
+                if (acquired)
+                {
+                    this.RecordFailure(state, tenantId);
+                }
+
+                return false;
             }
             finally
             {
-                rwls.ExitReadLock();
-            }
-
-            if (!needUpdate)
-            {
-                return result;
-            }
-
-            string cacheKeyName = $"TenantSecret-{tenantId}";
-            Dictionary<string, string> secrets = this.memoryCache.Get<Dictionary<string, string>>(cacheKeyName);
-            if (developmentOptions == TenantDevelopmentOptions.ProductionOptions || !developmentOptions.UseSecrets)
-            {
-                if (secrets == null || secrets.Count == 0)
+                if (acquired)
                 {
-                    secrets ??= new Dictionary<string, string>();
+                    tenantLock.Release();
+                }
+            }
+        }
 
-                    KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-                    if (tenantSecretClient.ContainsKey(tenantId))
+        private bool TryInitializeTenant(KeyVaultConfigurationCache.State state, Tenant tenant)
+        {
+            this.lastLoadDiagnostics = null;
+            var clients = new Dictionary<int, SecretClient>();
+            try
+            {
+                foreach (KeyVaultConfiguration item in tenant.KeyVaultConfigurations.Where(item => item.Environment == this.environment.EnvironmentName))
+                {
+                    if (!this.TryInitializeTenantClient(
+                        tenant,
+                        item,
+                        this.environment.IsDevelopment() ? "AzureCliCredential" : "ManagedIdentityCredential",
+                        state.CoreSecrets,
+                        clients))
                     {
-                        if (!await this.TryLoadTenantSecretsAsync(tenantId, cacheKeyName, secrets, secretManager))
-                        {
-                            return false;
-                        }
-
-                        result = true;
+                        this.RecordFailure(state, tenant.Id);
+                        this.logger.LogError("Tenant {TenantId} configuration failed at {Stage}", tenant.Id, this.lastLoadDiagnostics?.Stage);
+                        return false;
                     }
                 }
+
+                if (clients.TryGetValue(tenant.Id, out SecretClient? client))
+                {
+                    state.Clients[tenant.Id] = client;
+                }
+
+                return true;
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                this.SetLoadDiagnostics("TenantKeyVaultInitializationFailed", "Tenant client configuration is invalid.", null, tenant.Name, null, exception);
+                this.logger.LogError(exception, "Failed to configure client for tenant {TenantId}", tenant.Id);
+                this.RecordFailure(state, tenant.Id);
+                return false;
+            }
+        }
+
+        private void RecordFailure(KeyVaultConfigurationCache.State state, int? tenantId)
+        {
+            KeyVaultConfigurationLoadDiagnostics diagnostics = this.lastLoadDiagnostics
+                ?? throw new InvalidOperationException("A configuration failure requires diagnostics.");
+            KeyVaultConfigurationCache.Failure? previous = state.BootstrapFailure;
+            if (tenantId.HasValue)
+            {
+                state.Failures.TryGetValue(tenantId.Value, out previous);
+            }
+
+            int attempts = Math.Min(31, (previous?.Attempts ?? 0) + 1);
+            var failure = new KeyVaultConfigurationCache.Failure(diagnostics, attempts, this.clock.GetUtcNow() + this.runtimeOptions.GetRetryDelay(attempts));
+            if (tenantId.HasValue)
+            {
+                state.Failures[tenantId.Value] = failure;
             }
             else
             {
-                secrets ??= new Dictionary<string, string>();
-                this.ApplyConfigurationOverrides(secrets);
-                result = true;
+                state.BootstrapFailure = failure;
             }
+        }
 
-            rwls.EnterWriteLock();
-            try
-            {
-                if (!tenantSecretValue.ContainsKey(tenantId) && secrets != null)
-                {
-                    tenantSecretValue.TryAdd(tenantId, secrets);
-                }
-            }
-            finally
-            {
-                rwls.ExitWriteLock();
-            }
-
-            return result;
+        private void SetTimeoutDiagnostics(string stage)
+        {
+            this.SetLoadDiagnostics(stage, "Configuration loading exceeded the configured deadline.", null, null, null, null);
+            this.logger.LogError("Tenant configuration load exceeded its deadline at {Stage}", stage);
         }
 
         /// <inheritdoc/>
         public Dictionary<string, string>? GetTenantConfiguration(int tenantId)
         {
-            return tenantSecretValue.TryGetValue(tenantId, out Dictionary<string, string>? secrets) ? secrets : null;
+            return this.cache.Current.Values.TryGetValue(tenantId, out Dictionary<string, string>? secrets) ? secrets : null;
         }
 
-        private bool TryInitializeTenantClient(Tenant tenant, KeyVaultConfiguration configurationItem, string credentialMode)
+        /// <summary>
+        /// Creates a client for a configured vault.
+        /// </summary>
+        /// <param name="vaultUri">Vault URI.</param>
+        /// <param name="credential">Credential selected for this vault.</param>
+        /// <returns>The vault client.</returns>
+        protected virtual SecretClient CreateSecretClient(Uri vaultUri, TokenCredential credential)
+        {
+            return new SecretClient(vaultUri, credential);
+        }
+
+        private bool TryInitializeTenantClient(
+            Tenant tenant,
+            KeyVaultConfiguration configurationItem,
+            string credentialMode,
+            Dictionary<string, string> coreSecrets,
+            Dictionary<int, SecretClient> clients)
         {
             TokenCredential credential = new ManagedIdentityCredential();
             string tenantCredentialMode = credentialMode;
@@ -264,7 +391,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
             if (configurationItem.HasServicePrincipalEnabled)
             {
-                if (!this.sasCoreSecrets.ContainsKey(configurationItem.SasSPKeyVaultKeyName))
+                if (!coreSecrets.ContainsKey(configurationItem.SasSPKeyVaultKeyName))
                 {
                     this.telemetryClient.TrackEvent(
                         "ServicePrincipal-Secret-NotFound",
@@ -284,13 +411,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     return false;
                 }
 
-                string servicePrincipalConnectionString = this.sasCoreSecrets[configurationItem.SasSPKeyVaultKeyName];
+                string servicePrincipalConnectionString = coreSecrets[configurationItem.SasSPKeyVaultKeyName];
                 KeyVaultServicePrincipalSettings servicePrincipalSettings = KeyVaultServicePrincipalSettings.Parse(servicePrincipalConnectionString);
                 if (string.IsNullOrWhiteSpace(servicePrincipalSettings.ClientId) ||
                     string.IsNullOrWhiteSpace(servicePrincipalSettings.ClientSecret) ||
                     KeyVaultServicePrincipalSettings.LooksLikeSecretIdentifier(servicePrincipalSettings.ClientSecret))
                 {
-                    lastLoadDiagnostics = KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(
+                    this.lastLoadDiagnostics = KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(
                         new InvalidOperationException(
                             "The service principal secret in SAS core Key Vault is missing ClientId/Secret or the Secret value looks like a secret id (GUID) instead of the secret value."),
                         this.environment.EnvironmentName,
@@ -298,7 +425,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                         ResolveTenantVaultUri(configurationItem.Vault)?.ToString(),
                         configurationItem.SasSPKeyVaultKeyName,
                         servicePrincipalSettings);
-                    lastLoadDiagnostics.Stage = "TenantServicePrincipalInvalidSecret";
+                    this.lastLoadDiagnostics.Stage = "TenantServicePrincipalInvalidSecret";
                     return false;
                 }
 
@@ -307,27 +434,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
 
             Uri tenantVaultUri = ResolveTenantVaultUri(configurationItem.Vault);
-            SecretClient client = new SecretClient(vaultUri: tenantVaultUri, credential: credential);
-            tenantSecretClient.AddOrUpdate(tenant.Id, client, (int key, SecretClient secret) =>
-            {
-                return client;
-            });
+            clients[tenant.Id] = this.CreateSecretClient(tenantVaultUri, credential);
             return true;
         }
 
         private async Task<bool> TryLoadTenantSecretsAsync(
             int tenantId,
-            string cacheKeyName,
+            SecretClient secretClient,
+            KeyVaultConfigurationCache.State state,
             Dictionary<string, string> secrets,
-            KeyVaultSecretManager secretManager)
+            CancellationToken cancellationToken)
         {
             try
             {
-                SecretClient secretClient = tenantSecretClient[tenantId];
-                AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
-                await foreach (SecretProperties secretItem in page)
+                KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
+                AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync(cancellationToken);
+                await foreach (SecretProperties secretItem in page.WithCancellation(cancellationToken))
                 {
-                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
+                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name, cancellationToken: cancellationToken).WaitAsync(cancellationToken);
                     if (responseSecret.Value != null)
                     {
                         secrets.Add(
@@ -340,19 +464,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                     }
                 }
 
-                this.memoryCache.Set(cacheKeyName, secrets);
                 return true;
             }
-            catch (Exception ex) when (KeyVaultAuthenticationFailureHelper.IsAuthenticationFailure(ex))
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                await this.RecordTenantAuthenticationFailureAsync(tenantId, ex);
+                if (KeyVaultAuthenticationFailureHelper.IsAuthenticationFailure(ex))
+                {
+                    state.Tenants.TryGetValue(tenantId, out Tenant? tenant);
+                    this.RecordTenantAuthenticationFailure(tenantId, tenant, state.CoreSecrets, ex);
+                }
+                else
+                {
+                    this.SetLoadDiagnostics("TenantSecretsLoadFailed", "Unable to load tenant secrets.", null, null, null, ex);
+                    this.logger.LogError(ex, "Unable to load secrets for tenant {TenantId}", tenantId);
+                    this.telemetryClient.TrackException(ex);
+                }
+
                 return false;
             }
         }
 
         private void ApplyConfigurationOverrides(Dictionary<string, string> secrets)
         {
-            IEnumerable<KeyValuePair<string, string>> enumerator = this.configuration.AsEnumerable();
+            IConfiguration hostConfiguration = this.configuration is TenantConfigurationRoot tenantConfiguration
+                ? tenantConfiguration.HostConfiguration
+                : this.configuration;
+            IEnumerable<KeyValuePair<string, string>> enumerator = hostConfiguration.AsEnumerable();
             foreach (var item in enumerator)
             {
                 if (!secrets.ContainsKey(item.Key))
@@ -366,18 +503,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
         }
 
-        private async Task RecordTenantAuthenticationFailureAsync(int tenantId, Exception exception)
+        private void RecordTenantAuthenticationFailure(int tenantId, Tenant? tenant, Dictionary<string, string> coreSecrets, Exception exception)
         {
-            Tenant tenant = await this.GetTenantWithKeyVaultConfigurationAsync(tenantId);
             KeyVaultConfiguration keyVaultConfiguration = tenant?.KeyVaultConfigurations?
                 .FirstOrDefault(item => item.Environment == this.environment.EnvironmentName);
             KeyVaultServicePrincipalSettings servicePrincipalSettings = keyVaultConfiguration != null &&
                 !string.IsNullOrWhiteSpace(keyVaultConfiguration.SasSPKeyVaultKeyName) &&
-                this.sasCoreSecrets.TryGetValue(keyVaultConfiguration.SasSPKeyVaultKeyName, out string connectionString)
+                coreSecrets.TryGetValue(keyVaultConfiguration.SasSPKeyVaultKeyName, out string connectionString)
                 ? KeyVaultServicePrincipalSettings.Parse(connectionString)
                 : new KeyVaultServicePrincipalSettings();
 
-            lastLoadDiagnostics = KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(
+            this.lastLoadDiagnostics = KeyVaultAuthenticationFailureHelper.BuildServicePrincipalDiagnostics(
                 exception,
                 this.environment.EnvironmentName,
                 tenant?.Name,
@@ -394,14 +530,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
             this.telemetryClient.TrackException(exception, new Dictionary<string, string>()
             {
-                { "Stage", lastLoadDiagnostics.Stage },
+                { "Stage", this.lastLoadDiagnostics.Stage },
                 { "TenantId", tenantId.ToString() },
                 { "ClientId", servicePrincipalSettings.ClientId ?? string.Empty },
                 { "SasSPKeyVaultKeyName", keyVaultConfiguration?.SasSPKeyVaultKeyName ?? string.Empty },
             });
         }
 
-        private async Task<bool> LoadSasKeyVaultConfiguration(string credentialMode)
+        private async Task<bool> LoadSasKeyVaultConfiguration(string credentialMode, Dictionary<string, string> coreSecrets, CancellationToken cancellationToken)
         {
             bool result = false;
             Uri sasCoreVaultUri = new Uri($"https://{SasCoreKeyVaultName}.vault.azure.net/");
@@ -424,21 +560,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             }
 
             KeyVaultSecretManager secretManager = new KeyVaultSecretManager();
-            SecretClient secretClient = new SecretClient(vaultUri: sasCoreVaultUri, credential: credential);
-            AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync();
+            SecretClient secretClient = this.CreateSecretClient(sasCoreVaultUri, credential);
+            AsyncPageable<SecretProperties> page = secretClient.GetPropertiesOfSecretsAsync(cancellationToken);
             try
             {
-                await foreach (SecretProperties secretItem in page)
+                await foreach (SecretProperties secretItem in page.WithCancellation(cancellationToken))
                 {
-                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name);
-                    this.sasCoreSecrets.Add(
+                    Response<KeyVaultSecret> responseSecret = await secretClient.GetSecretAsync(secretItem.Name, cancellationToken: cancellationToken).WaitAsync(cancellationToken);
+                    coreSecrets.Add(
                         secretManager.GetKey(responseSecret.Value),
                         responseSecret.Value.Value);
                 }
 
                 result = true;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 this.logger.LogError(
                     ex,
@@ -472,7 +608,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             string tenantVaultUri,
             Exception exception)
         {
-            lastLoadDiagnostics = new KeyVaultConfigurationLoadDiagnostics
+            this.lastLoadDiagnostics = new KeyVaultConfigurationLoadDiagnostics
             {
                 Stage = stage,
                 Message = message,
@@ -505,13 +641,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 ? vault.Host
                 : vault.ToString().Trim().Trim('/');
             return new Uri($"https://{vaultName}.vault.azure.net/");
-        }
-
-        private async Task<Tenant> GetTenantWithKeyVaultConfigurationAsync(int tenantId)
-        {
-            return await this.context.Tenants
-                .Include(item => item.KeyVaultConfigurations)
-                .FirstOrDefaultAsync(item => item.Id == tenantId);
         }
 
         private TokenCredential GetServicePrincipalCredential(KeyVaultServicePrincipalSettings settings)

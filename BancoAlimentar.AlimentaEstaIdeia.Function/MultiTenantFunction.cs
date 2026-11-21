@@ -119,7 +119,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                     new Dictionary<string, long> { { "tenantCount", allTenants.Count } });
 
                 IKeyVaultConfigurationManager keyVaultConfigurationManager = this.ServiceProvider.GetRequiredService<IKeyVaultConfigurationManager>();
-                keyVaultConfigurationManager.LoadTenantConfiguration();
+                if (!await keyVaultConfigurationManager.LoadTenantConfigurationAsync().ConfigureAwait(false))
+                {
+                    throw new InvalidOperationException("Shared tenant configuration is unavailable; inspect configuration-load diagnostics.");
+                }
+
                 TenantExecutionSummary tenantSummary = await this.ExecuteTenantsAsync(allTenants, keyVaultConfigurationManager, invocationId, triggerType, correlationId).ConfigureAwait(false);
                 infrastructureReport.SetCounter("tenantsDiscovered", tenantSummary.Discovered);
                 infrastructureReport.SetCounter("tenantsProcessed", tenantSummary.Processed);

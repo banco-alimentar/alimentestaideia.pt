@@ -6,16 +6,16 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
 {
-    using System;
     using System.Collections.Generic;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
+    using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Web;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
-    using Microsoft.Extensions.Caching.Memory;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Localization;
 
     /// <summary>
@@ -24,43 +24,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
     [Authorize(Policy = "RoleArea")]
     public class ReloadSettingsModel : PageModel
     {
-        private readonly IMemoryCache memoryCache;
-        private readonly InMemoryCacheService tenantConfigurationCache;
         private readonly IStringLocalizer<AdminSharedResources> localizer;
-        private readonly IEnumerable<ITenantAuthenticationOptionsCache> authenticationOptionsCaches;
+        private readonly KeyVaultConfigurationCache keyVaultConfigurationCache;
+        private readonly RuntimeCacheInvalidationService invalidation;
+        private readonly TenantInitializationService initialization;
+        private readonly ITenantStaticLocalCacheService staticCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReloadSettingsModel"/> class.
         /// </summary>
-        /// <param name="memoryCache">App-level memory cache.</param>
-        /// <param name="tenantConfigurationCache">Tenant configuration cache service.</param>
         /// <param name="localizer">Admin shared localizer.</param>
+        /// <param name="keyVaultConfigurationCache">Host-wide vault configuration cache.</param>
+        /// <param name="invalidation">Durable cache revision coordinator.</param>
+        /// <param name="initialization">Tenant initialization status.</param>
+        /// <param name="staticCache">Static asset synchronization status.</param>
         public ReloadSettingsModel(
-            IMemoryCache memoryCache,
-            InMemoryCacheService tenantConfigurationCache,
-            IStringLocalizer<AdminSharedResources> localizer)
-            : this(memoryCache, tenantConfigurationCache, localizer, Array.Empty<ITenantAuthenticationOptionsCache>())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReloadSettingsModel"/> class.
-        /// </summary>
-        /// <param name="memoryCache">App-level memory cache.</param>
-        /// <param name="tenantConfigurationCache">Tenant configuration cache.</param>
-        /// <param name="localizer">Admin shared localizer.</param>
-        /// <param name="authenticationOptionsCaches">Tenant authentication caches.</param>
-        [ActivatorUtilitiesConstructor]
-        public ReloadSettingsModel(
-            IMemoryCache memoryCache,
-            InMemoryCacheService tenantConfigurationCache,
             IStringLocalizer<AdminSharedResources> localizer,
-            IEnumerable<ITenantAuthenticationOptionsCache> authenticationOptionsCaches)
+            KeyVaultConfigurationCache keyVaultConfigurationCache,
+            RuntimeCacheInvalidationService invalidation,
+            TenantInitializationService initialization,
+            ITenantStaticLocalCacheService staticCache)
         {
-            this.memoryCache = memoryCache;
-            this.tenantConfigurationCache = tenantConfigurationCache;
             this.localizer = localizer;
-            this.authenticationOptionsCaches = authenticationOptionsCaches;
+            this.keyVaultConfigurationCache = keyVaultConfigurationCache;
+            this.invalidation = invalidation;
+            this.initialization = initialization;
+            this.staticCache = staticCache;
         }
 
         /// <summary>
@@ -69,29 +58,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages
         [TempData]
         public string StatusMessage { get; set; }
 
+        /// <summary>Gets configuration readiness for tenants known to this instance.</summary>
+        public IReadOnlyList<TenantConfigurationStatus> ConfigurationStatuses { get; private set; }
+
+        /// <summary>Gets the current tenant's initialization status.</summary>
+        public TenantInitializationStatus InitializationStatus { get; private set; }
+
+        /// <summary>Gets the current tenant's static asset synchronization status.</summary>
+        public TenantStaticSyncStatus StaticSyncStatus { get; private set; }
+
+        /// <summary>Gets shared invalidation observation status.</summary>
+        public RuntimeInvalidationStatus InvalidationStatus { get; private set; }
+
+        /// <summary>Gets the instance-local configuration generation.</summary>
+        public System.Guid CacheGeneration => this.keyVaultConfigurationCache.Generation;
+
         /// <summary>
         /// Execute get operation.
         /// </summary>
         public void OnGet()
         {
+            var tenant = this.HttpContext.GetTenant();
+            this.ConfigurationStatuses = this.keyVaultConfigurationCache.GetStatuses();
+            this.InitializationStatus = this.initialization.GetStatus(tenant.Id);
+            this.StaticSyncStatus = this.staticCache.GetStatus(tenant.PublicId);
+            this.InvalidationStatus = this.invalidation.GetStatus();
         }
 
         /// <summary>
         /// Clears runtime caches so tenant settings are reloaded on next request.
         /// </summary>
         /// <returns>The current page.</returns>
-        public IActionResult OnPost()
+        public async Task<IActionResult> OnPostAsync()
         {
-            this.tenantConfigurationCache.Clear();
-            foreach (ITenantAuthenticationOptionsCache authenticationCache in this.authenticationOptionsCaches)
-            {
-                authenticationCache.Clear();
-            }
-
-            if (this.memoryCache is MemoryCache cache)
-            {
-                cache.Compact(1.0);
-            }
+            await this.invalidation.PublishAsync(this.HttpContext.RequestAborted);
 
             this.StatusMessage = this.localizer["SettingsCacheCleared"];
             return this.RedirectToPage();

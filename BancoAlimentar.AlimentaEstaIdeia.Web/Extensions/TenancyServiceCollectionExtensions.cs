@@ -40,6 +40,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         {
             services.DecorateEndpointSelector();
             services.AddSingleton<TenantInitializationService>();
+            services.AddSingleton<KeyVaultConfigurationCache>();
+            services.AddSingleton(TimeProvider.System);
+            services.AddOptions<TenantRuntimeOptions>()
+                .Bind(rootConfiguration.GetSection("TenantRuntime"))
+                .Validate(options => options.IsValid(), "Tenant runtime intervals must be positive and bounded.")
+                .ValidateOnStart();
             services.AddTransient<IKeyVaultConfigurationManager, KeyVaultConfigurationManager>();
             services.AddSingleton<INamingStrategy, DomainNamingStrategy>();
             services.AddSingleton<INamingStrategy, PathNamingStrategy>();
@@ -47,6 +53,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
             services.AddSingleton<ITenantProvider, TenantProvider>();
             services.AddTransient<ITenantLayout, TenantLayout>();
             services.AddSingleton<InMemoryCacheService>();
+            services.AddSingleton<RuntimeCacheInvalidationService>();
+            services.AddHostedService<RuntimeCacheInvalidationHostedService>();
             services.AddTransient<TenantDatabaseConfigurationInMemoryProvider>();
             services.AddSingleton<LocalDevelopmentOverride>();
             services.AddScoped<IStaticFileMapper, StaticFileMapper>();
