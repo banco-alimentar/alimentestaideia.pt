@@ -17,7 +17,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.0")
+                .HasAnnotation("ProductVersion", "10.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -34,10 +34,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DomainName")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(253)
+                        .HasColumnType("nvarchar(253)");
 
                     b.Property<string>("Environment")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<int?>("TenantId")
                         .HasColumnType("int");
@@ -45,6 +49,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId");
+
+                    b.HasIndex("DomainName", "Environment")
+                        .IsUnique();
 
                     b.ToTable("DomainIdentifiers");
                 });
@@ -99,6 +106,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Migrations
                     b.HasIndex("TenantId");
 
                     b.ToTable("KeyVaultConfigurations");
+                });
+
+            modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.RuntimeCacheRevision", b =>
+                {
+                    b.Property<string>("Environment")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTimeOffset>("PublishedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("Revision")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Environment");
+
+                    b.ToTable("RuntimeCacheRevisions");
                 });
 
             modelBuilder.Entity("BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Tenant", b =>

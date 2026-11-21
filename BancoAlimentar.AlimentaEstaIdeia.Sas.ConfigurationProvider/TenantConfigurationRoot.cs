@@ -6,8 +6,9 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 {
+    using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
@@ -18,9 +19,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
     /// </summary>
     public class TenantConfigurationRoot : IConfiguration
     {
+        private static readonly object SnapshotKey = new object();
         private readonly IConfiguration root;
         private readonly IHttpContextAccessor context;
-        private IDictionary<string, string>? tenantConfiguration;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantConfigurationRoot"/> class.
@@ -35,50 +36,28 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets process-level configuration without tenant overrides.
+        /// </summary>
+        public IConfiguration HostConfiguration => this.root;
+
         /// <inheritdoc/>
         public string this[string key]
         {
-            get
-            {
-                if (this.tenantConfiguration == null)
-                {
-                    HttpContext? current = this.context.HttpContext;
-                    if (current != null)
-                    {
-                        this.tenantConfiguration = current.GetTenantSpecificConfiguration();
-                    }
-                }
-
-                if (this.tenantConfiguration != null && this.tenantConfiguration.ContainsKey(key))
-                {
-                    return this.tenantConfiguration[key];
-                }
-
-                return this.root[key];
-            }
-
-            set
-            {
-                this.root[key] = value;
-            }
+            get => this.GetEffectiveConfiguration()[key];
+            set => this.root[key] = value;
         }
 
         public void InitTenantDatabaseConfiguration()
         {
             HttpContext? current = this.context.HttpContext;
-            if (current != null)
+            TenantConfigurationSnapshot? snapshot = this.GetTenantSnapshot();
+            if (current != null && snapshot != null)
             {
                 IDictionary<string, string> keyValuePairs = current.GetExtendedTenantProperties();
                 foreach (KeyValuePair<string, string> item in keyValuePairs)
                 {
-                    if (this.tenantConfiguration.ContainsKey(item.Key))
-                    {
-                        this.tenantConfiguration[item.Key] = item.Value;
-                    }
-                    else
-                    {
-                        this.tenantConfiguration.Add(item);
-                    }
+                    snapshot.Configuration.Providers.Last().Set(item.Key, item.Value);
                 }
             }
         }
@@ -86,7 +65,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         public IEnumerable<IConfigurationSection> GetChildren()
         {
-            return this.root.GetChildren();
+            return this.GetEffectiveConfiguration().GetChildren();
         }
 
         /// <inheritdoc/>
@@ -98,7 +77,64 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         public IConfigurationSection GetSection(string key)
         {
-            return this.root.GetSection(key);
+            return this.GetEffectiveConfiguration().GetSection(key);
+        }
+
+        private IConfiguration GetEffectiveConfiguration()
+        {
+            return this.GetTenantSnapshot()?.Configuration ?? this.root;
+        }
+
+        private TenantConfigurationSnapshot? GetTenantSnapshot()
+        {
+            HttpContext? current = this.context.HttpContext;
+            Model.Tenant? tenant = current?.Features.Get<Model.Tenant>();
+            if (current == null || tenant == null)
+            {
+                return null;
+            }
+
+            IDictionary<string, string>? secrets = current.GetTenantSpecificConfiguration();
+            if (secrets == null)
+            {
+                return null;
+            }
+
+            if (current.Items.TryGetValue(SnapshotKey, out object? existing) &&
+                existing is TenantConfigurationSnapshot snapshot &&
+                snapshot.TenantId == tenant.Id && ReferenceEquals(snapshot.Source, secrets))
+            {
+                return snapshot;
+            }
+
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .AddConfiguration(this.root)
+                .AddInMemoryCollection(secrets)
+                .Build();
+            snapshot = new TenantConfigurationSnapshot(tenant.Id, secrets, configuration);
+            current.Items[SnapshotKey] = snapshot;
+            if (configuration is IDisposable disposableConfiguration)
+            {
+                current.Response.RegisterForDispose(disposableConfiguration);
+            }
+
+            return snapshot;
+        }
+
+        private sealed class TenantConfigurationSnapshot
+        {
+            public TenantConfigurationSnapshot(int tenantId, IDictionary<string, string> source, IConfigurationRoot configuration)
+            {
+                this.TenantId = tenantId;
+                this.Source = source;
+                this.Configuration = configuration;
+            }
+
+            public int TenantId { get; }
+
+            public IDictionary<string, string> Source { get; }
+
+            public IConfigurationRoot Configuration { get; }
         }
     }
 }

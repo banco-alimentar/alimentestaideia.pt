@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
+    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter;
@@ -30,6 +31,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
 
     /// <summary>
@@ -138,30 +140,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
                 !string.IsNullOrEmpty(configuration["Authentication:Google:ClientSecret"]))
             {
                 authenticationBuilder.AddGoogle();
-                services.AddScoped<IPostConfigureOptions<GoogleOptions>, GooglePostConfigureOptions>();
+                AddTenantAuthenticationOptions<GoogleOptions>(services, configuration, (provider, tenantConfiguration) => new GooglePostConfigureOptions(tenantConfiguration));
             }
 
             if (!string.IsNullOrEmpty(configuration["Authentication:Facebook:AppId"]) &&
                 !string.IsNullOrEmpty(configuration["Authentication:Facebook:AppSecret"]))
             {
                 authenticationBuilder.AddFacebook();
-                services.AddScoped<IPostConfigureOptions<FacebookOptions>, FacebookPostConfigureOptions>();
+                AddTenantAuthenticationOptions<FacebookOptions>(services, configuration, (provider, tenantConfiguration) => new FacebookPostConfigureOptions(tenantConfiguration));
             }
 
             if (!string.IsNullOrEmpty(configuration["Authentication:Microsoft:ClientId"]) &&
                 !string.IsNullOrEmpty(configuration["Authentication:Microsoft:ClientSecret"]))
             {
                 authenticationBuilder.AddMicrosoftAccount();
-                services.AddScoped<IPostConfigureOptions<MicrosoftAccountOptions>, MicrosoftAccountPostConfigureOptions>();
+                AddTenantAuthenticationOptions<MicrosoftAccountOptions>(services, configuration, (provider, tenantConfiguration) => new MicrosoftAccountPostConfigureOptions(
+                    tenantConfiguration, provider.GetRequiredService<ILogger<MicrosoftAccountPostConfigureOptions>>()));
             }
 
             if (!string.IsNullOrEmpty(configuration["Authentication:Twitter:ConsumerAPIKey"]) &&
                 !string.IsNullOrEmpty(configuration["Authentication:Twitter:ConsumerSecret"]))
             {
                 authenticationBuilder.AddTwitter();
-                services.AddScoped<IPostConfigureOptions<TwitterOptions>,
-                    Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions>();
+                AddTenantAuthenticationOptions<TwitterOptions>(services, configuration, (provider, tenantConfiguration) =>
+                    new Sas.ConfigurationProvider.TenantConfiguration.Authentication.TwitterPostConfigureOptions(tenantConfiguration));
             }
+        }
+
+        private static void AddTenantAuthenticationOptions<TOptions>(
+            IServiceCollection services,
+            IConfiguration hostConfiguration,
+            Func<IServiceProvider, IConfiguration, IPostConfigureOptions<TOptions>> configureOptions)
+            where TOptions : class, new()
+        {
+            services.AddSingleton<IPostConfigureOptions<TOptions>>(provider => configureOptions(
+                provider,
+                new TenantConfigurationRoot(hostConfiguration, provider.GetRequiredService<IHttpContextAccessor>())));
+            services.AddSingleton<TenantAuthenticationOptionsCache<TOptions>>();
+            services.AddSingleton<IOptionsMonitorCache<TOptions>>(provider => provider.GetRequiredService<TenantAuthenticationOptionsCache<TOptions>>());
+            services.AddSingleton<ITenantAuthenticationOptionsCache>(provider => provider.GetRequiredService<TenantAuthenticationOptionsCache<TOptions>>());
         }
 
         private static void ConfigureSuperAdminOnlyAdminPages(PageConventionCollection conventions)

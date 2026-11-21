@@ -29,7 +29,20 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Description" xml:space="preserve"><value>This action clears tenant configuration cache and application memory cache.</value></data>
+  <data name="Description" xml:space="preserve"><value>This action publishes a settings reload to all instances in this environment and clears local runtime caches.</value></data>
   <data name="Submit" xml:space="preserve"><value>Reload settings</value></data>
   <data name="Title" xml:space="preserve"><value>Reload Runtime Settings</value></data>
+  <data name="RuntimeStatus" xml:space="preserve"><value>Runtime status (this instance)</value></data>
+  <data name="CacheGeneration" xml:space="preserve"><value>Cache generation</value></data>
+  <data name="SharedRevision" xml:space="preserve"><value>Shared revision</value></data>
+  <data name="LastRevisionPoll" xml:space="preserve"><value>Last successful revision check</value></data>
+  <data name="Initialization" xml:space="preserve"><value>Tenant initialization</value></data>
+  <data name="LastAssetSync" xml:space="preserve"><value>Last successful asset refresh</value></data>
+  <data name="NextAssetSync" xml:space="preserve"><value>Next asset refresh</value></data>
+  <data name="FailureCategory" xml:space="preserve"><value>Failure category</value></data>
+  <data name="Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Configuration" xml:space="preserve"><value>Configuration</value></data>
+  <data name="RetryAt" xml:space="preserve"><value>Retry at (UTC)</value></data>
+  <data name="Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="NotReady" xml:space="preserve"><value>Not ready</value></data>
 </root>
