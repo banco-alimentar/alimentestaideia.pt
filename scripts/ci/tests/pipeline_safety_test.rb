@@ -261,6 +261,25 @@ class PipelineSafetyTest < Minitest::Test
     assert_equal 'Debug', read_yaml(VALIDATION_PIPELINE).dig('variables', 'BuildConfiguration')
   end
 
+  def test_developer_solution_builds_restore_implicitly
+    pipeline_stages = stages(VALIDATION_PIPELINE)
+    validation = pipeline_stages.find { |stage| stage['stage'] == 'BrowserRegression' }
+    packaging = pipeline_stages.find { |stage| stage['stage'] == 'Build' }
+    jobs = [
+      [validation.fetch('jobs').find { |job| job['job'] == 'DotNetTests' }, 'Release'],
+      [packaging.fetch('jobs').find { |job| job['job'] == 'Build' }, '$(BuildConfiguration)']
+    ]
+
+    jobs.each do |job, configuration|
+      steps = job.fetch('steps')
+      refute steps.any? { |step| step.dig('inputs', 'command') == 'restore' }
+      builds = steps.select { |step| step['task'] == 'DotNetCoreCLI@2' && step.dig('inputs', 'command') == 'build' }
+      assert_equal 1, builds.length
+      assert_equal 'BancoAlimentar.AlimentaEstaIdeia.Web.sln', builds.first.dig('inputs', 'projects')
+      assert_equal "--configuration #{configuration}", builds.first.dig('inputs', 'arguments')
+    end
+  end
+
   def test_dependency_audit_runs_for_schedule_and_manual_queue
     stage = stages(VALIDATION_PIPELINE).find { |entry| entry['stage'] == 'DependencyAudit' }
     audit = stage.fetch('jobs').find { |entry| entry['job'] == 'DependencyAudit' }
