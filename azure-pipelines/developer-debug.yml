@@ -96,18 +96,11 @@ stages:
             displayName: Log runner and NuGet context
 
           - task: DotNetCoreCLI@2
-            displayName: Restore solution
-            inputs:
-              command: restore
-              projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
-              verbosityRestore: Diagnostic
-
-          - task: DotNetCoreCLI@2
             displayName: Build solution
             inputs:
               command: build
               projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
-              arguments: '--configuration Release --no-restore'
+              arguments: '--configuration Release'
 
           - bash: |
               set -uo pipefail
@@ -252,17 +245,11 @@ stages:
                 version: 10.0.x
 
             - task: DotNetCoreCLI@2
-              displayName: Restore
-              inputs:
-                command: restore
-                projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
-
-            - task: DotNetCoreCLI@2
               displayName: Build solution
               inputs:
                 command: build
                 projects: BancoAlimentar.AlimentaEstaIdeia.Web.sln
-                arguments: '--configuration $(BuildConfiguration) --no-restore'
+                arguments: '--configuration $(BuildConfiguration)'
 
             - task: DotNetCoreCLI@2
               displayName: Publish web

@@ -50,6 +50,8 @@ and pushes to either branch when at least one changed file matches `**/*.cs`. It
 manual runs. Its secret-free **BrowserRegression** stage first restores/builds the solution in
 Release and runs all five test projects sequentially: Repository, Sas.Core, Integration,
 Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML coverage.
+The Release validation and Debug packaging builds each restore implicitly in their own job;
+the independent dependency audit retains its explicit force-evaluated restore.
 A second job runs the self-contained Selenium checks and depends on the .NET job while still
 running after test failures so both result sets are available. Either job failing fails the
 stage and prevents developer packaging/deployment.
