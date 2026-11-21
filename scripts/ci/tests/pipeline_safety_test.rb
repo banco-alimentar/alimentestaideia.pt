@@ -248,6 +248,11 @@ class PipelineSafetyTest < Minitest::Test
       BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
     ].each { |project| assert_includes test_script, project }
     assert_match(/test_failure=1/, test_script, 'A failed test project must fail the validation job')
+    assert_match(/--results-directory "\$TEST_RESULTS_DIRECTORY\/\$name" \\\n\s*> "\$log_directory\/\$name\.log" 2>&1 &$/, test_script,
+                 'Test projects must run concurrently with separate logs')
+    assert_match(/wait "\$\{pids\[\$index\]\}"/, test_script, 'Every concurrent test project must be awaited')
+    assert_includes File.read(File.join(ROOT, 'coverlet.runsettings')), '[BancoAlimentar.AlimentaEstaIdeia.Web.Views]*',
+                    'Instrumenting compiled Razor views adds over 10 minutes per test project'
     assert_match(/XPlat Code Coverage/, test_script)
     assert_match(/--configuration Release/, test_script)
     %w[PublishTestResults@2 PublishCodeCoverageResults@2 PublishPipelineArtifact@1].each do |task|
@@ -259,6 +264,25 @@ class PipelineSafetyTest < Minitest::Test
     refute hashes(build).any? { |entry| entry.dig('inputs', 'command') == 'test' },
            'Packaging must not duplicate validation tests'
     assert_equal 'Debug', read_yaml(VALIDATION_PIPELINE).dig('variables', 'BuildConfiguration')
+  end
+
+  def test_developer_solution_builds_restore_implicitly
+    pipeline_stages = stages(VALIDATION_PIPELINE)
+    validation = pipeline_stages.find { |stage| stage['stage'] == 'BrowserRegression' }
+    packaging = pipeline_stages.find { |stage| stage['stage'] == 'Build' }
+    jobs = [
+      [validation.fetch('jobs').find { |job| job['job'] == 'DotNetTests' }, 'Release'],
+      [packaging.fetch('jobs').find { |job| job['job'] == 'Build' }, '$(BuildConfiguration)']
+    ]
+
+    jobs.each do |job, configuration|
+      steps = job.fetch('steps')
+      refute steps.any? { |step| step.dig('inputs', 'command') == 'restore' }
+      builds = steps.select { |step| step['task'] == 'DotNetCoreCLI@2' && step.dig('inputs', 'command') == 'build' }
+      assert_equal 1, builds.length
+      assert_equal 'BancoAlimentar.AlimentaEstaIdeia.Web.sln', builds.first.dig('inputs', 'projects')
+      assert_equal "--configuration #{configuration}", builds.first.dig('inputs', 'arguments')
+    end
   end
 
   def test_dependency_audit_runs_for_schedule_and_manual_queue
