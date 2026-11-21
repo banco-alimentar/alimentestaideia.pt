@@ -107,8 +107,7 @@ stages:
               mkdir -p "$TEST_RESULTS_DIRECTORY"
               test_failure=0
 
-              # Run sequentially: concurrent web-hosting test projects exhaust the agent user's
-              # inotify instance limit (128) and slow timing-sensitive tests, without reducing wall time.
+              # Run sequentially: concurrent projects slowed timing-sensitive tests without reducing wall time.
               run_test() {
                 local name="$1"
                 local project="$2"

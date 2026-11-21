@@ -69,6 +69,7 @@ Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening 
 
 - Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB** (unique database per test host), test tenant config, and seeded data.
 - Disables configuration-file reloads through host configuration before startup builds the default providers, avoiding unnecessary inotify watchers on shared Linux runners. Normal application configuration reloads remain enabled.
+- Sets `DOTNET_USE_POLLING_FILE_WATCHER=true` for the test process, unless already set, before any host starts, so web-root watchers (for example `asp-append-version`) poll instead of opening inotify instances. Without this, per-test hosts leaked about 100 inotify instances in one Integration run, exhausting the agent user's limit of 128.
 - Sends HTTP requests with `HttpClient`; submits forms via **AngleSharp** (same idea as a browser POST, but no JavaScript execution).
 - Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
 - **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.

@@ -53,6 +53,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
         private readonly BrowserTestUploads uploads;
         private bool disposed;
 
+        /// <summary>
+        /// Initializes static members of the <see cref="BrowserTestApplication"/> class.
+        /// </summary>
+        static BrowserTestApplication()
+        {
+            TestFileWatching.UsePolling();
+        }
+
         private BrowserTestApplication(int smtpPort)
         {
             string identity = Guid.NewGuid().ToString("N");
