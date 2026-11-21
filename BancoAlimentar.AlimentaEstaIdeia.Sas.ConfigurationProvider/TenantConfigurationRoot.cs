@@ -94,24 +94,27 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 return null;
             }
 
-            IDictionary<string, string>? secrets = current.GetTenantSpecificConfiguration();
+            // The snapshot is request-owned: once built from the pinned secrets it is never rebuilt, so a reload
+            // cannot drop tenant credentials or database overrides applied by InitTenantDatabaseConfiguration.
+            bool pinned = current.TryGetCapturedTenantConfiguration(out IDictionary<string, string>? captured);
+            if (current.Items.TryGetValue(SnapshotKey, out object? existing) &&
+                existing is TenantConfigurationSnapshot snapshot &&
+                snapshot.TenantId == tenant.Id && (snapshot.Pinned || !pinned))
+            {
+                return snapshot;
+            }
+
+            IDictionary<string, string>? secrets = pinned ? captured : current.GetTenantSpecificConfiguration();
             if (secrets == null)
             {
                 return null;
-            }
-
-            if (current.Items.TryGetValue(SnapshotKey, out object? existing) &&
-                existing is TenantConfigurationSnapshot snapshot &&
-                snapshot.TenantId == tenant.Id && ReferenceEquals(snapshot.Source, secrets))
-            {
-                return snapshot;
             }
 
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .AddConfiguration(this.root)
                 .AddInMemoryCollection(secrets)
                 .Build();
-            snapshot = new TenantConfigurationSnapshot(tenant.Id, secrets, configuration);
+            snapshot = new TenantConfigurationSnapshot(tenant.Id, pinned, configuration);
             current.Items[SnapshotKey] = snapshot;
             if (configuration is IDisposable disposableConfiguration)
             {
@@ -123,16 +126,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
 
         private sealed class TenantConfigurationSnapshot
         {
-            public TenantConfigurationSnapshot(int tenantId, IDictionary<string, string> source, IConfigurationRoot configuration)
+            public TenantConfigurationSnapshot(int tenantId, bool pinned, IConfigurationRoot configuration)
             {
                 this.TenantId = tenantId;
-                this.Source = source;
+                this.Pinned = pinned;
                 this.Configuration = configuration;
             }
 
             public int TenantId { get; }
 
-            public IDictionary<string, string> Source { get; }
+            public bool Pinned { get; }
 
             public IConfigurationRoot Configuration { get; }
         }

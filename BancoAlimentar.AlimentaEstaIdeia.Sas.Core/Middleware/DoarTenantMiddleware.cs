@@ -103,6 +103,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware
                 return;
             }
 
+            // Pin the verified secrets so a concurrent reload cannot swap them for host credentials mid-request.
+            context.CaptureTenantSpecificConfiguration(tenant.Id, tenantConfiguration);
             await context.RequestServices
                 .GetRequiredService<TenantInitializationService>()
                 .InitializeTenant(context, tenant, root, configuration)

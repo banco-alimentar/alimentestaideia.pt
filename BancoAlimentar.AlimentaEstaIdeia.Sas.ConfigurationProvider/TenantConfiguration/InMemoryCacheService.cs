@@ -20,6 +20,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
     {
         private readonly Dictionary<int, Dictionary<string, string>> cache;
         private readonly ReaderWriterLockSlim readerWriterLockSlim = new ReaderWriterLockSlim();
+        private long generation;
 
         public InMemoryCacheService()
         {
@@ -75,7 +76,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         }
 
         /// <summary>
-        /// Clears all tenant configurations from memory.
+        /// Gets the current cache generation. Capture it before querying the database and pass it to
+        /// <see cref="SetTenantConfiguration(int, Dictionary{string, string}, long)"/>.
+        /// </summary>
+        public long Generation => Interlocked.Read(ref this.generation);
+
+        /// <summary>
+        /// Sets the Tenant configuration only when the cache has not been cleared since
+        /// <paramref name="expectedGeneration"/> was captured, so in-flight queries cannot restore pre-reload values.
+        /// </summary>
+        /// <param name="tenantId">Tenant Id.</param>
+        /// <param name="configuration">Dictionary with the values.</param>
+        /// <param name="expectedGeneration">Generation captured before the values were read.</param>
+        /// <returns>True when the values were cached; false when the cache was invalidated meanwhile.</returns>
+        public bool SetTenantConfiguration(int tenantId, Dictionary<string, string> configuration, long expectedGeneration)
+        {
+            readerWriterLockSlim.EnterWriteLock();
+            try
+            {
+                if (this.generation != expectedGeneration)
+                {
+                    return false;
+                }
+
+                this.cache[tenantId] = configuration;
+                return true;
+            }
+            finally
+            {
+                readerWriterLockSlim.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// Clears all tenant configurations from memory and invalidates in-flight writes.
         /// </summary>
         public void Clear()
         {
@@ -83,6 +117,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
             try
             {
                 this.cache.Clear();
+                Interlocked.Increment(ref this.generation);
             }
             finally
             {

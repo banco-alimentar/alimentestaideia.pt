@@ -185,6 +185,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Extensions
         {
             string[] superAdminPages =
             {
+                "/Configuration",
                 "/ReloadSettings",
                 "/ClearTenantStaticCache",
                 "/SiteHealthReport",

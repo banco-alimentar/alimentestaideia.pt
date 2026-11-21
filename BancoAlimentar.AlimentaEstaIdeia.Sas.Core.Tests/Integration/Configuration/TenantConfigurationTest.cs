@@ -454,6 +454,45 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
             Assert.Equal("/done", first.StateDataFormat.Unprotect(state).RedirectUri);
         }
 
+        /// <summary>
+        /// A reload after the middleware accepts a tenant cannot swap the request's configuration or auth options.
+        /// </summary>
+        [Fact]
+        public void PinnedTenantConfigurationSurvivesReloadForTheRequest()
+        {
+            var accessor = new HttpContextAccessor();
+            using ServiceProvider services = CreateAuthenticationServices(accessor);
+            IOptionsMonitor<GoogleOptions> monitor = services.GetRequiredService<IOptionsMonitor<GoogleOptions>>();
+            var configuration = new TenantConfigurationRoot(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>
+            {
+                { "ConnectionStrings:DefaultConnection", "host-database" },
+            }).Build(), accessor);
+            HttpContext context = CreateAuthenticationContext(1, "pinned-client");
+            var live = new Mock<IKeyVaultConfigurationManager>();
+            context.Items[typeof(IKeyVaultConfigurationManager).Name] = live.Object;
+            var secrets = new Dictionary<string, string>
+            {
+                { "ConnectionStrings:DefaultConnection", "tenant-database" },
+                { "Authentication:Google:ClientId", "pinned-client" },
+                { "Authentication:Google:ClientSecret", "test-only" },
+            };
+            context.CaptureTenantSpecificConfiguration(1, secrets);
+            accessor.HttpContext = context;
+            Assert.Equal("tenant-database", configuration.GetConnectionString("DefaultConnection"));
+
+            live.Setup(item => item.GetTenantConfiguration(1)).Returns((Dictionary<string, string>)null);
+            Assert.Equal("tenant-database", configuration.GetConnectionString("DefaultConnection"));
+            Assert.Equal("pinned-client", monitor.Get("Google").ClientId);
+
+            live.Setup(item => item.GetTenantConfiguration(1)).Returns(new Dictionary<string, string>
+            {
+                { "ConnectionStrings:DefaultConnection", "replacement-database" },
+                { "Authentication:Google:ClientId", "replacement-client" },
+            });
+            Assert.Equal("tenant-database", configuration.GetConnectionString("DefaultConnection"));
+            Assert.Equal("pinned-client", monitor.Get("Google").ClientId);
+        }
+
         private static ServiceProvider CreateAuthenticationServices(IHttpContextAccessor accessor)
         {
             IConfiguration host = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string>

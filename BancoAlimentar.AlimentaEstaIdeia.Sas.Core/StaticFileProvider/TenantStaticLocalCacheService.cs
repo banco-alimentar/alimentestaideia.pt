@@ -228,12 +228,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
 
             Directory.CreateDirectory(cacheRootPath);
             string manifestPath = Path.Combine(cacheRootPath, VersionManifestName);
+            string webRoot = Path.Combine(cacheRootPath, "wwwroot");
             Dictionary<string, string> previousVersions = await ReadVersionsAsync(manifestPath, cancellationToken);
             var currentVersions = new Dictionary<string, string>(StringComparer.Ordinal);
-            var currentFiles = new HashSet<string>(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
-            var downloads = new Dictionary<string, string>();
-            var backups = new Dictionary<string, string>();
-            var addedFiles = new HashSet<string>();
+            StringComparer pathComparer = OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            var currentFiles = new HashSet<string>(pathComparer);
+            var downloads = new Dictionary<string, string>(pathComparer);
+            var backups = new Dictionary<string, string>(pathComparer);
+            var addedFiles = new List<string>();
+            var createdDirectories = new List<string>();
+            var removedDirectories = new List<string>();
             string? stagedManifest = null;
             bool published = false;
             int filesDownloaded = 0;
@@ -257,13 +261,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                         continue;
                     }
 
-                    string? directory = Path.GetDirectoryName(targetFile);
-                    if (directory != null && !Directory.Exists(directory))
-                    {
-                        Directory.CreateDirectory(directory);
-                    }
-
-                    string temporaryFile = string.Concat(targetFile, ".", Guid.NewGuid().ToString("N"), ".download");
+                    // Stage outside the served tree so the live layout is untouched until publication.
+                    string temporaryFile = Path.Combine(cacheRootPath, string.Concat(".", Guid.NewGuid().ToString("N"), ".download"));
                     downloads.Add(targetFile, temporaryFile);
                     var downloadOptions = new BlobDownloadToOptions
                     {
@@ -280,43 +279,34 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                 int filesRemoved = 0;
                 try
                 {
-                    // Finish downloads first, then retain rollback copies during publication.
-                    foreach (var download in downloads)
-                    {
-                        BackupFile(download.Key);
-                        File.Move(download.Value, download.Key, overwrite: true);
-                    }
-
-                    string webRoot = Path.Combine(cacheRootPath, "wwwroot");
+                    // Remove obsolete files first so their paths can become directories (and vice versa).
                     if (Directory.Exists(webRoot))
                     {
-                        foreach (string file in Directory.EnumerateFiles(webRoot, "*", SearchOption.AllDirectories))
+                        foreach (string file in Directory.EnumerateFiles(webRoot, "*", SearchOption.AllDirectories).ToList())
                         {
                             if (!currentFiles.Contains(file))
                             {
-                                BackupFile(file);
-                                File.Delete(file);
+                                MoveToBackup(file);
                                 filesRemoved++;
                             }
                         }
                     }
 
-                    BackupFile(manifestPath);
+                    foreach (var download in downloads)
+                    {
+                        EnsureParentDirectory(download.Key);
+                        RemoveEmptyDirectory(download.Key);
+                        CopyToBackup(download.Key);
+                        File.Move(download.Value, download.Key, overwrite: true);
+                    }
+
+                    CopyToBackup(manifestPath);
                     File.Move(stagedManifest, manifestPath, overwrite: true);
                     published = true;
                 }
                 catch
                 {
-                    foreach (string file in addedFiles)
-                    {
-                        File.Delete(file);
-                    }
-
-                    foreach (var backup in backups)
-                    {
-                        File.Move(backup.Value, backup.Key, overwrite: true);
-                    }
-
+                    Rollback();
                     throw;
                 }
 
@@ -348,31 +338,106 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider
                 }
             }
 
-            void BackupFile(string path)
+            string NewBackupPath() => Path.Combine(cacheRootPath, string.Concat(".", Guid.NewGuid().ToString("N"), ".backup"));
+
+            // Keeps the published file in place while retaining a rollback copy.
+            void CopyToBackup(string path)
             {
-                if (File.Exists(path))
+                if (!File.Exists(path))
                 {
-                    string backup = Path.Combine(cacheRootPath, string.Concat(".", Guid.NewGuid().ToString("N"), ".backup"));
-                    try
-                    {
-                        File.Copy(path, backup);
-                    }
-                    catch
-                    {
-                        File.Delete(backup);
-                        throw;
-                    }
-
-                    backups.Add(path, backup);
-                }
-                else
-                {
-                    if (Directory.Exists(path))
-                    {
-                        throw new IOException("The tenant cache destination is a directory.");
-                    }
-
                     addedFiles.Add(path);
+                    return;
+                }
+
+                string backup = NewBackupPath();
+                try
+                {
+                    File.Copy(path, backup);
+                }
+                catch
+                {
+                    File.Delete(backup);
+                    throw;
+                }
+
+                backups.Add(path, backup);
+            }
+
+            void MoveToBackup(string path)
+            {
+                string backup = NewBackupPath();
+                File.Move(path, backup);
+                backups.Add(path, backup);
+            }
+
+            void EnsureParentDirectory(string path)
+            {
+                var missing = new Stack<string>();
+                for (string? directory = Path.GetDirectoryName(path); directory != null && !Directory.Exists(directory); directory = Path.GetDirectoryName(directory))
+                {
+                    if (File.Exists(directory))
+                    {
+                        // Obsolete files were already removed, so this file is still published at this path.
+                        throw new IOException("Tenant static blobs use the same path for a file and a directory.");
+                    }
+
+                    missing.Push(directory);
+                }
+
+                foreach (string directory in missing)
+                {
+                    Directory.CreateDirectory(directory);
+                    createdDirectories.Add(directory);
+                }
+            }
+
+            void RemoveEmptyDirectory(string path)
+            {
+                if (!Directory.Exists(path))
+                {
+                    return;
+                }
+
+                if (Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Any())
+                {
+                    throw new IOException("Tenant static blobs use the same path for a file and a directory.");
+                }
+
+                removedDirectories.Add(path);
+                removedDirectories.AddRange(Directory.EnumerateDirectories(path, "*", SearchOption.AllDirectories));
+                Directory.Delete(path, recursive: true);
+            }
+
+            void Rollback()
+            {
+                foreach (string file in addedFiles)
+                {
+                    File.Delete(file);
+                }
+
+                for (int i = createdDirectories.Count - 1; i >= 0; i--)
+                {
+                    string directory = createdDirectories[i];
+                    if (Directory.Exists(directory) && !Directory.EnumerateFileSystemEntries(directory).Any())
+                    {
+                        Directory.Delete(directory);
+                    }
+                }
+
+                foreach (string directory in removedDirectories)
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                foreach (var backup in backups)
+                {
+                    string? directory = Path.GetDirectoryName(backup.Key);
+                    if (directory != null)
+                    {
+                        Directory.CreateDirectory(directory);
+                    }
+
+                    File.Move(backup.Value, backup.Key, overwrite: true);
                 }
             }
         }

@@ -143,7 +143,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             var laterBlob = new Mock<BlobClient>();
             if (failDuringPublication)
             {
-                Directory.CreateDirectory(Path.Combine(root, "wwwroot", "later.css"));
+                // A blob that needs later.css to be a directory conflicts with the later.css blob itself.
+                blobs.Add(BlobsModelFactory.BlobItem("wwwroot/later.css/nested.css", properties: BlobsModelFactory.BlobItemProperties(accessTierInferred: false, contentLength: 4, eTag: new ETag("v2"))));
+                container.Setup(item => item.GetBlobClient("wwwroot/later.css/nested.css")).Returns(laterBlob.Object);
                 laterBlob.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
                     .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
                     {
@@ -176,6 +178,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
 
             Assert.Equal("aaaa", await File.ReadAllTextAsync(Path.Combine(root, "wwwroot", "site.css")));
             Assert.Equal("known-good", await File.ReadAllTextAsync(obsolete));
+            Assert.False(File.Exists(Path.Combine(root, "wwwroot", "later.css")));
+            Assert.False(Directory.Exists(Path.Combine(root, "wwwroot", "later.css")));
             Assert.Equal(manifest, await File.ReadAllTextAsync(Path.Combine(root, ".tenant-static-versions.json")));
             Assert.Equal(failDuringPublication ? "LocalIO" : "StorageUnavailable", service.GetStatus(this.tenantId).LastFailureType);
             Assert.Empty(Directory.EnumerateFiles(root, "*.download", SearchOption.AllDirectories));
@@ -250,6 +254,49 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         }
 
         /// <summary>
+        /// A cached file can become a directory and back without manual cache clearing.
+        /// </summary>
+        [Fact]
+        public async Task LayoutChangesBetweenFileAndDirectoryArePublished()
+        {
+            var blobs = new List<BlobItem> { CreateBlob("wwwroot/icons", "v1") };
+            var container = new Mock<BlobContainerClient>();
+            container.Setup(item => item.ExistsAsync(It.IsAny<CancellationToken>())).ReturnsAsync(Response.FromValue(true, Mock.Of<Response>()));
+            container.Setup(item => item.GetBlobsAsync(BlobTraits.Metadata, BlobStates.None, "wwwroot/", It.IsAny<CancellationToken>()))
+                .Returns(() => AsyncPageable<BlobItem>.FromPages(new[] { Page<BlobItem>.FromValues(blobs.ToArray(), null, Mock.Of<Response>()) }));
+            container.Setup(item => item.GetBlobClient(It.IsAny<string>())).Returns<string>(name =>
+            {
+                var blobClient = new Mock<BlobClient>();
+                blobClient.Setup(item => item.DownloadToAsync(It.IsAny<string>(), It.IsAny<BlobDownloadToOptions>(), It.IsAny<CancellationToken>()))
+                    .Returns<string, BlobDownloadToOptions, CancellationToken>(async (path, options, cancellationToken) =>
+                    {
+                        await File.WriteAllTextAsync(path, name, cancellationToken);
+                        return Mock.Of<Response>();
+                    });
+                return blobClient.Object;
+            });
+            var service = new TenantStaticLocalCacheService((connection, name) => container.Object);
+            string root = StaticFileConfigurationManager.GetTenantLocalCacheRootPath(this.tenantId);
+            string icons = Path.Combine(root, "wwwroot", "icons");
+            string logo = Path.Combine(icons, "nested", "logo.svg");
+            await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            Assert.Equal("wwwroot/icons", await File.ReadAllTextAsync(icons));
+
+            blobs[0] = CreateBlob("wwwroot/icons/nested/logo.svg", "v2");
+            TenantStaticLocalCacheResult toDirectory = await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            Assert.Equal("wwwroot/icons/nested/logo.svg", await File.ReadAllTextAsync(logo));
+            Assert.Equal(1, toDirectory.FilesRemoved);
+
+            blobs[0] = CreateBlob("wwwroot/icons", "v3");
+            TenantStaticLocalCacheResult toFile = await service.ResyncFromBlobAsync(this.tenantId, "tenant", "test-only", true);
+            Assert.Equal("wwwroot/icons", await File.ReadAllTextAsync(icons));
+            Assert.Equal(1, toFile.FilesRemoved);
+            Assert.Null(service.GetStatus(this.tenantId).LastFailureType);
+            Assert.Empty(Directory.EnumerateFiles(root, "*.download", SearchOption.AllDirectories));
+            Assert.Empty(Directory.EnumerateFiles(root, "*.backup", SearchOption.AllDirectories));
+        }
+
+        /// <summary>
         /// File metadata and repeated existence checks do not repeat storage requests.
         /// </summary>
         [Fact]
@@ -287,6 +334,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
         private static BlobItem CreateBlob(string version, long length)
         {
             return BlobsModelFactory.BlobItem("wwwroot/site.css", properties: BlobsModelFactory.BlobItemProperties(accessTierInferred: false, contentLength: length, eTag: new ETag(version)));
+        }
+
+        private static BlobItem CreateBlob(string name, string version)
+        {
+            return BlobsModelFactory.BlobItem(name, properties: BlobsModelFactory.BlobItemProperties(accessTierInferred: false, contentLength: name.Length, eTag: new ETag(version)));
         }
 
         private static Mock<BlobContainerClient> CreateContainer(List<BlobItem> blobs, BlobClient blobClient)

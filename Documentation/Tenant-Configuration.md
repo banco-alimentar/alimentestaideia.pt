@@ -7,6 +7,9 @@ secrets. Indexed reads, sections, enumeration, and binding use the same overlay.
 The overlay belongs to the HTTP request; database configuration updates do not
 mutate the process-wide secret dictionary. Reads before tenant resolution fall
 back to host configuration without fixing the request to that early result.
+When the tenant middleware accepts a request, it pins that request to the
+tenant secrets it validated. A settings reload during the request cannot replace
+the request's overlay, remove its secrets, or discard its database overrides.
 
 Use `TenantConfigurationRoot.HostConfiguration` for process-only controls.
 In particular, local email capture, expected local databases, and its fixed SMTP
@@ -46,10 +49,17 @@ the synchronous loader remains only as a compatibility entry point.
 
 Settings reload also invalidates vault clients and secrets, so the next request
 reloads credentials and tenant metadata. In-flight loads finish against their
-old cache generation and cannot repopulate the replacement cache. Requests
+old cache generation and cannot repopulate the replacement cache. The same
+applies to database-backed tenant settings: a query that started before reload
+cannot store its result in the replacement cache. Requests
 racing with reload may receive the existing retryable configuration-unavailable
 response. Database initialization remains once per tenant per process; reload
 does not rerun successful seeding or replace ordered deployment migrations.
+
+Multi-tenant Azure Functions bootstrap the current cache generation before each
+tenant and retry when the cache is replaced during a load. A tenant whose
+configuration still cannot be loaded is reported as failed and not executed;
+the function never runs with empty tenant configuration.
 
 ## Shared Invalidation And Diagnostics
 
@@ -98,6 +108,11 @@ Only timestamps, identifiers, and failure categories are displayed; exception
 messages, secret values, and connection strings are not exposed.
 Authentication-provider registration remains host-wide and is unchanged.
 
+`/Admin/Configuration` is also SuperAdmin-only. It lists effective configuration
+keys but redacts every value loaded from the tenant Key Vault and every value
+whose key looks sensitive (for example secrets, passwords, keys, tokens, and
+connection strings).
+
 ## Host-Level Runtime Limits
 
 Defaults are a 10-second configuration-load deadline, 24-hour asset refresh,
@@ -127,12 +142,15 @@ Tenant asset synchronization records ETags in a local version manifest. The
 existing `onlyIfSizeChanged` argument now requires both size and recorded version
 to match before skipping a blob. Versionless blobs are refreshed conservatively.
 
-Downloads are staged beside the destination and published after the download
-pass completes. Conditional downloads reject blobs changed after listing. Failed
+Downloads are staged in the tenant cache root, outside the served `wwwroot`,
+and published after the download pass completes. Conditional downloads reject blobs changed after listing. Failed
 downloads retain the last complete cached files and clean up temporary files.
 Publication retains rollback copies to recover from an I/O failure; this is not
 a crash-atomic filesystem transaction and requires staging/backup disk space.
-Deleted blobs are reconciled only after successful enumeration. Paths are
+Deleted blobs are reconciled only after successful enumeration. A path can change
+between a file and a directory: obsolete files are removed before new files are
+published, and only directories without files can be replaced by a file.
+Directories created or removed during publication are restored on rollback. Paths are
 canonicalized and must remain within the tenant's cache root.
 
 Synchronization and clearing are coordinated per tenant. A clear request during

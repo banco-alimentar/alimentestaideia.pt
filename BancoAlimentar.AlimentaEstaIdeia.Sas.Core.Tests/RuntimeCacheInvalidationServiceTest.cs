@@ -98,6 +98,26 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests
             Assert.Equal(nameof(SqliteException), invalidation.GetStatus().LastFailureType);
         }
 
+        /// <summary>A database settings query that finishes after a reload cannot restore pre-reload values.</summary>
+        [Fact]
+        public async Task StaleDatabaseSettingsAreRejectedAfterInvalidation()
+        {
+            using var connection = new SqliteConnection("Filename=:memory:");
+            connection.Open();
+            using ServiceProvider host = CreateHost(connection, "Development");
+            using IServiceScope schemaScope = host.CreateScope();
+            schemaScope.ServiceProvider.GetRequiredService<InfrastructureDbContext>().Database.EnsureCreated();
+            InMemoryCacheService databaseCache = host.GetRequiredService<InMemoryCacheService>();
+            long inFlightGeneration = databaseCache.Generation;
+
+            await host.GetRequiredService<RuntimeCacheInvalidationService>().PublishAsync();
+
+            Assert.False(databaseCache.SetTenantConfiguration(1, new Dictionary<string, string> { { "Test", "stale" } }, inFlightGeneration));
+            Assert.Null(databaseCache.GetTenantConfiguration(1));
+            Assert.True(databaseCache.SetTenantConfiguration(1, new Dictionary<string, string> { { "Test", "fresh" } }, databaseCache.Generation));
+            Assert.Equal("fresh", databaseCache.GetTenantConfiguration(1)["Test"]);
+        }
+
         private static ServiceProvider CreateHost(SqliteConnection connection, string environmentName)
         {
             var environment = new Mock<IWebHostEnvironment>();

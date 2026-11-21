@@ -185,9 +185,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
                 IFunctionExecutionReportExecution report = null;
                 try
                 {
-                    await keyVaultConfigurationManager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions).ConfigureAwait(false);
                     Dictionary<string, string> tenantConfiguration = new Dictionary<string, string>(
-                        keyVaultConfigurationManager.GetTenantConfiguration(tenant.Id) ?? new Dictionary<string, string>());
+                        await this.LoadTenantConfigurationAsync(keyVaultConfigurationManager, tenant).ConfigureAwait(false));
                     tenantConfiguration["Tenant:NormalizedName"] = tenant.NormalizedName;
                     tenantConfiguration["Tenant:Name"] = tenant.Name;
                     tenantConfiguration["Tenant:PaymentStrategy"] = tenant.PaymentStrategy.ToString();
@@ -296,6 +295,41 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function
             }
 
             return summary;
+        }
+
+        /// <summary>
+        /// Loads one tenant's configuration against a bootstrapped cache generation.
+        /// </summary>
+        /// <remarks>
+        /// The runtime invalidation poller can replace the cache between tenants. Bootstrap is idempotent per
+        /// generation, so it is repeated for each tenant and retried when the generation changes mid-load.
+        /// </remarks>
+        private async Task<Dictionary<string, string>> LoadTenantConfigurationAsync(IKeyVaultConfigurationManager manager, Tenant tenant)
+        {
+            const int maxAttempts = 3;
+            KeyVaultConfigurationCache cache = this.ServiceProvider.GetService<KeyVaultConfigurationCache>();
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                Guid? generation = cache?.Generation;
+                if (!await manager.LoadTenantConfigurationAsync().ConfigureAwait(false))
+                {
+                    throw new InvalidOperationException("Shared tenant configuration is unavailable; inspect configuration-load diagnostics.");
+                }
+
+                await manager.EnsureTenantConfigurationLoaded(tenant.Id, TenantDevelopmentOptions.ProductionOptions).ConfigureAwait(false);
+                Dictionary<string, string> configuration = manager.GetTenantConfiguration(tenant.Id);
+                if (configuration != null)
+                {
+                    return configuration;
+                }
+
+                if (cache == null || cache.Generation == generation)
+                {
+                    break;
+                }
+            }
+
+            throw new InvalidOperationException($"Configuration for tenant {tenant.Id} is unavailable; the function was not executed for this tenant.");
         }
 
         private async Task RecordGlobalOutcomeAsync(
