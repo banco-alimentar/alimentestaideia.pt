@@ -91,12 +91,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             };
             donation.DonationItems.First().Donation = donation;
             context.Donations.Add(donation);
+            Guid easypaySubscriptionId = Guid.NewGuid();
+            string transactionKey = Guid.NewGuid().ToString();
             context.Subscriptions.Add(new Subscription
             {
                 Created = DateTime.UtcNow,
                 ExpirationTime = DateTime.UtcNow.AddYears(1),
-                TransactionKey = Guid.NewGuid().ToString(),
-                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                TransactionKey = transactionKey,
+                EasyPaySubscriptionId = easypaySubscriptionId.ToString(),
                 Url = "https://example.com/subscription",
                 InitialDonation = donation,
                 Frequency = "1M",
@@ -110,10 +112,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             var api = new Mock<ISubscriptionPaymentApi>();
             api.SetupSequence(client => client.SubscriptionIdGet(It.IsAny<Guid>(), It.IsAny<int>()))
                 .Returns(new SubscriptionIdGet200Response(
+                    id: easypaySubscriptionId,
+                    key: transactionKey,
                     retries: 0,
                     failover: false,
                     method: new SubscriptionIdGet200ResponseMethod(status: SubscriptionIdGet200ResponseMethod.StatusEnum.Active)))
                 .Returns(new SubscriptionIdGet200Response(
+                    id: easypaySubscriptionId,
+                    key: transactionKey,
                     retries: 3,
                     failover: false,
                     method: new SubscriptionIdGet200ResponseMethod(status: SubscriptionIdGet200ResponseMethod.StatusEnum.Active)));

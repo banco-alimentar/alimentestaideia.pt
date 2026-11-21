@@ -48,8 +48,10 @@ Feature-branch runs contain validation and auditing only, not deployment stages.
 The consolidated **developer-debug** pipeline validates PRs targeting `developer` or `master`
 and pushes to either branch when at least one changed file matches `**/*.cs`. It also supports
 manual runs. Its secret-free **BrowserRegression** stage first restores/builds the solution in
-Release and runs all five test projects sequentially: Repository, Sas.Core, Integration,
-Function, and CleanProdHarden. It publishes TRX results and merged Cobertura/HTML coverage.
+Release and runs all five test projects concurrently: Repository, Sas.Core, Integration,
+Function, and CleanProdHarden. Each project writes to its own log, printed as a collapsible group
+after it finishes; any failing project fails the step after every project has completed.
+It publishes TRX results and merged Cobertura/HTML coverage.
 The Release validation and Debug packaging builds each restore implicitly in their own job;
 the independent dependency audit retains its explicit force-evaluated restore.
 A second job runs the self-contained Selenium checks and depends on the .NET job while still

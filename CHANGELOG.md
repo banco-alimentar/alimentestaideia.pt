@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Corrected the EasyPay response mocks in [UpdateSubscriptionsFunctionTests](BancoAlimentar.AlimentaEstaIdeia.Function.Tests/UpdateSubscriptionsFunctionTests.cs).
+  - **Context:** The pipeline's five-project test step failed because the active-subscription test omitted provider `Id` and `Key`, so subscription identity validation prevented the expected retry update.
+  - **Options considered:** Populate the mock identity fields, or relax the production identity check.
+  - **Decision:** Reuse the local subscription's ID and transaction key in both mocked responses. Preserve production validation and the assertion that repeated execution patches retries only once.
+  - **Rollout:** Test-only change; rerun the pipeline. No deployment configuration or database changes are required.
 - Addressed the non-Azure subscription review issues in [capture persistence](BancoAlimentar.AlimentaEstaIdeia.Repository/SubscriptionRepository.cs), [failure-email delivery](BancoAlimentar.AlimentaEstaIdeia.Web/Api/EasyPayGenericNotification.cs), and the [reconciliation report](BancoAlimentar.AlimentaEstaIdeia.Tools/EasyPay/SubscriptionReconciliationReportTool.cs).
   - **Context:** Same-day captures could duplicate the initial donation's history link or overwrite a paid donation; pending email claims could stop webhook retries before delivery; audit expiration totals depended on provider availability and invalid local IDs could leave an incomplete audit marked successful.
   - **Options considered:** Infer failure from an unsigned callback and zero-paid provider values, add callback authentication requiring provider configuration, or reject failures until authenticated or terminal provider evidence is available. For delivery, acknowledge all existing claims or distinguish sent from unsent claims.
@@ -21,6 +26,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Configure the two target sections with read-only database/provider credentials and run the documented command. No migration or database update is required. Lifetime/unlimited-payment policy remains a separate business decision.
 
 ### Changed
+- Reduced the [developer-debug](azure-pipelines/developer-debug.yml) .NET test step from about 45 minutes by excluding compiled Razor markup in [coverlet.runsettings](coverlet.runsettings) and running the five test projects concurrently, with [policy coverage](scripts/ci/tests/pipeline_safety_test.rb).
+  - **Context:** About 39 minutes elapsed before the test hosts started. Coverlet diagnostics showed `BancoAlimentar.AlimentaEstaIdeia.Web.Views.dll` taking 2 minutes to instrument locally and roughly 13 minutes on the agent, repeated for Sas.Core, Integration, and Function. All other modules took about 4.5 seconds combined. Locally, Sas.Core took 1.6 seconds without coverage and 107.6 seconds with it.
+  - **Options considered:** Exclude Web.Views everywhere; keep Views coverage only for Integration (about 20 minutes); leave coverage unchanged; split projects into separate pipeline jobs; or run projects concurrently within the step. Removing `ExcludeByFile` did not reduce the cost.
+  - **Decision:** Exclude Web.Views from every project. This removes only Razor-markup line coverage; `BancoAlimentar.AlimentaEstaIdeia.Web` C# coverage was unchanged at 47.44%. Run the projects concurrently with per-project logs because each has its own instrumented output and the tests use ephemeral ports and unique temporary paths. Keep one job to avoid extra builds and self-hosted agent demand.
+  - **Rollout:** Queue a manual developer-debug run because YAML/runsettings-only changes do not trigger CI. The coverage summary will no longer include a Web.Views package.
 - Combined restore and build into a single task in each [developer-debug solution build](azure-pipelines/developer-debug.yml), with [pipeline policy coverage](scripts/ci/tests/pipeline_safety_test.rb).
   - **Context:** The Release validation and Debug packaging jobs used separate restore and build tasks, with `--no-restore` on each build.
   - **Options considered:** Keep separate restore tasks, or let each build perform its implicit restore.

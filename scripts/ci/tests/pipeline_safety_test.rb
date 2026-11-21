@@ -248,6 +248,11 @@ class PipelineSafetyTest < Minitest::Test
       BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests/BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests.csproj
     ].each { |project| assert_includes test_script, project }
     assert_match(/test_failure=1/, test_script, 'A failed test project must fail the validation job')
+    assert_match(/--results-directory "\$TEST_RESULTS_DIRECTORY\/\$name" \\\n\s*> "\$log_directory\/\$name\.log" 2>&1 &$/, test_script,
+                 'Test projects must run concurrently with separate logs')
+    assert_match(/wait "\$\{pids\[\$index\]\}"/, test_script, 'Every concurrent test project must be awaited')
+    assert_includes File.read(File.join(ROOT, 'coverlet.runsettings')), '[BancoAlimentar.AlimentaEstaIdeia.Web.Views]*',
+                    'Instrumenting compiled Razor views adds over 10 minutes per test project'
     assert_match(/XPlat Code Coverage/, test_script)
     assert_match(/--configuration Release/, test_script)
     %w[PublishTestResults@2 PublishCodeCoverageResults@2 PublishPipelineArtifact@1].each do |task|

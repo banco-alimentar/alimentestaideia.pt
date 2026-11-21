@@ -227,7 +227,9 @@ Bridges repository logic and user-facing pages without hitting dev or real Easyp
 Azure DevOps collects Cobertura reports using `coverlet.runsettings` at the repository root. The settings:
 
 - **Include** only `BancoAlimentar.AlimentaEstaIdeia.*` production assemblies
-- **Exclude** `*.Tests` projects and `*.Integration.Tests`
+- **Exclude** `*.Tests` projects, `*.Integration.Tests`, and `BancoAlimentar.AlimentaEstaIdeia.Web.Views`
+  (compiled `.cshtml` markup; instrumenting it took over 10 minutes per test project on CI, while
+  page models and other Web C# code remain covered through `BancoAlimentar.AlimentaEstaIdeia.Web`)
 - **ExcludeByFile** EF migrations and `*Designer.cs`
 
 Download the **code-coverage** pipeline artifact or inspect the run's Code Coverage tab to review per-assembly numbers without test-project noise. Visual Studio solution-wide totals still mix in Web Razor Pages and migrations unless you filter the report the same way.
