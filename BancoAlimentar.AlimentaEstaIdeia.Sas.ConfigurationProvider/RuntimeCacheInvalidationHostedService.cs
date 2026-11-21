@@ -41,13 +41,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            int failures = 0;
             while (!stoppingToken.IsCancellationRequested)
             {
+                TimeSpan delay = this.options.InvalidationPollInterval;
                 using var deadline = new CancellationTokenSource(this.options.ConfigurationLoadTimeout, this.clock);
                 using var linked = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, deadline.Token);
                 try
                 {
                     await this.invalidation.PollAsync(linked.Token);
+                    failures = 0;
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -57,11 +60,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider
                 {
                     this.invalidation.RecordFailure(exception);
                     this.logger.LogError(exception, "Unable to observe shared tenant cache revisions");
+                    failures = Math.Min(failures + 1, 31);
+                    TimeSpan retryDelay = this.options.GetRetryDelay(failures);
+                    delay = retryDelay < delay ? retryDelay : delay;
                 }
 
                 try
                 {
-                    await Task.Delay(this.options.InvalidationPollInterval, this.clock, stoppingToken);
+                    await Task.Delay(delay, this.clock, stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
