@@ -86,6 +86,8 @@ Drives a **real Chrome browser** against either an isolated local application or
 - Local targeting, Mailpit email capture, and separate local/developer run commands are documented in [Local-Email-Tests.md](Local-Email-Tests.md).
 - Clicks through donation, payment method selection, Easypay/PayPal/MBWay/Multibanco UIs.
 - Exercises referral campaign forms, client-side validation, automatic error scrolling, QR-image loading, referral redirects, opening tracking, and admin metrics.
+- Checks donation history at exact desktop, tablet and mobile viewport widths, including contained table scrolling, paid-only summaries, receipt/subscription/payment actions, server-side search, empty accounts and loading failures. These self-contained cases use the `LocalBrowser` category.
+- Checks subscription history at the same viewport widths, including localized states/payment methods, lifecycle dates, details links, chronological sorting, search, counts for the full list and explicit loading failures without fabricated counts.
 - After the flow, queries the selected target's database to confirm persisted records.
 - Developer runs require user secrets or equivalent environment settings. Self-contained local runs generate synthetic accounts and require no SQL or Azure credentials.
 

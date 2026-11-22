@@ -2,6 +2,8 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.DonationHistoryModel
 @using System.Text.Json
 @{
+    ViewData["Title"] = IdentitySharedLocalizer["DonationHistory"];
+    ViewData["ActivePage"] = ManageNavPages.DonationHistory;
     var donationHistoryI18n = new Dictionary<string, object>
     {
         ["emptyTable"] = Localizer["DataTableEmptyTable"].Value,
@@ -16,68 +18,71 @@
         ["paginateNext"] = Localizer["DataTablePaginateNext"].Value,
         ["paginateLast"] = Localizer["DataTablePaginateLast"].Value,
         ["searchHelpTooltip"] = Localizer["SearchHelpTooltip"].Value,
-        ["details"] = Localizer["Details"].Value,
+        ["subscription"] = Localizer["Subscription"].Value,
         ["donationInvoice"] = Localizer["DonationInvoice"].Value,
         ["invalidNif"] = Localizer["InvalidNIF"].Value,
+        ["invalidNifTooltip"] = Localizer["InvalidNIFToolTip"].Value,
         ["paymentPendingStatus"] = Localizer["PaymentPendingStatus"].Value,
         ["completeDonation"] = Localizer["CompleteDonation"].Value,
+        ["loadFailed"] = Localizer["LoadDonationsFailed"].Value,
         ["paymentTypes"] = new Dictionary<string, string>
         {
             ["CreditCard"] = IdentitySharedLocalizer["CreditCard"].Value,
         },
         ["paymentStatuses"] = new Dictionary<string, string>
         {
-            ["Payed"] = IdentitySharedLocalizer["Payed"].Value,
+            ["Payed"] = Localizer["PaidStatus"].Value,
+            ["WaitingPayment"] = Localizer["PaymentPendingStatus"].Value,
+            ["NotPayed"] = Localizer["UnpaidStatus"].Value,
+            ["ErrorPayment"] = Localizer["PaymentErrorStatus"].Value,
         },
     };
 }
 @section Css {
     <environment include="Development">
         <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
     </environment>
     <environment exclude="Development">
         <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
-        <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
     </environment>
-    <style>
-        #donationHistory thead th.donation-history-th {
-            font-size: 0.8125rem;
-            line-height: 1.15;
-            padding: 0.35rem 0.25rem;
-            text-align: center;
-            vertical-align: bottom;
-        }
-
-        #donationHistory thead th .donation-history-th-label {
-            display: inline-block;
-            white-space: normal;
-        }
-    </style>
+    <link href="~/css/account-history.css" rel="stylesheet" asp-append-version="true" />
 }
 
-<div class="container">
-    <div>@Localizer["SummaryDonatedIntro"] <b>@Model.GetsDonatedFirstDateString</b> @Localizer["SummaryDonatedIntro2"] <b>@Model.GetsDonatedCount</b> @Localizer["SummaryDonatedIntro3"] <b>@Math.Round(Model.GetsDonatedTotal,2)</b> €</div>
-    <br />
+<section class="donation-history account-history" aria-labelledby="donation-history-title">
+    <h3 id="donation-history-title">@IdentitySharedLocalizer["DonationHistory"]</h3>
+    <p class="text-muted">@Localizer["HistoryDescription"]</p>
+
+    <dl class="account-history-summary">
+        <div class="account-history-stat account-history-stat-total">
+            <dt>@Localizer["TotalDonated"]</dt>
+            <dd>@Model.GetsDonatedTotal.ToString("N2") €</dd>
+        </div>
+        <div class="account-history-stat">
+            <dt>@Localizer["CompletedDonations"]</dt>
+            <dd>@Model.GetsDonatedCount</dd>
+        </div>
+        <div class="account-history-stat">
+            <dt>@Localizer["DonatingSince"]</dt>
+            <dd>@(Model.GetsDonatedCount > 0 ? Model.GetsDonatedFirstDateString : "—")</dd>
+        </div>
+    </dl>
 
     <script type="application/json" id="donation-history-i18n">@Html.Raw(JsonSerializer.Serialize(donationHistoryI18n))</script>
 
-    <table id="donationHistory" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
-        <thead>
-            <tr>
-                <th class="donation-history-th">#</th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationDateTimeHeaderLine1"]<br />@Localizer["DonationDateTimeHeaderLine2"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationFoodBankHeaderLine1"]<br />@Localizer["DonationFoodBankHeaderLine2"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationAmountHeaderLine1"]<br />@Localizer["DonationAmountHeaderLine2"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationPaymentTypeHeaderLine1"]<br />@Localizer["DonationPaymentTypeHeaderLine2"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationPaymentStatusHeaderLine1"]<br />@Localizer["DonationPaymentStatusHeaderLine2"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["SubscriptionHeaderLine1"]<br />@Localizer["SubscriptionHeaderLine2"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["DonationInvoice"]</span></th>
-                <th class="donation-history-th"><span class="donation-history-th-label">@Localizer["CompleteDonationHeaderLine1"]<br />@Localizer["CompleteDonationHeaderLine2"]</span></th>
-            </tr>
-        </thead>
-    </table>
-
-</div>
+    <div id="donation-history-load-error" class="alert alert-danger d-none" role="alert"></div>
+    <div class="account-history-panel">
+        <table id="donationHistory" class="table table-hover account-history-table" aria-labelledby="donation-history-title">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">@Localizer["DonationDateTime"]</th>
+                    <th scope="col">@Localizer["DonationFoodBank"]</th>
+                    <th scope="col">@Localizer["DonationAmount"]</th>
+                    <th scope="col">@Localizer["DonationPaymentType"]</th>
+                    <th scope="col">@Localizer["DonationPaymentStatus"]</th>
+                    <th scope="col">@Localizer["Actions"]</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</section>

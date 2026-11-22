@@ -243,4 +243,28 @@
   <data name="DataTablePaginateLast" xml:space="preserve">
     <value>Last</value>
   </data>
+  <data name="HistoryDescription" xml:space="preserve">
+    <value>Review your donations, check payments and download receipts.</value>
+  </data>
+  <data name="TotalDonated" xml:space="preserve">
+    <value>Total donated</value>
+  </data>
+  <data name="CompletedDonations" xml:space="preserve">
+    <value>Completed donations</value>
+  </data>
+  <data name="DonatingSince" xml:space="preserve">
+    <value>First completed donation</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="PaidStatus" xml:space="preserve">
+    <value>Paid</value>
+  </data>
+  <data name="UnpaidStatus" xml:space="preserve">
+    <value>Not paid</value>
+  </data>
+  <data name="PaymentErrorStatus" xml:space="preserve">
+    <value>Payment error</value>
+  </data>
 </root>

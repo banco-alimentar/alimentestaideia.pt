@@ -21,9 +21,20 @@
         }
 
         var i18n = readJsonConfig('donation-history-i18n') || {};
-        $(tableSelector).DataTable({
+        var $table = $(tableSelector);
+        var $error = $('#donation-history-load-error');
+        var textRenderer = $.fn.dataTable.render.text();
+        $table.on('xhr.dt', function (event, settings, json) {
+            $error.text(json === null ? i18n.loadFailed : '').toggleClass('d-none', json !== null);
+            if (json === null) {
+                return true;
+            }
+        });
+
+        $table.DataTable({
             processing: true,
             serverSide: true,
+            dom: '<"account-history-toolbar"lf><"account-history-table-region table-responsive"t><"account-history-footer"ip>r',
             ajax: {
                 url: '?handler=DataTableData',
                 type: 'GET',
@@ -50,15 +61,22 @@
             lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
             order: [[1, 'desc']],
             initComplete: function () {
+                $(tableSelector).closest('.account-history-table-region').attr({
+                    tabindex: '0',
+                    role: 'region',
+                    'aria-labelledby': 'donation-history-title'
+                });
                 var $searchInput = $('#donationHistory_filter input[type="search"]');
                 if ($searchInput.length && i18n.searchHelpTooltip) {
                     $searchInput.attr('title', i18n.searchHelpTooltip);
                 }
             },
             columns: [
-                { data: 'Id', orderable: false },
+                // Preserve the server's sort-column indexes while hiding the row counter.
+                { data: 'Id', orderable: false, visible: false },
                 {
                     data: 'DonationDate',
+                    width: '15%',
                     render: function (data, type) {
                         if (!data) {
                             return '';
@@ -76,10 +94,16 @@
                         return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
                     }
                 },
-                { data: 'FoodBank' },
-                { data: 'DonationAmount', render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
+                { data: 'FoodBank', width: '19%', render: textRenderer },
+                {
+                    data: 'DonationAmount',
+                    width: '14%',
+                    className: 'account-history-amount',
+                    render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')
+                },
                 {
                     data: 'Payments',
+                    width: '16%',
                     orderable: false,
                     render: function (data) {
                         var labels = i18n.paymentTypes || {};
@@ -91,7 +115,7 @@
                                     paymentType = labels[paymentType];
                                 }
 
-                                result += '<div>' + paymentType + '</div>';
+                                result += '<div>' + textRenderer.display(paymentType) + '</div>';
                             }
                         }
 
@@ -100,53 +124,49 @@
                 },
                 {
                     data: 'PaymentStatus',
-                    render: function (data) {
+                    width: '16%',
+                    render: function (data, type) {
                         var labels = i18n.paymentStatuses || {};
-                        if (labels.hasOwnProperty(data)) {
-                            return labels[data];
+                        var label = labels.hasOwnProperty(data) ? labels[data] : data;
+                        if (type !== 'display') {
+                            return label;
                         }
 
-                        return data;
-                    }
-                },
-                {
-                    data: 'SubscriptionPublicId',
-                    orderable: false,
-                    render: function (data) {
-                        if (data == null) {
-                            return '';
-                        }
-
-                        return '<a class="btn btn-primary" style="min-width: 120px" target="_blank" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '">' + (i18n.details || 'Details') + '</a>';
+                        var statusClass = data === 'Payed' ? 'success' : data === 'ErrorPayment' ? 'error' : 'pending';
+                        return '<span class="account-history-status account-history-status-' + statusClass + '">' + textRenderer.display(label) + '</span>';
                     }
                 },
                 {
                     data: 'PublicId',
+                    width: '20%',
                     orderable: false,
                     render: function (data, type, row) {
+                        if (type !== 'display') {
+                            return data;
+                        }
+
+                        var actions = '';
+                        if (row.SubscriptionPublicId != null) {
+                            actions += '<a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + encodeURIComponent(row.SubscriptionPublicId) + '">' + textRenderer.display(i18n.subscription || '') + '</a>';
+                        }
+
                         if (row.PaymentStatus === 'Payed') {
                             if ((row.Nif !== null && row.Nif !== '000000000') || (row.UsersNif !== null && row.UsersNif !== '000000000')) {
-                                return '<p class="alert alert-primary text-center" role="alert"><a class="text-primary" target="_blank" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + data + '">' + (i18n.donationInvoice || '') + '</a></p>';
+                                actions += '<a class="btn btn-sm btn-outline-primary" target="_blank" rel="noopener" href="/Identity/Account/Manage/GenerateInvoice?publicDonationId=' + encodeURIComponent(data) + '">' + textRenderer.display(i18n.donationInvoice || '') + '</a>';
+                            } else {
+                                actions += '<a class="btn btn-sm donation-history-nif" href="/Identity/Account/Manage">' + textRenderer.display(i18n.invalidNif || '') + '</a>';
                             }
-
-                            return '<p class="alert alert-warning text-center" role="alert"><a class="text-warning" href="/Identity/Account/Manage">' + (i18n.invalidNif || '') + '</a></p>';
+                        } else if (row.SubscriptionPublicId == null) {
+                            actions += '<a class="btn btn-sm btn-primary" target="_blank" rel="noopener" href="/Payment?publicDonationId=' + encodeURIComponent(data) + '">' + textRenderer.display(i18n.completeDonation || '') + '</a>';
                         }
 
-                        return '<p class="alert alert-warning text-center" role="alert">' + (i18n.paymentPendingStatus || '') + '</p>';
-                    }
-                },
-                {
-                    data: 'DonationId',
-                    orderable: false,
-                    render: function (data, type, row) {
-                        if (row.PaymentStatus !== 'Payed' && row.SubscriptionPublicId == null) {
-                            return '<a class="btn btn-primary" target="_blank" href="/Payment?publicDonationId=' + row.PublicId + '">' + (i18n.completeDonation || '') + '</a>';
-                        }
-
-                        return '';
+                        return '<div class="account-history-actions">' + actions + '</div>';
                     }
                 }
-            ]
+            ],
+            drawCallback: function () {
+                $('#donationHistory .donation-history-nif').attr('title', i18n.invalidNifTooltip || '');
+            }
         });
     }
 
@@ -161,6 +181,16 @@
         var $table = $(tableSelector);
         var $loading = $('#subscriptions-loading');
         var $error = $('#subscriptions-load-error');
+        var textRenderer = $.fn.dataTable.render.text();
+
+        function formatDate(value) {
+            if (!value) {
+                return '';
+            }
+
+            var parsed = moment(value, moment.ISO_8601, true);
+            return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
+        }
 
         $loading.show();
         $error.addClass('d-none').text('');
@@ -169,84 +199,97 @@
             .done(function (data) {
                 $loading.hide();
                 $table.attr('aria-busy', 'false');
+                if (!Array.isArray(data)) {
+                    $error.text(i18n.loadFailed || '').removeClass('d-none').show();
+                    return;
+                }
+
+                $('#subscriptions-total-count').text(data.length);
+                $('#subscriptions-active-count').text(data.filter(function (row) { return row.Status === 'Active'; }).length);
+                $('#subscriptions-inactive-count').text(data.filter(function (row) { return row.Status === 'Inactive'; }).length);
+                $('#subscriptions-summary').removeClass('d-none');
                 $table.dataTable({
                     language: { url: '/resources/dataTable.' + culture + '.json' },
+                    dom: '<"account-history-toolbar"lf><"account-history-table-region table-responsive"t><"account-history-footer"ip>r',
                     orderCellsTop: true,
-                    autoWidth: true,
+                    autoWidth: false,
                     order: [[1, 'desc']],
                     data: data,
-                    createdRow: function (row, rowData) {
-                        if (rowData.Status === 'Inactive') {
-                            $(row).addClass('table-secondary');
-                        }
+                    initComplete: function () {
+                        $table.closest('.account-history-table-region').attr({
+                            tabindex: '0',
+                            role: 'region',
+                            'aria-labelledby': 'subscriptions-title'
+                        });
                     },
                     columns: [
-                        { data: 'Id' },
+                        { data: 'Id', visible: false, orderable: false },
                         {
                             data: 'Created',
-                            render: function (data, type) {
-                                if (!data) {
-                                    return '';
-                                }
-
+                            width: '30%',
+                            render: function (data, type, row) {
                                 if (type === 'sort' || type === 'type') {
-                                    return data;
+                                    return data || '';
                                 }
 
-                                var parsed = moment(data, moment.ISO_8601, true);
-                                return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
-                            }
-                        },
-                        {
-                            data: 'ExpirationTime',
-                            render: function (data) {
-                                if (!data) {
-                                    return '';
-                                }
+                                var result = textRenderer.display(formatDate(data));
+                                var dates = [[i18n.starts, row.StartTime], [i18n.ends, row.ExpirationTime]];
+                                dates.forEach(function (date) {
+                                    var value = formatDate(date[1]);
+                                    if (value) {
+                                        result += '<div class="subscription-history-date"><span class="subscription-history-date-label">' + textRenderer.display(date[0] || '') + '</span>' + value + '</div>';
+                                    }
+                                });
 
-                                var parsed = moment(data, moment.ISO_8601, true);
-                                return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
-                            }
-                        },
-                        {
-                            data: 'StartTime',
-                            render: function (data) {
-                                if (!data) {
-                                    return '';
-                                }
-
-                                var parsed = moment(data, moment.ISO_8601, true);
-                                return parsed.isValid() ? parsed.format('DD/MM/YYYY') : '';
-                            }
-                        },
-                        { data: 'SubscriptionType' },
-                        {
-                            data: 'Status',
-                            render: function (data) {
-                                var labels = i18n.statuses || {};
-                                if (labels.hasOwnProperty(data)) {
-                                    return labels[data];
-                                }
-
-                                return data;
+                                return result;
                             }
                         },
                         {
                             data: 'Frequency',
+                            width: '15%',
                             render: function (data) {
                                 var labels = i18n.frequencies || {};
-                                if (labels.hasOwnProperty(data)) {
-                                    return labels[data];
-                                }
-
-                                return data;
+                                return textRenderer.display(labels.hasOwnProperty(data) ? labels[data] : data);
                             }
                         },
-                        { data: 'DonationAmount', render: $.fn.dataTable.render.number(',', '.', 2, '', ' €') },
+                        {
+                            data: 'DonationAmount',
+                            width: '14%',
+                            className: 'account-history-amount',
+                            render: $.fn.dataTable.render.number(',', '.', 2, '', ' €')
+                        },
+                        {
+                            data: 'SubscriptionType',
+                            width: '16%',
+                            render: function (data) {
+                                var labels = i18n.paymentTypes || {};
+                                return textRenderer.display(labels.hasOwnProperty(data) ? labels[data] : data);
+                            }
+                        },
+                        {
+                            data: 'Status',
+                            width: '13%',
+                            render: function (data, type) {
+                                var labels = i18n.statuses || {};
+                                var label = labels.hasOwnProperty(data) ? labels[data] : data;
+                                if (type !== 'display') {
+                                    return label;
+                                }
+
+                                var statusClass = data === 'Active' ? 'success' : data === 'Inactive' ? 'inactive' : data === 'Error' ? 'error' : 'pending';
+                                return '<span class="account-history-status account-history-status-' + statusClass + '">' + textRenderer.display(label) + '</span>';
+                            }
+                        },
                         {
                             data: 'PublicId',
-                            render: function (data) {
-                                return '<a class="btn btn-primary" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + data + '">' + (i18n.details || 'Details') + '</a>';
+                            width: '12%',
+                            orderable: false,
+                            render: function (data, type) {
+                                if (type !== 'display') {
+                                    return data;
+                                }
+
+                                return '<div class="account-history-actions"><a class="btn btn-sm btn-outline-primary" href="/Identity/Account/Manage/Subscriptions/Details?PublicId=' + encodeURIComponent(data) + '">' + textRenderer.display(i18n.details || '') + '</a></div>';
                             }
                         }
                     ]

@@ -13,23 +13,28 @@
 
 @section Css {
     @RenderSection("Css", required: false)
+    <link href="~/css/manage-account.css" rel="stylesheet" asp-append-version="true" />
 }
 
-
-<h2>@IdentitySharedLocalizer["ManageAccount"]</h2>
-
-<div>
-    <h4>@IdentitySharedLocalizer["ManageAccountMessage"]</h4>
-    <hr />
-    <div class="row">
-        <div class="col-md-3">
-            <partial name="_ManageNav" />
+<section class="account-manage" aria-labelledby="account-manage-title">
+    <header class="account-manage-header">
+        <div>
+            <h1 id="account-manage-title">@IdentitySharedLocalizer["ManageAccount"]</h1>
+            <p>@IdentitySharedLocalizer["ManageAccountMessage"]</p>
         </div>
-        <div class="col-md-9">
+        <span class="account-manage-header-icon" aria-hidden="true">
+            <i class="fas fa-hand-holding-heart"></i>
+        </span>
+    </header>
+    <div class="account-manage-grid">
+        <nav class="account-manage-sidebar" aria-label="@IdentitySharedLocalizer["ManageAccount"]">
+            <partial name="_ManageNav" />
+        </nav>
+        <div class="account-manage-content">
             @RenderBody()
         </div>
     </div>
-</div>
+</section>
 
 @section Scripts {
     <environment include="Development">

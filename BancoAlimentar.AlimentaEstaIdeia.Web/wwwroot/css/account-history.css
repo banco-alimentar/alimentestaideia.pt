@@ -1,0 +1,216 @@
+.account-history {
+    min-width: 0;
+    width: 100%;
+}
+
+.account-history-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.account-history-stat {
+    padding: 1rem 1.25rem;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    background: #fff;
+}
+
+.account-history-stat dt {
+    color: #495057;
+    font-size: .875rem;
+    font-weight: 400;
+}
+
+.account-history-stat dd {
+    margin: .5rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.account-history-stat-total {
+    background: #f0f7ff;
+    border-color: #cce0f5;
+}
+
+.account-history-panel {
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    background: #fff;
+    overflow: hidden;
+}
+
+.account-history-toolbar,
+.account-history-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: 1rem;
+}
+
+.account-history .dataTables_length label,
+.account-history .dataTables_filter label {
+    margin: 0;
+    white-space: normal;
+}
+
+.account-history div.dataTables_wrapper div.dataTables_filter {
+    text-align: left;
+}
+
+.account-history div.dataTables_wrapper div.dataTables_filter input {
+    width: 12rem;
+    max-width: 100%;
+}
+
+.account-history div.dataTables_wrapper div.dataTables_info {
+    padding-top: 0;
+    font-size: .875rem;
+    color: #495057;
+}
+
+.account-history-table-region:focus-visible {
+    outline: 2px solid #007bff;
+    outline-offset: -2px;
+}
+
+table.account-history-table {
+    width: 100% !important;
+    min-width: 640px;
+    table-layout: fixed;
+    margin: 0 !important;
+}
+
+table.account-history-table th,
+table.account-history-table td {
+    padding: .875rem .75rem;
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+    white-space: normal;
+}
+
+table.account-history-table thead th {
+    background: #f8f9fa;
+    color: #495057;
+    font-size: .8125rem;
+    border-bottom-width: 1px;
+}
+
+table.account-history-table tbody td {
+    font-size: .875rem;
+}
+
+table.account-history-table .account-history-amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+table.account-history-table td.account-history-amount {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.account-history-status {
+    display: inline-block;
+    padding: .3rem .6rem;
+    border-radius: 1rem;
+    font-size: .8125rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.account-history-status-success {
+    background: #e6f4ea;
+    color: #246b3c;
+}
+
+.account-history-status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.account-history-status-error {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.account-history-status-inactive {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.account-history-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.account-history-actions .btn {
+    white-space: normal;
+    text-align: left;
+}
+
+.donation-history-nif {
+    color: #856404;
+    background: #fff3cd;
+    border-color: #e0c97d;
+}
+
+.donation-history-nif:hover,
+.donation-history-nif:focus {
+    color: #533f03;
+    background: #ffe69c;
+}
+
+.subscription-history-date {
+    margin-top: .35rem;
+    font-size: .8125rem;
+}
+
+.subscription-history-date-label {
+    color: #495057;
+    margin-right: .35rem;
+}
+
+@media (max-width: 575.98px) {
+    .account-history-summary {
+        grid-template-columns: 1fr;
+        gap: .75rem;
+    }
+
+    .account-history-stat {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+    }
+
+    .account-history-stat dd {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .account-history .dataTables_filter {
+        width: 100%;
+    }
+
+    .account-history .dataTables_filter label {
+        display: flex;
+        align-items: center;
+    }
+
+    .account-history div.dataTables_wrapper div.dataTables_filter input {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+    }
+
+    .account-history div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+}
