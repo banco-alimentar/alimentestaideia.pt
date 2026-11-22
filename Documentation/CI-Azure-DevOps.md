@@ -242,10 +242,10 @@ shell/verifier CLI. They do not replace Azure service-side compilation or prove 
    - `/azure-pipelines/developer-debug.yml` — developer/master validation, dependency audit, developer build + deploy (id=11 / release id=3)
    - `/azure-pipelines/preprod-release.yml` — preprod migrations + deploy (release id=5)
 
-   Retire the separate Selenium validation definition; its root-level YAML has been removed.
-
    Select the **Default** pool for every YAML pipeline. Confirm its Linux agent is online and has
    the tools listed under [Default self-hosted agent setup](#default-self-hosted-agent-setup).
+
+   Retire the separate Selenium validation definition; its root-level YAML has been removed.
 
 2. **Service connection**  
    Set `AzureServiceConnection` to the ARM connection **name** (Project settings → Service connections). For this project the classic GUID `7ada5308-2372-46ef-af95-bdfff138b059` maps to:
