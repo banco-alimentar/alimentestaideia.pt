@@ -232,8 +232,15 @@
                                     return data || '';
                                 }
 
-                                var result = textRenderer.display(formatDate(data));
                                 var dates = [[i18n.starts, row.StartTime], [i18n.ends, row.ExpirationTime]];
+                                if (type === 'filter') {
+                                    return [formatDate(data)].concat(dates.map(function (date) {
+                                        var value = formatDate(date[1]);
+                                        return value ? (date[0] || '') + ' ' + value : '';
+                                    })).join(' ');
+                                }
+
+                                var result = textRenderer.display(formatDate(data));
                                 dates.forEach(function (date) {
                                     var value = formatDate(date[1]);
                                     if (value) {

@@ -64,6 +64,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.SeleniumUITest
 
             await myApplicationDbContext.SaveChangesAsync();
             SetAccountHistoryViewport(width);
+            Assert.IsType<ChromeDriver>(driver).ExecuteCdpCommand("Emulation.setTimezoneOverride", new Dictionary<string, object?>
+            {
+                ["timezoneId"] = "UTC",
+            });
             Login(email, IntegrationTestCredentials.DefaultPassword);
             driver.Navigate().GoToUrl(baseUrl + "/Identity/Account/Manage/Subscriptions?culture=pt&ui-culture=pt");
             var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
