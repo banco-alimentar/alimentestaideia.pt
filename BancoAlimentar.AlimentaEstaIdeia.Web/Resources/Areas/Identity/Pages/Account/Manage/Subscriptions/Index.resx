@@ -130,7 +130,7 @@
     <value>Tipo de pagamento</value>
   </data>
   <data name="Title" xml:space="preserve">
-    <value>Administre a sua doação regular aqui</value>
+    <value>Consulte as suas doações regulares, os métodos de pagamento e os prazos.</value>
   </data>
   <data name="LoadingSubscriptions" xml:space="preserve">
     <value>A carregar as subscrições...</value>
@@ -143,5 +143,35 @@
   </data>
   <data name="SubscriptionCancellationFailed" xml:space="preserve">
     <value>Não foi possível cancelar a subscrição. Tente novamente.</value>
+  </data>
+  <data name="TotalSubscriptions" xml:space="preserve">
+    <value>Total de subscrições</value>
+  </data>
+  <data name="Starts" xml:space="preserve">
+    <value>Início</value>
+  </data>
+  <data name="Ends" xml:space="preserve">
+    <value>Fim</value>
+  </data>
+  <data name="DirectDebit" xml:space="preserve">
+    <value>Débito direto</value>
+  </data>
+  <data name="PendingActivationStatus" xml:space="preserve">
+    <value>A aguardar ativação</value>
+  </data>
+  <data name="SubscriptionErrorStatus" xml:space="preserve">
+    <value>Requer atenção</value>
+  </data>
+  <data name="Details" xml:space="preserve">
+    <value>Detalhes</value>
+  </data>
+  <data name="DonationAmount" xml:space="preserve">
+    <value>Valor por doação</value>
+  </data>
+  <data name="Frequency" xml:space="preserve">
+    <value>Frequência</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Estado</value>
   </data>
 </root>

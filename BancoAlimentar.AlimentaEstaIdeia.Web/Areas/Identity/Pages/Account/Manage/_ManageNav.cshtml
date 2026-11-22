@@ -3,21 +3,81 @@
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item"><a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-area="Identity" asp-page="/Account/Manage/Index">@IdentitySharedLocalizer["Profile"]</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.DonationHistoryNavClass(ViewContext)" id="donation-history" asp-area="Identity" asp-page="/Account/Manage/DonationHistory">@IdentitySharedLocalizer["DonationHistory"]</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PaymentNotificationsNavClass(ViewContext)" id="payment-notifications" asp-area="Identity" asp-page="/Account/Manage/PaymentNotifications">@IdentitySharedLocalizer["PaymentNotifications"]</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.CommunicationsNavClass(ViewContext)" id="communications" asp-area="Identity" asp-page="/Account/Manage/Communications">@IdentitySharedLocalizer["EmailCommunicationsTitle"]</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.SubscriptionManagementNavClass(ViewContext)" id="subscription-management" asp-area="Identity" asp-page="/Account/Manage/Subscriptions/Index">@IdentitySharedLocalizer["Subscriptions"]</a></li>
+<ul class="nav nav-pills account-manage-nav">
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-area="Identity" asp-page="/Account/Manage/Index"
+           aria-current="@(ManageNavPages.IndexNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-user-circle"></i></span>
+            <span>@IdentitySharedLocalizer["Profile"]</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.DonationHistoryNavClass(ViewContext)" id="donation-history" asp-area="Identity" asp-page="/Account/Manage/DonationHistory"
+           aria-current="@(ManageNavPages.DonationHistoryNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-hand-holding-heart"></i></span>
+            <span>@IdentitySharedLocalizer["DonationHistory"]</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.PaymentNotificationsNavClass(ViewContext)" id="payment-notifications" asp-area="Identity" asp-page="/Account/Manage/PaymentNotifications"
+           aria-current="@(ManageNavPages.PaymentNotificationsNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-bell"></i></span>
+            <span>@IdentitySharedLocalizer["PaymentNotifications"]</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.CommunicationsNavClass(ViewContext)" id="communications" asp-area="Identity" asp-page="/Account/Manage/Communications"
+           aria-current="@(ManageNavPages.CommunicationsNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-envelope-open-text"></i></span>
+            <span>@IdentitySharedLocalizer["EmailCommunicationsTitle"]</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.SubscriptionManagementNavClass(ViewContext)" id="subscription-management" asp-area="Identity" asp-page="/Account/Manage/Subscriptions/Index"
+           aria-current="@(ManageNavPages.SubscriptionManagementNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-sync-alt"></i></span>
+            <span>@IdentitySharedLocalizer["Subscriptions"]</span>
+        </a>
+    </li>
     <feature name=@nameof(DevelopingFeatureFlags.ReferralCampaignManagement)>
-        <li class="nav-item"><a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-area="Identity" asp-page="/Account/Manage/CampaignsHistory">@IdentitySharedLocalizer["CampaignsHistory"]</a></li>
+        <li class="nav-item">
+            <a class="nav-link @ManageNavPages.CampaignsHistoryNavClass(ViewContext)" id="compaigns-history" asp-area="Identity" asp-page="/Account/Manage/CampaignsHistory"
+               aria-current="@(ManageNavPages.CampaignsHistoryNavClass(ViewContext) == "active" ? "page" : null)">
+                <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-bullhorn"></i></span>
+                <span>@IdentitySharedLocalizer["CampaignsHistory"]</span>
+            </a>
+        </li>
     </feature>
 
-    <li class="nav-item"><a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-area="Identity" asp-page="/Account/Manage/Email">@IdentitySharedLocalizer["Email"]</a></li>
-    <li class="nav-item"><a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-area="Identity" asp-page="/Account/Manage/ChangePassword">@IdentitySharedLocalizer["Password"]</a></li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-area="Identity" asp-page="/Account/Manage/Email"
+           aria-current="@(ManageNavPages.EmailNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-envelope"></i></span>
+            <span>@IdentitySharedLocalizer["Email"]</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-area="Identity" asp-page="/Account/Manage/ChangePassword"
+           aria-current="@(ManageNavPages.ChangePasswordNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
+            <span>@IdentitySharedLocalizer["Password"]</span>
+        </a>
+    </li>
     @if (hasExternalLogins)
     {
-        <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-area="Identity" asp-page="/Account/Manage/ExternalLogins">@IdentitySharedLocalizer["ExternalLogins"]</a></li>
+        <li id="external-logins" class="nav-item">
+            <a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-area="Identity" asp-page="/Account/Manage/ExternalLogins"
+               aria-current="@(ManageNavPages.ExternalLoginsNavClass(ViewContext) == "active" ? "page" : null)">
+                <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-link"></i></span>
+                <span>@IdentitySharedLocalizer["ExternalLogins"]</span>
+            </a>
+        </li>
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication">@IdentitySharedLocalizer["2FA"]</a></li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-area="Identity" asp-page="/Account/Manage/TwoFactorAuthentication"
+           aria-current="@(ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-shield-alt"></i></span>
+            <span>@IdentitySharedLocalizer["2FA"]</span>
+        </a>
+    </li>
 </ul>

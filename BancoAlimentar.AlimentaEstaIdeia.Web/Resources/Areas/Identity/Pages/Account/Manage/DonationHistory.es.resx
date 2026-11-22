@@ -240,4 +240,31 @@
   <data name="DataTablePaginateLast" xml:space="preserve">
     <value>Último</value>
   </data>
+  <data name="HistoryDescription" xml:space="preserve">
+    <value>Consulta tus donaciones, comprueba los pagos y descarga los recibos.</value>
+  </data>
+  <data name="TotalDonated" xml:space="preserve">
+    <value>Total donado</value>
+  </data>
+  <data name="CompletedDonations" xml:space="preserve">
+    <value>Donaciones completadas</value>
+  </data>
+  <data name="DonatingSince" xml:space="preserve">
+    <value>Primera donación completada</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Acciones</value>
+  </data>
+  <data name="PaidStatus" xml:space="preserve">
+    <value>Pagado</value>
+  </data>
+  <data name="UnpaidStatus" xml:space="preserve">
+    <value>No pagado</value>
+  </data>
+  <data name="PaymentErrorStatus" xml:space="preserve">
+    <value>Error de pago</value>
+  </data>
+  <data name="LoadDonationsFailed" xml:space="preserve">
+    <value>No se pudo cargar el historial de donaciones. Actualiza la página e inténtalo de nuevo.</value>
+  </data>
 </root>

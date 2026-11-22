@@ -8,60 +8,57 @@
 
 
 
-<div class="mobileMargin">
-    <div>
-        <div class="column1">
-            <span class="text1 text-center">Alimente<br />esta ideia</span>
-            <span class="text2 text-center">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</span>
-            <div class="clear"></div>
+<div class="home-page">
+    <div class="home-page-layout">
+        <div class="home-intro">
+            <h1 class="home-title">Alimente<br />esta ideia</h1>
+            <p class="home-description">@Localizer["ASuaContribuicaoFazTodaADiferencaAjudeQuemMaisPrecisa"]</p>
             <a class="btn btn-primary btn-lg btn-block btn-donate social-login-button" asp-page="./Donation">
-                <i class="fas fa-heart btn-donate-text-size" alt='@Localizer["Doar"]'></i>
+                <i class="fas fa-heart btn-donate-text-size" aria-hidden="true"></i>
                 <span class="btn-donate-text-size">@Localizer["Doar"]</span>
             </a>
             @if (!Model.IsUserLoggedIn)
             {
                 <a class="btn btn-primary btn-lg btn-block btn-signindonate social-login-button" asp-page="/Account/Login" asp-area="Identity" asp-route-donate="true" data-bs-toggle="tooltip" title='@HeaderLocalizer["MessageLogin"]'>
-                    <i class="fas fa-heart" alt='@Localizer["DonarAndSignin"]'></i>
+                    <i class="fas fa-heart" aria-hidden="true"></i>
                     <span>@Localizer["DonarAndSignin"]</span>
                 </a>
-                <hr />
             }
         </div>
 
-        <div class="column2">
-            <img class="mobileOnly imageComida" src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
+        <div class="home-food-image">
+            <img src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
         </div>
 
-        <div class="column3">
-
-            <div class="clear"></div>
-
-            <p class="text4">@Localizer["AlimentosJaDoados"] <span class="text10"> @Localizer["Since"] @Model.CampaignStartDateString </span></p>
-            <div class="table">
-                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/azeite.png")' alt='@Localizer["Azeite"]'/></span>@Localizer["Azeite"]</div>
-                <div class="rightColumn">@Model.TotalDonations[0].Total.ToString("00000")<small>@Model.ProductCatalogue[0].UnitOfMeasure</small></div>
-                <div class="clear"></div>
-
-                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/oleo.png")' alt='@Localizer["Oleo"]'/></span>@Localizer["Oleo"]</div>
-                <div class="rightColumn">@Model.TotalDonations[1].Total.ToString("00000")<small>@Model.ProductCatalogue[1].UnitOfMeasure</small></div>
-                <div class="clear"></div>
-
-                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/leite.png")' alt='@Localizer["Leite"]'/></span>@Localizer["Leite"]</div>
-                <div class="rightColumn">@Model.TotalDonations[2].Total.ToString("00000")<small>@Model.ProductCatalogue[2].UnitOfMeasure</small></div>
-                <div class="clear"></div>
-
-                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/atum.png")' alt='@Localizer["Atum"]'/></span>@Localizer["Atum"]</div>
-                <div class="rightColumn">@Model.TotalDonations[3].Total.ToString("00000")<small>@Model.ProductCatalogue[3].UnitOfMeasure</small></div>
-                <div class="clear"></div>
-
-                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/salsichas.png")' alt='@Localizer["Salsichas"]'/></span>@Localizer["Salsichas"]</div>
-                <div class="rightColumn">@Model.TotalDonations[4].Total.ToString("00000")<small>@Model.ProductCatalogue[4].UnitOfMeasure</small></div>
-                <div class="clear"></div>
-
-                <div class="leftColumn"><span class="imageContainer"><img src='@Url.Content("~/img/acucar.png")' alt='@Localizer["Açucar"]'/></span>@Localizer["Açucar"]</div>
-                <div class="rightColumn">@Model.TotalDonations[5].Total.ToString("00000")<small>@Model.ProductCatalogue[5].UnitOfMeasure</small></div>
-                <div class="clear"></div>
-            </div>
-        </div>
+        <section class="home-food-summary" aria-labelledby="home-food-title">
+            <h2 id="home-food-title">@Localizer["AlimentosJaDoados"]</h2>
+            <p class="home-food-since">@Localizer["Since"] @Model.CampaignStartDateString</p>
+            <dl class="home-food-list">
+                <div class="home-food-item">
+                    <dt><img src='@Url.Content("~/img/azeite.png")' alt="" /><span>@Localizer["Azeite"]</span></dt>
+                    <dd><span class="home-food-total">@Model.TotalDonations[0].Total.ToString("00000")</span><small>@Model.ProductCatalogue[0].UnitOfMeasure</small></dd>
+                </div>
+                <div class="home-food-item">
+                    <dt><img src='@Url.Content("~/img/oleo.png")' alt="" /><span>@Localizer["Oleo"]</span></dt>
+                    <dd><span class="home-food-total">@Model.TotalDonations[1].Total.ToString("00000")</span><small>@Model.ProductCatalogue[1].UnitOfMeasure</small></dd>
+                </div>
+                <div class="home-food-item">
+                    <dt><img src='@Url.Content("~/img/leite.png")' alt="" /><span>@Localizer["Leite"]</span></dt>
+                    <dd><span class="home-food-total">@Model.TotalDonations[2].Total.ToString("00000")</span><small>@Model.ProductCatalogue[2].UnitOfMeasure</small></dd>
+                </div>
+                <div class="home-food-item">
+                    <dt><img src='@Url.Content("~/img/atum.png")' alt="" /><span>@Localizer["Atum"]</span></dt>
+                    <dd><span class="home-food-total">@Model.TotalDonations[3].Total.ToString("00000")</span><small>@Model.ProductCatalogue[3].UnitOfMeasure</small></dd>
+                </div>
+                <div class="home-food-item">
+                    <dt><img src='@Url.Content("~/img/salsichas.png")' alt="" /><span>@Localizer["Salsichas"]</span></dt>
+                    <dd><span class="home-food-total">@Model.TotalDonations[4].Total.ToString("00000")</span><small>@Model.ProductCatalogue[4].UnitOfMeasure</small></dd>
+                </div>
+                <div class="home-food-item">
+                    <dt><img src='@Url.Content("~/img/acucar.png")' alt="" /><span>@Localizer["Açucar"]</span></dt>
+                    <dd><span class="home-food-total">@Model.TotalDonations[5].Total.ToString("00000")</span><small>@Model.ProductCatalogue[5].UnitOfMeasure</small></dd>
+                </div>
+            </dl>
+        </section>
     </div>
 </div>
