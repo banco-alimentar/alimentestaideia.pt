@@ -20,3 +20,45 @@
     @Html.AntiForgeryToken()
     <button type="submit" class="btn btn-primary">@Localizer["Submit"]</button>
 </form>
+
+<h2 class="mt-4">@Localizer["RuntimeStatus"]</h2>
+<dl>
+    <dt>@Localizer["CacheGeneration"]</dt>
+    <dd>@Model.CacheGeneration</dd>
+    <dt>@Localizer["SharedRevision"]</dt>
+    <dd>@(Model.InvalidationStatus.LastObservedRevision?.ToString() ?? "--")</dd>
+    <dt>@Localizer["LastRevisionPoll"]</dt>
+    <dd>@(Model.InvalidationStatus.LastSuccessfulPollAt?.ToString("u") ?? "--")</dd>
+    <dt>@Localizer["Initialization"]</dt>
+    <dd>@Localizer[Model.InitializationStatus.Initialized ? "Ready" : "NotReady"]</dd>
+    <dt>@Localizer["LastAssetSync"]</dt>
+    <dd>@(Model.StaticSyncStatus.LastSuccessAt?.ToString("u") ?? "--")</dd>
+    <dt>@Localizer["NextAssetSync"]</dt>
+    <dd>@(Model.StaticSyncStatus.NextAttemptAt?.ToString("u") ?? "--")</dd>
+    <dt>@Localizer["FailureCategory"]</dt>
+    <dd>@(Model.InvalidationStatus.LastFailureType ?? Model.InitializationStatus.LastFailureType ?? Model.StaticSyncStatus.LastFailureType ?? "--")</dd>
+</dl>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>@Localizer["Tenant"]</th>
+                <th>@Localizer["Configuration"]</th>
+                <th>@Localizer["FailureCategory"]</th>
+                <th>@Localizer["RetryAt"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var status in Model.ConfigurationStatuses)
+            {
+                <tr>
+                    <td>@(status.TenantName ?? status.TenantId.ToString())</td>
+                    <td>@Localizer[status.SecretsLoaded && status.FailureStage == null ? "Ready" : "NotReady"]</td>
+                    <td>@(status.FailureStage ?? "--")</td>
+                    <td>@(status.RetryAt?.ToString("u") ?? "--")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

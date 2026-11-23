@@ -183,6 +183,58 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// Account pages share accessible navigation without losing their forms or page assets.
+        /// </summary>
+        /// <param name="page">Account page path.</param>
+        /// <param name="activeLinkId">Expected current navigation link.</param>
+        /// <param name="expectedHref">Expected generated navigation URL.</param>
+        /// <param name="contentSelector">Page-specific content that must remain available.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Theory]
+        [InlineData("Index", "profile", "/Identity/Account/Manage", "#profile-form")]
+        [InlineData("DonationHistory", "donation-history", "/Identity/Account/Manage/DonationHistory", "#donationHistory")]
+        [InlineData("Communications", "communications", "/Identity/Account/Manage/Communications", ".account-manage-content > h4")]
+        [InlineData("ChangePassword", "change-password", "/Identity/Account/Manage/ChangePassword", "#change-password-form")]
+        [InlineData("Subscriptions/Index", "subscription-management", "/Identity/Account/Manage/Subscriptions", "#subscriptions")]
+        public async Task ManagePages_PreserveContentAndMarkCurrentNavigation(
+            string page,
+            string activeLinkId,
+            string expectedHref,
+            string contentSelector)
+        {
+            var email = $"manage-layout-{Guid.NewGuid():N}@integration.test";
+            using var webFactory = this.CreateAuthFactory();
+            using (var scope = webFactory.Services.CreateScope())
+            {
+                await IntegrationTestDataSeeder.EnsureUserAsync(
+                    scope.ServiceProvider,
+                    email,
+                    IntegrationTestCredentials.DefaultPassword);
+            }
+
+            using var client = await WebTestAuthHelper.CreateAuthenticatedClientAsync(
+                webFactory,
+                email,
+                IntegrationTestCredentials.DefaultPassword);
+            using var response = await client.GetAsync($"/Identity/Account/Manage/{page}");
+            response.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(response);
+
+            Assert.NotNull(document.QuerySelector(".account-manage #account-manage-title"));
+            var currentLink = Assert.Single(document.QuerySelectorAll(".account-manage-sidebar a[aria-current='page']"));
+            Assert.Equal(activeLinkId, currentLink.Id);
+            Assert.True(currentLink.ClassList.Contains("active"));
+            Assert.Equal(expectedHref, currentLink.GetAttribute("href"));
+            Assert.NotNull(document.QuerySelector(contentSelector));
+            Assert.NotNull(document.QuerySelector("link[href^='/css/manage-account.css?v=']"));
+            Assert.NotNull(document.QuerySelector("script[src^='/js/manage-account-datatables.js?v=']"));
+            if (page == "DonationHistory" || page == "Subscriptions/Index")
+            {
+                Assert.NotNull(document.QuerySelector("link[href^='/css/account-history.css?v=']"));
+            }
+        }
+
+        /// <summary>
         /// Unconfirmed accounts cannot sign in and see the same generic login error.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

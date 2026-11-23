@@ -17,10 +17,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Tests;
+    using Easypay.Rest.Client.Api;
+    using Easypay.Rest.Client.Model;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Moq;
     using Xunit;
+    using Subscription = BancoAlimentar.AlimentaEstaIdeia.Model.Subscription;
 
     /// <summary>
     /// Tests for <see cref="UpdateSubscriptions"/>.
@@ -87,36 +91,65 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
             };
             donation.DonationItems.First().Donation = donation;
             context.Donations.Add(donation);
+            Guid easypaySubscriptionId = Guid.NewGuid();
+            string transactionKey = Guid.NewGuid().ToString();
             context.Subscriptions.Add(new Subscription
             {
                 Created = DateTime.UtcNow,
                 ExpirationTime = DateTime.UtcNow.AddYears(1),
-                TransactionKey = Guid.NewGuid().ToString(),
-                EasyPaySubscriptionId = Guid.NewGuid().ToString(),
+                TransactionKey = transactionKey,
+                EasyPaySubscriptionId = easypaySubscriptionId.ToString(),
                 Url = "https://example.com/subscription",
                 InitialDonation = donation,
                 Frequency = "1M",
                 PublicId = Guid.NewGuid(),
                 User = user,
                 Status = SubscriptionStatus.Active,
+                SubscriptionType = SubscriptionPaymentType.CC,
             });
             await context.SaveChangesAsync();
 
+            var api = new Mock<ISubscriptionPaymentApi>();
+            api.SetupSequence(client => client.SubscriptionIdGet(It.IsAny<Guid>(), It.IsAny<int>()))
+                .Returns(new SubscriptionIdGet200Response(
+                    id: easypaySubscriptionId,
+                    key: transactionKey,
+                    retries: 0,
+                    failover: false,
+                    method: new SubscriptionIdGet200ResponseMethod(status: SubscriptionIdGet200ResponseMethod.StatusEnum.Active)))
+                .Returns(new SubscriptionIdGet200Response(
+                    id: easypaySubscriptionId,
+                    key: transactionKey,
+                    retries: 3,
+                    failover: false,
+                    method: new SubscriptionIdGet200ResponseMethod(status: SubscriptionIdGet200ResponseMethod.StatusEnum.Active)));
+            api.Setup(client => client.SubscriptionIdPatch(
+                    It.IsAny<Guid>(),
+                    It.IsAny<SubscriptionIdPatchRequest>(),
+                    It.IsAny<int>()))
+                .Returns(new SubscriptionIdPatch200Response(status: "ok"));
             var function = new UpdateSubscriptions(
                 TelemetryConfiguration.CreateDefault(),
-                fixture.ServiceProvider);
+                fixture.ServiceProvider,
+                (_, _) => api.Object);
 
-            var exception = await Record.ExceptionAsync(() => function.ExecuteFunction(unitOfWork, context));
+            await function.ExecuteFunction(unitOfWork, context);
+            await function.ExecuteFunction(unitOfWork, context);
 
-            Assert.Null(exception);
+            api.Verify(
+                client => client.SubscriptionIdPatch(
+                    It.IsAny<Guid>(),
+                    It.Is<SubscriptionIdPatchRequest>(request => request.Retries == 3 && !request.Failover),
+                    It.IsAny<int>()),
+                Times.Once);
         }
 
         /// <summary>
-        /// Repeated execution remains idempotent for the current no-op implementation.
+        /// Repeated execution remains safe when there are no eligible subscriptions.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [Fact]
-        public async Task ExecuteFunction_IsIdempotentAcrossRepeatedRuns()
+        public async Task ExecuteFunction_CompletesWhenNoEligibleSubscriptionsExist()
         {
             var context = this.fixture.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var unitOfWork = this.fixture.ServiceProvider.GetRequiredService<IUnitOfWork>();

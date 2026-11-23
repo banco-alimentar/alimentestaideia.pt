@@ -159,6 +159,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         [InlineData("Site", "/RoleManagement/Roles")]
         [InlineData("Admin", "/RoleManagement/Roles")]
         [InlineData("Admin", "/Admin/ReloadSettings")]
+        [InlineData("Admin", "/Admin/Configuration")]
         public async Task Get_InsufficientRole_RedirectsAuthenticatedUserToAccessDenied(string account, string path)
         {
             await using var application = await BrowserTestApplication.StartAsync();

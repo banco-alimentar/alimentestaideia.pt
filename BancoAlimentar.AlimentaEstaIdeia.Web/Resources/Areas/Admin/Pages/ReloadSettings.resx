@@ -29,7 +29,20 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Description" xml:space="preserve"><value>Esta ação limpa a cache de configuração do tenant e a cache de memória da aplicação.</value></data>
+  <data name="Description" xml:space="preserve"><value>Esta ação publica o recarregamento das definições em todas as instâncias deste ambiente e limpa as caches locais.</value></data>
   <data name="Submit" xml:space="preserve"><value>Recarregar definições</value></data>
   <data name="Title" xml:space="preserve"><value>Recarregar definições de runtime</value></data>
+  <data name="RuntimeStatus" xml:space="preserve"><value>Estado de runtime (esta instância)</value></data>
+  <data name="CacheGeneration" xml:space="preserve"><value>Geração da cache</value></data>
+  <data name="SharedRevision" xml:space="preserve"><value>Revisão partilhada</value></data>
+  <data name="LastRevisionPoll" xml:space="preserve"><value>Última verificação de revisão bem-sucedida</value></data>
+  <data name="Initialization" xml:space="preserve"><value>Inicialização do tenant</value></data>
+  <data name="LastAssetSync" xml:space="preserve"><value>Última atualização de ficheiros bem-sucedida</value></data>
+  <data name="NextAssetSync" xml:space="preserve"><value>Próxima atualização de ficheiros</value></data>
+  <data name="FailureCategory" xml:space="preserve"><value>Categoria da falha</value></data>
+  <data name="Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Configuration" xml:space="preserve"><value>Configuração</value></data>
+  <data name="RetryAt" xml:space="preserve"><value>Nova tentativa (UTC)</value></data>
+  <data name="Ready" xml:space="preserve"><value>Pronto</value></data>
+  <data name="NotReady" xml:space="preserve"><value>Não está pronto</value></data>
 </root>

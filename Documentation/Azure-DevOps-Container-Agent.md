@@ -192,5 +192,7 @@ python3 -m unittest discover -s scripts/ci/tests -p 'agent_container_test.py'
 
 The image build checks installed tool versions and the Chrome/ChromeDriver build
 match. Registration requires a real organization/PAT. Before adopting the pool,
-run only the secret-free standalone Selenium pipeline and confirm browser startup,
-Mailpit readiness, all test results, and per-job cleanup on the dedicated host.
+manually run `developer-debug` on a feature branch so only secret-free validation
+and auditing are included. Confirm browser startup, Mailpit readiness, all test
+results, and per-job cleanup on the dedicated host. Do not select `developer`
+for this check because trusted developer runs can deploy.

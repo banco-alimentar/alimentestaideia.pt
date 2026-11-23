@@ -69,6 +69,7 @@ Runs the **real ASP.NET pipeline** without starting Kestrel manually or opening 
 
 - Uses `CustomWebApplicationFactory` to boot the app with **InMemory DB** (unique database per test host), test tenant config, and seeded data.
 - Disables configuration-file reloads through host configuration before startup builds the default providers, avoiding unnecessary inotify watchers on shared Linux runners. Normal application configuration reloads remain enabled.
+- Sets `DOTNET_USE_POLLING_FILE_WATCHER=true` for the test process, unless already set, before any host starts, so web-root watchers (for example `asp-append-version`) poll instead of opening inotify instances. Without this, per-test hosts leaked about 100 inotify instances in one Integration run, exhausting the agent user's limit of 128.
 - Sends HTTP requests with `HttpClient`; submits forms via **AngleSharp** (same idea as a browser POST, but no JavaScript execution).
 - Can inspect server-side state through DI (`DonationRepository`, `UserManager`, etc.).
 - **Does not** call Easypay/PayPal/SMTP for real — those are stubbed or disabled in config.
@@ -85,12 +86,14 @@ Drives a **real Chrome browser** against either an isolated local application or
 - Local targeting, Mailpit email capture, and separate local/developer run commands are documented in [Local-Email-Tests.md](Local-Email-Tests.md).
 - Clicks through donation, payment method selection, Easypay/PayPal/MBWay/Multibanco UIs.
 - Exercises referral campaign forms, client-side validation, automatic error scrolling, QR-image loading, referral redirects, opening tracking, and admin metrics.
+- Checks donation history at exact desktop, tablet and mobile viewport widths, including contained table scrolling, paid-only summaries, receipt/subscription/payment actions, server-side search, empty accounts and loading failures. These self-contained cases use the `LocalBrowser` category.
+- Checks subscription history at the same viewport widths, including localized states/payment methods, lifecycle dates, details links, chronological sorting, search, counts for the full list and explicit loading failures without fabricated counts.
 - After the flow, queries the selected target's database to confirm persisted records.
 - Developer runs require user secrets or equivalent environment settings. Self-contained local runs generate synthetic accounts and require no SQL or Azure credentials.
 
 **Best for:** Full payment journeys, subscription donation (authenticated), claim-invoice with real invoice generation, regressions that only show up with real JS and payment providers.
 
-**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration. Azure runs the standalone Selenium pipeline for PRs targeting `developer`; local runs remain available through the command below.
+**Trade-offs:** Browser cases take minutes and need Chrome. The self-contained selection is suitable for CI without developer infrastructure or secrets; live developer cases remain environment-dependent and require sandbox configuration. Azure runs the consolidated `developer-debug` pipeline for PRs targeting and pushes to `developer`/`master` with a `.cs` change; local runs remain available through the command below.
 
 ### When to use which
 
@@ -141,12 +144,14 @@ dotnet test BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests\BancoAlimentar
 bash scripts/test-selenium.sh developer
 ```
 
-Azure DevOps [`azure-pipeline-selenium-ui-tests.yml`](../azure-pipeline-selenium-ui-tests.yml)
-runs the solution build and all five test projects for PRs targeting `developer` and on
-manual runs. It also runs offline helpers and self-contained headless Selenium; these browser
+Azure DevOps [`azure-pipelines/developer-debug.yml`](../azure-pipelines/developer-debug.yml)
+runs the Release solution build and all five test projects for PRs targeting and pushes to
+`developer` or `master` with a `.cs` change, and on manual runs. It also runs offline helpers and self-contained headless Selenium; these browser
 cases do not target a deployed slot. The pipeline publishes test results and merged Cobertura
-coverage. Core and developer pipelines reuse the Selenium job before trusted packaging and
-deployment. The shared job also runs pipeline/report-policy regression tests and rejects
+coverage. Only trusted `developer` CI/manual contexts proceed to Debug packaging and developer
+deployment after validation succeeds; `master` never deploys through this pipeline. Weekly
+scheduled runs perform only the dependency audit. Core release packaging is unchanged and
+reuses the Selenium job. The shared job also runs pipeline/report-policy regression tests and rejects
 incomplete or duplicate-name TRXs before publishing the unmodified reports. See
 [the pipeline setup](CI-Azure-DevOps.md#pr-validation-and-trusted-branch-builds).
 
@@ -225,7 +230,9 @@ Bridges repository logic and user-facing pages without hitting dev or real Easyp
 Azure DevOps collects Cobertura reports using `coverlet.runsettings` at the repository root. The settings:
 
 - **Include** only `BancoAlimentar.AlimentaEstaIdeia.*` production assemblies
-- **Exclude** `*.Tests` projects and `*.Integration.Tests`
+- **Exclude** `*.Tests` projects, `*.Integration.Tests`, and `BancoAlimentar.AlimentaEstaIdeia.Web.Views`
+  (compiled `.cshtml` markup; instrumenting it took over 10 minutes per test project on CI, while
+  page models and other Web C# code remain covered through `BancoAlimentar.AlimentaEstaIdeia.Web`)
 - **ExcludeByFile** EF migrations and `*Designer.cs`
 
 Download the **code-coverage** pipeline artifact or inspect the run's Code Coverage tab to review per-assembly numbers without test-project noise. Visual Studio solution-wide totals still mix in Web Razor Pages and migrations unless you filter the report the same way.

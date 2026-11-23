@@ -40,6 +40,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
     /// </summary>
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
+        /// <summary>
+        /// Initializes static members of the <see cref="CustomWebApplicationFactory"/> class.
+        /// </summary>
+        static CustomWebApplicationFactory()
+        {
+            TestFileWatching.UsePolling();
+        }
+
         /// <inheritdoc />
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {

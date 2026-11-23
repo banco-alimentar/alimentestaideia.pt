@@ -6,7 +6,8 @@
         <Configuration>
           <Format>cobertura</Format>
           <Include>[BancoAlimentar.AlimentaEstaIdeia.*]*</Include>
-          <Exclude>[*.Tests]*,[*]*.Integration.Tests*</Exclude>
+          <!-- Instrumenting compiled Razor markup (Web.Views) takes over 10 minutes per test project on CI. -->
+          <Exclude>[*.Tests]*,[*]*.Integration.Tests*,[BancoAlimentar.AlimentaEstaIdeia.Web.Views]*</Exclude>
           <ExcludeByFile>**/Migrations/**,**/*Designer.cs</ExcludeByFile>
           <SingleHit>false</SingleHit>
         </Configuration>

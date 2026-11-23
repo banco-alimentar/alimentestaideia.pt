@@ -43,6 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
         {
             Dictionary<string, string> result = null;
             Model.Tenant tenant = this.httpContext.GetTenant();
+            long generation = this.inMemmoryCacheService.Generation;
             Dictionary<string, string> tenantConfiguration = this.inMemmoryCacheService.GetTenantConfiguration(tenant.Id);
             if (tenantConfiguration != null && tenantConfiguration.Count > 0)
             {
@@ -57,7 +58,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfi
                     result.Add(configuration.Name, configuration.Value);
                 }
 
-                this.inMemmoryCacheService.SetTenantConfiguration(tenant.Id, result);
+                // A reload during the query invalidates this generation; the request still uses its values.
+                this.inMemmoryCacheService.SetTenantConfiguration(tenant.Id, result, generation);
             }
 
 

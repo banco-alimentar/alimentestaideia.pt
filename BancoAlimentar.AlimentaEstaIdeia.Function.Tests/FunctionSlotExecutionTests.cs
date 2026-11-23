@@ -13,6 +13,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Function.Tests
     /// <summary>
     /// Tests for <see cref="FunctionSlotExecution"/>.
     /// </summary>
+    [Collection(WebsiteSlotNameCollection.Name)]
     public class FunctionSlotExecutionTests
     {
         /// <summary>

@@ -2,17 +2,26 @@
 @model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.Subscriptions.IndexModel
 @using System.Text.Json
 @{
-    ViewData["Title"] = "Subscription management";
+    ViewData["Title"] = IdentitySharedLocalizer["Subscriptions"];
     ViewData["ActivePage"] = ManageNavPages.SubscriptionManagement;
     var subscriptionsI18n = new Dictionary<string, object>
     {
         ["details"] = Localizer["Details"].Value,
         ["loading"] = Localizer["LoadingSubscriptions"].Value,
         ["loadFailed"] = Localizer["LoadSubscriptionsFailed"].Value,
+        ["starts"] = Localizer["Starts"].Value,
+        ["ends"] = Localizer["Ends"].Value,
+        ["paymentTypes"] = new Dictionary<string, string>
+        {
+            ["CC"] = IdentitySharedLocalizer["CreditCard"].Value,
+            ["DD"] = Localizer["DirectDebit"].Value,
+        },
         ["statuses"] = new Dictionary<string, string>
         {
             ["Inactive"] = IdentitySharedLocalizer["Inactive"].Value,
             ["Active"] = IdentitySharedLocalizer["Active"].Value,
+            ["Capture"] = Localizer["PendingActivationStatus"].Value,
+            ["Error"] = Localizer["SubscriptionErrorStatus"].Value,
         },
         ["frequencies"] = new Dictionary<string, string>
         {
@@ -31,31 +40,42 @@
     };
 }
 
-<h1>@Localizer["Title"]</h1>
-
-@if (TempData["SubscriptionCancellationStatus"] is string cancellationStatus)
-{
-    var isCancellationFailure = cancellationStatus == "SubscriptionCancellationFailed";
-    <div class="alert @(isCancellationFailure ? "alert-danger" : "alert-success")" role="status">
-        @Localizer[cancellationStatus]
-    </div>
-}
-
 @section Css {
 <environment include="Development">
     <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.css" rel="stylesheet" />
 </environment>
 <environment exclude="Development">
     <link href="~/lib/datatables.net-bs4/dataTables.bootstrap4.min.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-buttons-bs4/buttons.bootstrap4.min.css" rel="stylesheet" />
-    <link href="~/lib/datatables.net-responsive-bs4/responsive.bootstrap4.min.css" rel="stylesheet" />
 </environment>
+    <link href="~/css/account-history.css" rel="stylesheet" asp-append-version="true" />
 }
 
-<div class="container">
-    <br />
+<section class="subscription-history account-history" aria-labelledby="subscriptions-title">
+    <h3 id="subscriptions-title">@IdentitySharedLocalizer["Subscriptions"]</h3>
+    <p class="text-muted">@Localizer["Title"]</p>
+
+    @if (TempData["SubscriptionCancellationStatus"] is string cancellationStatus)
+    {
+        var isCancellationFailure = cancellationStatus == "SubscriptionCancellationFailed";
+        <div class="alert @(isCancellationFailure ? "alert-danger" : "alert-success")" role="status">
+            @Localizer[cancellationStatus]
+        </div>
+    }
+
+    <dl id="subscriptions-summary" class="account-history-summary d-none">
+        <div class="account-history-stat account-history-stat-total">
+            <dt>@Localizer["TotalSubscriptions"]</dt>
+            <dd id="subscriptions-total-count"></dd>
+        </div>
+        <div class="account-history-stat">
+            <dt>@IdentitySharedLocalizer["Active"]</dt>
+            <dd id="subscriptions-active-count"></dd>
+        </div>
+        <div class="account-history-stat">
+            <dt>@IdentitySharedLocalizer["Inactive"]</dt>
+            <dd id="subscriptions-inactive-count"></dd>
+        </div>
+    </dl>
 
     <script type="application/json" id="subscriptions-i18n">@Html.Raw(JsonSerializer.Serialize(subscriptionsI18n))</script>
 
@@ -65,21 +85,20 @@
     </div>
     <div id="subscriptions-load-error" class="alert alert-danger d-none" role="alert"></div>
 
-    <table id="subscriptions" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0"
+    <div class="account-history-panel">
+    <table id="subscriptions" class="table table-hover account-history-table" aria-labelledby="subscriptions-title"
            data-culture="@System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName.ToUpperInvariant()" aria-busy="true">
         <thead>
             <tr>
-                <th>#</th>
-                <th>@Localizer["Created"]</th>
-                <th>@Localizer["ExpirationTime"]</th>
-                <th>@Localizer["StartTime"]</th>
-                <th>@Localizer["SubscriptionType"]</th>
-                <th>@Localizer["Status"]</th>
-                <th>@Localizer["Frequency"]</th>
-                <th>@Localizer["DonationAmount"]</th>
-                <th>@Localizer["PaymentStatus"]</th>
-                <th></th>
+                <th scope="col">#</th>
+                <th scope="col">@Localizer["Created"]</th>
+                <th scope="col">@Localizer["Frequency"]</th>
+                <th scope="col">@Localizer["DonationAmount"]</th>
+                <th scope="col">@Localizer["SubscriptionType"]</th>
+                <th scope="col">@Localizer["Status"]</th>
+                <th scope="col">@Localizer["Details"]</th>
             </tr>
         </thead>
     </table>
-</div>
+    </div>
+</section>

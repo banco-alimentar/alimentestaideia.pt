@@ -11,6 +11,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
     using BancoAlimentar.AlimentaEstaIdeia.Testing.Common;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
@@ -20,10 +21,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
     using Microsoft.ApplicationInsights;
     using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
+    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.AspNetCore.Routing.Matching;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.FileProviders;
     using Xunit;
     using Xunit.Abstractions;
 
@@ -91,6 +94,40 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 
                 throw new InvalidOperationException(body);
             }
+        }
+
+        /// <summary>
+        /// Keeps localized food names paired with their donated totals and catalogue units.
+        /// </summary>
+        /// <param name="culture">Requested page culture.</param>
+        /// <param name="oliveOilName">Expected localized name of the first food.</param>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [Theory]
+        [InlineData("en", "Olive oil")]
+        [InlineData("es", "Aceite de oliva")]
+        [InlineData("pt", "Azeite")]
+        public async Task Get_HomePairsLocalizedFoodsWithDonationTotals(string culture, string oliveOilName)
+        {
+            using var response = await this.client.GetAsync($"/?culture={culture}&ui-culture={culture}");
+            response.EnsureSuccessStatusCode();
+            var document = await HtmlHelpers.GetDocumentAsync(response);
+            var rows = document.QuerySelectorAll(".home-food-list > .home-food-item");
+
+            using var scope = this.factory.Services.CreateScope();
+            var repository = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            var products = repository.ProductCatalogue.GetCurrentProductCatalogue().ProductCatalogues;
+            var totals = repository.Donation.GetTotalDonations(products);
+            Assert.Equal(products.Count, rows.Length);
+            Assert.Equal(oliveOilName, rows[0].QuerySelector("dt span").TextContent);
+            for (int index = 0; index < rows.Length; index++)
+            {
+                Assert.NotNull(rows[index].QuerySelector("dt img[alt='']"));
+                Assert.Equal(totals[index].Total.ToString("00000"), rows[index].QuerySelector("dd .home-food-total").TextContent);
+                Assert.Equal(products[index].UnitOfMeasure, rows[index].QuerySelector("dd small").TextContent);
+            }
+
+            Assert.NotNull(document.QuerySelector(".home-intro a[href='/Donation']"));
+            Assert.NotNull(document.QuerySelector(".home-intro a[href='/Identity/Account/Login?donate=true']"));
         }
 
         /// <summary>
@@ -182,6 +219,23 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
                     Assert.All(fileSources, source => Assert.False(source.ReloadOnChange));
                 }));
             using var customizedClient = customizedFactory.CreateClient();
+        }
+
+        /// <summary>
+        /// Checks that test hosts poll their web root instead of allocating Linux inotify instances.
+        /// </summary>
+        [Fact]
+        public void WebRoot_UsesPollingFileWatcherForTestHosts()
+        {
+            // UsePollingFileWatcher reports false after a provider starts watching, so inspect a host that has served no requests.
+            using var freshFactory = this.factory.WithWebHostBuilder(_ => { });
+            IFileProvider webRoot = freshFactory.Services.GetRequiredService<IWebHostEnvironment>().WebRootFileProvider;
+            PhysicalFileProvider[] physicalProviders = (webRoot is CompositeFileProvider composite ? composite.FileProviders : new[] { webRoot })
+                .OfType<PhysicalFileProvider>()
+                .ToArray();
+
+            Assert.NotEmpty(physicalProviders);
+            Assert.All(physicalProviders, provider => Assert.True(provider.UsePollingFileWatcher));
         }
 
         /// <summary>

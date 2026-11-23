@@ -7,89 +7,44 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
-    using System.Threading.RateLimiting;
     using System.Threading.Tasks;
     using Azure.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Common.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
-    using BancoAlimentar.AlimentaEstaIdeia.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Reporting;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.SiteHealth;
     using BancoAlimentar.AlimentaEstaIdeia.Repository.Validation;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.ApplicationInsight;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Authentication;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider.TenantConfiguration.Options;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.HostedServices;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Layout;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Middleware;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.StaticFileProvider;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Model.Strategy;
-    using BancoAlimentar.AlimentaEstaIdeia.Sas.Repository;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.FunctionExecutionReports;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Extensions;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Features;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.JsonConverter;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Tenants;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Donations;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Services.FunctionExecutionReports;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Services.Invoices;
     using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api;
-    using BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Filtering;
-    using Microsoft.ApplicationInsights.AspNetCore.Extensions;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Cookies;
-    using Microsoft.AspNetCore.Authentication.Facebook;
-    using Microsoft.AspNetCore.Authentication.Google;
-    using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
-    using Microsoft.AspNetCore.Authentication.Twitter;
-    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Features;
     using Microsoft.AspNetCore.HttpOverrides;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.UI.Services;
     using Microsoft.AspNetCore.Localization;
-    using Microsoft.AspNetCore.Mvc.ApplicationModels;
-    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.AspNetCore.Mvc.Razor;
     using Microsoft.AspNetCore.Mvc.ViewFeatures;
-    using Microsoft.AspNetCore.RateLimiting;
-    using Microsoft.AspNetCore.Routing;
-    using Microsoft.AspNetCore.Routing.Matching;
-    using Microsoft.AspNetCore.StaticFiles;
-    using Microsoft.AspNetCore.StaticFiles.Infrastructure;
-    using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
     using Microsoft.FeatureManagement;
     using Microsoft.FeatureManagement.FeatureFilters;
-    using Newtonsoft.Json;
-    using NuGet.Packaging.Signing;
     using StackExchange.Profiling.Storage;
 
     /// <summary>
@@ -335,8 +290,10 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             IWebHostEnvironment environment,
             IHttpContextAccessor httpContextAccessor)
         {
+            var physicalFileProvider = new PhysicalFileProvider(environment.WebRootPath);
+            app.ApplicationServices.GetRequiredService<IHostApplicationLifetime>().ApplicationStopped.Register(physicalFileProvider.Dispose);
             TenantStaticFileProvider tenantStaticFileProvider = new TenantStaticFileProvider(
-                new PhysicalFileProvider(environment.WebRootPath),
+                physicalFileProvider,
                 httpContextAccessor);
             app.UseStaticFiles(new StaticFileOptions
             {

@@ -29,7 +29,20 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Description" xml:space="preserve"><value>Cette action efface le cache de configuration du tenant et le cache mémoire de l&apos;application.</value></data>
+  <data name="Description" xml:space="preserve"><value>Cette action publie le rechargement des paramètres sur toutes les instances de cet environnement et efface les caches locaux.</value></data>
   <data name="Submit" xml:space="preserve"><value>Recharger les paramètres</value></data>
   <data name="Title" xml:space="preserve"><value>Recharger les paramètres runtime</value></data>
+  <data name="RuntimeStatus" xml:space="preserve"><value>État de runtime (cette instance)</value></data>
+  <data name="CacheGeneration" xml:space="preserve"><value>Génération du cache</value></data>
+  <data name="SharedRevision" xml:space="preserve"><value>Révision partagée</value></data>
+  <data name="LastRevisionPoll" xml:space="preserve"><value>Dernière vérification de révision réussie</value></data>
+  <data name="Initialization" xml:space="preserve"><value>Initialisation du tenant</value></data>
+  <data name="LastAssetSync" xml:space="preserve"><value>Dernière actualisation des fichiers réussie</value></data>
+  <data name="NextAssetSync" xml:space="preserve"><value>Prochaine actualisation des fichiers</value></data>
+  <data name="FailureCategory" xml:space="preserve"><value>Catégorie d&apos;échec</value></data>
+  <data name="Tenant" xml:space="preserve"><value>Tenant</value></data>
+  <data name="Configuration" xml:space="preserve"><value>Configuration</value></data>
+  <data name="RetryAt" xml:space="preserve"><value>Nouvelle tentative (UTC)</value></data>
+  <data name="Ready" xml:space="preserve"><value>Prêt</value></data>
+  <data name="NotReady" xml:space="preserve"><value>Pas prêt</value></data>
 </root>
