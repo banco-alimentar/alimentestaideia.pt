@@ -2,8 +2,12 @@
 @model AngolaModel
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<HeaderResources> HeaderLocalizer
+@inject BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext HomepageImageDbContext
+@using Microsoft.EntityFrameworkCore
 @{
     ViewData["Title"] = "Home page Angola";
+    var currentImageVersion = await HomepageImageDbContext.HomepageImageVersions.AsNoTracking().Where(image => image.IsCurrent).Select(image => image.Id).FirstOrDefaultAsync();
+    var homepageImageUrl = Url.Content("~/img/comida.png") + (currentImageVersion > 0 ? $"?v={currentImageVersion}" : string.Empty);
 }
 
 
@@ -28,8 +32,8 @@
             </a>
         </div>
 
-        <div class="column2">
-            <img class="mobileOnly imageComida" src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
+        <div class="column2" style="background-image: url('@homepageImageUrl')">
+            <img class="mobileOnly imageComida" src="@homepageImageUrl" alt='@Localizer["Comida"]' />
         </div>
 
         <div class="column3">

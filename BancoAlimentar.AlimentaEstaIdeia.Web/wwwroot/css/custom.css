@@ -600,7 +600,9 @@ button.close2 {
     width: 52%;
     height: 34vw;
     max-height: 900px;
-    background: url(../img/comida.png) center bottom no-repeat transparent;
+    background-color: transparent;
+    background-position: center bottom;
+    background-repeat: no-repeat;
     background-size: 100% auto;
 }
 

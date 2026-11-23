@@ -479,4 +479,29 @@
   <data name="NoReferralDonations" xml:space="preserve"><value>No donations were found for this referral.</value></data>
   <data name="DonationsPagination" xml:space="preserve"><value>Donations pagination</value></data>
   <data name="BackToActiveReferrals" xml:space="preserve"><value>Back to active referrals</value></data>
+  <data name="NextCampaignTitle" xml:space="preserve"><value>Next campaign</value></data>
+  <data name="NoNextCampaign" xml:space="preserve"><value>No next campaign is defined.</value></data>
+  <data name="Starts" xml:space="preserve"><value>Starts</value></data>
+  <data name="TimeUntilCampaignStarts" xml:space="preserve"><value>Time until it starts</value></data>
+  <data name="HomepageImageTitle" xml:space="preserve"><value>Homepage central image</value></data>
+  <data name="HomepageImageDescription" xml:space="preserve"><value>Upload a new image or restore any previous version. The current image changes immediately.</value></data>
+  <data name="HomepageImageUploaded" xml:space="preserve"><value>The image was uploaded and is now in use.</value></data>
+  <data name="HomepageImageRestored" xml:space="preserve"><value>The selected version is now in use.</value></data>
+  <data name="HomepageImageUploadLabel" xml:space="preserve"><value>Choose image</value></data>
+  <data name="HomepageImageUploadHelp" xml:space="preserve"><value>Accepted formats: PNG, JPEG, and WebP. Maximum size: 10 MB.</value></data>
+  <data name="HomepageImageUploadButton" xml:space="preserve"><value>Upload image</value></data>
+  <data name="HomepageImageNoHistory" xml:space="preserve"><value>No images have been uploaded. The default image is still in use.</value></data>
+  <data name="HomepageImagePreview" xml:space="preserve"><value>Preview</value></data>
+  <data name="HomepageImageUploadedAt" xml:space="preserve"><value>Upload date</value></data>
+  <data name="HomepageImageUploadedBy" xml:space="preserve"><value>Uploaded by</value></data>
+  <data name="HomepageImageStatus" xml:space="preserve"><value>Status</value></data>
+  <data name="HomepageImageCurrent" xml:space="preserve"><value>Current</value></data>
+  <data name="HomepageImagePrevious" xml:space="preserve"><value>Previous</value></data>
+  <data name="HomepageImageRestore" xml:space="preserve"><value>Restore</value></data>
+  <data name="CountdownDays" xml:space="preserve"><value>d</value></data>
+  <data name="CountdownHours" xml:space="preserve"><value>h</value></data>
+  <data name="CountdownMinutes" xml:space="preserve"><value>m</value></data>
+  <data name="CountdownSeconds" xml:space="preserve"><value>s</value></data>
+  <data name="HomepageImageUploadInvalidSize" xml:space="preserve"><value>The image must be between 1 byte and 10 MB.</value></data>
+  <data name="HomepageImageUploadInvalidType" xml:space="preserve"><value>Upload a valid PNG, JPEG, or WebP image.</value></data>
 </root>
