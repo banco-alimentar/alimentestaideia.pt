@@ -2,8 +2,12 @@
 @model IndexModel
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<HeaderResources> HeaderLocalizer
+@inject BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext HomepageImageDbContext
+@using Microsoft.EntityFrameworkCore
 @{
     ViewData["Title"] = "Home page";
+    var currentImageVersion = await HomepageImageDbContext.HomepageImageVersions.AsNoTracking().Where(image => image.IsCurrent).Select(image => image.Id).FirstOrDefaultAsync();
+    var homepageImageUrl = Url.Content("~/img/comida.png") + (currentImageVersion > 0 ? $"?v={currentImageVersion}" : string.Empty);
 }
 
 
@@ -27,7 +31,7 @@
         </div>
 
         <div class="home-food-image">
-            <img src='@Url.Content("~/img/comida.png")' alt='@Localizer["Comida"]' />
+            <img src="@homepageImageUrl" alt='@Localizer["Comida"]' />
         </div>
 
         <section class="home-food-summary" aria-labelledby="home-food-title">

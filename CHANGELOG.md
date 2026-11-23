@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- Aligned the centrally managed Hosting and related Microsoft.Extensions packages with [Microsoft.AspNetCore.Mvc.Testing](Directory.Packages.props).
+  - **Context:** `dotnet test` restore failed with NU1109 because `Microsoft.AspNetCore.Mvc.Testing` 10.0.15 requires Hosting 10.0.15, while central package management pinned Hosting and Hosting.Abstractions to 10.0.14.
+  - **Options considered:** Downgrade the test host package or update the centrally pinned Hosting package family to the required patch version.
+  - **Decision:** Update Hosting, Hosting.Abstractions, and the centrally pinned packages they depend on to 10.0.15 to match the selected ASP.NET Core test host package.
+  - **Rollout:** Restore packages and rerun tests. No deployment or data migration is required.
+
+### Added
+- Added next-campaign countdown and homepage image version management to the [campaign admin page](BancoAlimentar.AlimentaEstaIdeia.Web/Areas/Admin/Pages/Campaigns/Index.cshtml), with image audit metadata in [HomepageImageVersion](BancoAlimentar.AlimentaEstaIdeia.Model/HomepageImageVersion.cs) and its [migration](BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/20261123130000_HomepageImageVersions.cs).
+  - **Context:** Admins need to see the next campaign start and manage the site's central homepage image while retaining upload history and attribution.
+  - **Options considered:** Overwrite `wwwroot/img/comida.png`, retain versioned server files and select one in the database, or store image bytes in the database.
+  - **Decision:** Retain immutable generated image files under persistent server storage and keep uploader, UTC upload time, and selected version in SQL. Serve the existing `/img/comida.png` path from the selected file with no-cache headers; keep the deployed static image as fallback. This preserves old images and changes what the existing homepage URL returns immediately.
+  - **Rollout:** Apply the `HomepageImageVersions` migration before deploying the app. Ensure the App Service identity can write to its persistent `HOME/data/homepage-images` directory, or set `HomepageImages:StoragePath` to another persistent writable directory. No images are seeded; the existing static image remains active until the first upload.
+
 ### Fixed
 - Fixed the [homepage](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Index.cshtml) donated-food list with [scoped responsive styles](BancoAlimentar.AlimentaEstaIdeia.Web/wwwroot/css/customIndex.css).
   - **Context:** Separate floated name and quantity columns, fixed row heights, and a narrow desktop sidebar caused translated food names and totals to overlap or fall onto separate lines.
@@ -37,6 +51,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Options considered:** Infer failure from an unsigned callback and zero-paid provider values, add callback authentication requiring provider configuration, or reject failures until authenticated or terminal provider evidence is available. For delivery, acknowledge all existing claims or distinguish sent from unsent claims.
   - **Decision:** Reject unsupported failed subscription callbacks with `subscription_terminal_failure_not_verified`, reuse existing donation links, protect paid/confirmed initial donations before creating a payment, and return `503` for unsent delivery claims. Count expiration from the loaded local records and mark any incomplete provider audit `Failed` or `Partial`, retaining all collected rows. Existing explicit single-payment failure verification and failure-recorded email gating are covered by regression tests.
   - **Rollout:** No migration or data rewrite. Failed subscription callbacks return `403` without changing donations or sending alerts until authenticated or terminal provider evidence is implemented. Review existing duplicate history links separately rather than deleting them automatically. Azure Functions review changes are deferred.
+- Prevented the current image selection from violating the unique filtered index during upload or restore in the [campaign admin handler](BancoAlimentar.AlimentaEstaIdeia.Web/Areas/Admin/Pages/Campaigns/Index.cshtml.cs).
+  - **Context:** Restoring a previous image raised a SQL Server duplicate-key error because EF attempted to mark it current before updating the existing current row. The SQL Server retry strategy also rejected a user-started transaction outside its execution strategy.
+  - **Options considered:** Remove the unique index, replace it with a weaker invariant, or update the selection in two ordered writes inside a serializable transaction executed through the provider's retry strategy.
+  - **Decision:** Keep the unique index and atomically clear the previous selection before setting the new selection. Run the transaction through the SQL Server execution strategy and make retries idempotent, preserving the one-current-image guarantee.
+  - **Rollout:** Deploy the application code. No migration or manual data change is required.
+- Prevented concurrent Selenium jobs from competing for Mailpit's loopback ports in the [Compose definition](compose.mailpit.yml) and [shared job](azure-pipelines/templates/selenium-job.yml), with [regression tests](scripts/ci/tests/pipeline_safety_test.rb) and [operating guidance](Documentation/CI-Azure-DevOps.md#pr-validation-selenium-and-dependency-audit).
+  - **Context:** Multiple container agents share the Docker host. Run 2710 failed to start its isolated Mailpit project because `127.0.0.1:1025` was already allocated; distinct Compose project names do not isolate host ports.
+  - **Options considered:** Serialize Selenium jobs, assign static ports per agent, or let Docker allocate free loopback ports for each job.
+  - **Decision:** Request ephemeral SMTP and HTTP host ports in CI, validate the discovered loopback bindings, and use the exact endpoints for readiness checks and browser tests. Retain ports 1025/8025 for ordinary local Compose runs and keep per-project cleanup on all outcomes. Never stop another job's catcher or prune shared Docker data.
+  - **Rollout:** Merge the Compose/template changes and manually rerun the test-only PR pipeline because YAML/Compose-only changes do not match the C# trigger filters. No agent image rebuild or restart is required. Remove any abandoned older Compose project only after confirming its job has stopped.
+- Fixed the container agent's `env.sh: line 34: !checkVar: unbound variable` startup failure in the [entrypoint](docker/azure-devops-agent/start.sh), with [regression tests](scripts/ci/tests/agent_container_test.py) and [troubleshooting guidance](Documentation/Azure-DevOps-Container-Agent.md#startup-troubleshooting).
+  - **Context:** The entrypoint sourced the downloaded agent's environment script with `set -u`, but that script reads optional unset environment variables.
+  - **Options considered:** Disable strict mode for the entire entrypoint, modify the downloaded agent script, or disable only `nounset` while sourcing it.
+  - **Decision:** Temporarily disable `nounset` around the source command, then restore it before registration. Keep `errexit` and `pipefail` enabled so environment setup failures still stop startup. Registration and cleanup behavior are unchanged.
+  - **Rollout:** Rebuild/publish the image, pull the new image on the agent host, and recreate the container with its existing options and PAT mount. Restarting the old container is insufficient.
+- Prevent integration-test configuration loading from exhausting Linux inotify instances in [CustomWebApplicationFactory.cs](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/CustomWebApplicationFactory.cs) and release the temporary startup configuration in [Program.cs](BancoAlimentar.AlimentaEstaIdeia.Web/Program.cs).
+  - **Context:** PR #904 checks failed in `FileSystemWatcher.StartRaisingEvents` while constructing integration-test hosts on a shared Linux runner with an inotify instance limit of 128.
+  - **Options considered:** Raise the runner's shared limits, use polling, or stop allocating configuration watchers that tests do not need and dispose the startup snapshot.
+  - **Decision:** Disable configuration reloads in test host configuration before the default providers are created, including customized factories. Dispose the temporary startup configuration and remove an unused extra build; normal application reload behavior is unchanged.
+  - **Rollout:** Rerun the checks. No runner configuration, deployment settings, or data changes are required.
 
 ### Added
 - Added resilient tenant runtime maintenance, shared invalidation, and secret-free SuperAdmin diagnostics. See [runtime options](BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider/TenantRuntimeOptions.cs), [revision coordination](BancoAlimentar.AlimentaEstaIdeia.Sas.ConfigurationProvider/RuntimeCacheInvalidationService.cs), [asset refresh](BancoAlimentar.AlimentaEstaIdeia.Sas.Core/HostedServices/TenantStaticSyncHostedService.cs), and [two-tenant HTTP tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/IntegrationTests/TwoTenantHttpIsolationTests.cs).

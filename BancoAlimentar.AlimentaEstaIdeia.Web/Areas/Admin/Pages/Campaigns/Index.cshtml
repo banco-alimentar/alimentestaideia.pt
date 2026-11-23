@@ -7,6 +7,38 @@
 
 <h1>@AdminSharedLocalizer["Index"]</h1>
 
+<section class="card mb-4" aria-labelledby="next-campaign-heading">
+    <div class="card-body">
+        <h2 id="next-campaign-heading" class="h4">@AdminSharedLocalizer["NextCampaignTitle"]</h2>
+        @if (Model.NextCampaign == null)
+        {
+            <p class="mb-0">@AdminSharedLocalizer["NoNextCampaign"]</p>
+        }
+        else
+        {
+            var initialRemainingSeconds = Math.Max(0, (int)(Model.NextCampaign.Start - DateTime.Now).TotalSeconds);
+            var initialDays = initialRemainingSeconds / 86400;
+            var initialHours = (initialRemainingSeconds % 86400) / 3600;
+            var initialMinutes = (initialRemainingSeconds % 3600) / 60;
+            var initialSeconds = initialRemainingSeconds % 60;
+            <p>
+                <strong>@Model.NextCampaign.Number</strong>
+                <span>— @AdminSharedLocalizer["Starts"] @Model.NextCampaign.Start.ToString("g")</span>
+            </p>
+            <p class="mb-0">
+                @AdminSharedLocalizer["TimeUntilCampaignStarts"]:
+                <time id="campaign-countdown"
+                      data-remaining-ms="@(initialRemainingSeconds * 1000)"
+                      data-days="@(AdminSharedLocalizer["CountdownDays"].Value)"
+                      data-hours="@(AdminSharedLocalizer["CountdownHours"].Value)"
+                      data-minutes="@(AdminSharedLocalizer["CountdownMinutes"].Value)"
+                      data-seconds="@(AdminSharedLocalizer["CountdownSeconds"].Value)"
+                      aria-live="polite">@initialDays@AdminSharedLocalizer["CountdownDays"] @initialHours@AdminSharedLocalizer["CountdownHours"] @initialMinutes@AdminSharedLocalizer["CountdownMinutes"] @initialSeconds@AdminSharedLocalizer["CountdownSeconds"]</time>
+            </p>
+        }
+    </div>
+</section>
+
 <p>
     <a asp-page="Create">@AdminSharedLocalizer["CreateNew"]</a>
 </p>
@@ -63,3 +95,98 @@
         }
     </tbody>
 </table>
+
+<section class="mt-5" aria-labelledby="homepage-image-heading">
+    <h2 id="homepage-image-heading">@AdminSharedLocalizer["HomepageImageTitle"]</h2>
+    <p>@AdminSharedLocalizer["HomepageImageDescription"]</p>
+
+    @if (TempData["HomepageImageStatus"]?.ToString() == "Uploaded")
+    {
+        <div class="alert alert-success" role="status">@AdminSharedLocalizer["HomepageImageUploaded"]</div>
+    }
+    else if (TempData["HomepageImageStatus"]?.ToString() == "Restored")
+    {
+        <div class="alert alert-success" role="status">@AdminSharedLocalizer["HomepageImageRestored"]</div>
+    }
+
+    <form method="post" asp-page-handler="Upload" enctype="multipart/form-data" class="mb-4">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <label asp-for="UploadedImage" class="form-label">@AdminSharedLocalizer["HomepageImageUploadLabel"]</label>
+        <input asp-for="UploadedImage" type="file" class="form-control" accept="image/png,image/jpeg,image/webp" required />
+        <span asp-validation-for="UploadedImage" class="text-danger"></span>
+        <div class="form-text">@AdminSharedLocalizer["HomepageImageUploadHelp"]</div>
+        <button type="submit" class="btn btn-primary mt-2">@AdminSharedLocalizer["HomepageImageUploadButton"]</button>
+    </form>
+
+    @if (Model.ImageVersions.Count == 0)
+    {
+        <p class="text-muted">@AdminSharedLocalizer["HomepageImageNoHistory"]</p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">@AdminSharedLocalizer["HomepageImagePreview"]</th>
+                        <th scope="col">@AdminSharedLocalizer["HomepageImageUploadedAt"]</th>
+                        <th scope="col">@AdminSharedLocalizer["HomepageImageUploadedBy"]</th>
+                        <th scope="col">@AdminSharedLocalizer["HomepageImageStatus"]</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var image in Model.ImageVersions)
+                {
+                    <tr>
+                        <td>
+                            <img src="@Url.Page("./Index", "Image", new { id = image.Id })" alt="@AdminSharedLocalizer["HomepageImagePreview"]" style="max-width: 180px; max-height: 100px; object-fit: contain" />
+                        </td>
+                        <td><time datetime="@image.UploadedAtUtc.ToString("O")">@image.UploadedAtUtc.ToLocalTime().ToString("g")</time></td>
+                        <td>@image.UploadedByName</td>
+                        <td>
+                            @if (image.IsCurrent)
+                            {
+                                <span class="badge bg-success">@AdminSharedLocalizer["HomepageImageCurrent"]</span>
+                            }
+                            else
+                            {
+                                <span>@AdminSharedLocalizer["HomepageImagePrevious"]</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!image.IsCurrent)
+                            {
+                                <form method="post" asp-page-handler="Restore">
+                                    <input type="hidden" name="id" value="@image.Id" />
+                                    <button type="submit" class="btn btn-outline-primary">@AdminSharedLocalizer["HomepageImageRestore"]</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+</section>
+
+@if (Model.NextCampaign != null)
+{
+    <script>
+        (() => {
+            const countdown = document.getElementById("campaign-countdown");
+            const start = Date.now() + Number(countdown.dataset.remainingMs);
+            const render = () => {
+                const remaining = Math.max(0, start - Date.now());
+                const days = Math.floor(remaining / 86400000);
+                const hours = Math.floor((remaining % 86400000) / 3600000);
+                const minutes = Math.floor((remaining % 3600000) / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                countdown.textContent = `${days}${countdown.dataset.days} ${hours}${countdown.dataset.hours} ${minutes}${countdown.dataset.minutes} ${seconds}${countdown.dataset.seconds}`;
+            };
+            render();
+            window.setInterval(render, 1000);
+        })();
+    </script>
+}

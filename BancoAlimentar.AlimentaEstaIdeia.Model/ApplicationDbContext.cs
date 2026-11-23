@@ -131,6 +131,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
         public DbSet<EmailCommunication> EmailCommunications { get; set; }
 
         /// <summary>
+        /// Gets or sets the uploaded homepage image versions.
+        /// </summary>
+        public DbSet<HomepageImageVersion> HomepageImageVersions { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DbSet{TEntity}"/> for the <see cref="Configuration"/>.
         /// </summary>
         public DbSet<Configuration> Configurations { get; set; }
@@ -209,6 +214,18 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .WithMany()
                     .HasForeignKey(item => item.PaymentId)
                     .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<HomepageImageVersion>(entity =>
+            {
+                entity.Property(image => image.FileName).HasMaxLength(128).IsRequired();
+                entity.Property(image => image.ContentType).HasMaxLength(64).IsRequired();
+                entity.Property(image => image.UploadedByUserId).HasMaxLength(450).IsRequired();
+                entity.Property(image => image.UploadedByName).HasMaxLength(256).IsRequired();
+                entity.HasIndex(image => image.IsCurrent)
+                    .IsUnique()
+                    .HasFilter("[IsCurrent] = 1");
+                entity.HasIndex(image => image.UploadedAtUtc);
             });
 
             modelBuilder.Entity<WebUser>(b =>

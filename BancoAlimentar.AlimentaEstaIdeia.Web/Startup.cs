@@ -87,6 +87,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             services.AddScoped<FunctionExecutionReportOptions>(serviceProvider =>
                 FunctionExecutionReportConfiguration.Create(serviceProvider.GetRequiredService<IConfiguration>()));
             services.AddScoped<IFunctionExecutionReportReader, ConfiguredFunctionExecutionReportReader>();
+            services.AddScoped<HomepageImageStorage>();
             services.AddScoped<FunctionExecutionReportQueryService>();
             services.AddScoped<FunctionExecutionCommandsOptions>(serviceProvider =>
             {
@@ -174,6 +175,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web
             app.Use(BlockSuspiciousRequestsAsync);
             app.Use(RewriteReportPathsAsync);
             app.UseDoarMultitenancy();
+            app.UseMiddleware<HomepageImageMiddleware>();
             ConfigureStaticFiles(app, env, httpContextAccessor);
             app.UseRouting();
             app.UseCors(azureWebSiteOrigin);

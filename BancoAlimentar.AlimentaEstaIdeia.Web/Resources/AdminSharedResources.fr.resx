@@ -477,4 +477,29 @@
   <data name="NoReferralDonations" xml:space="preserve"><value>Aucun don n&apos;a été trouvé pour ce parrainage.</value></data>
   <data name="DonationsPagination" xml:space="preserve"><value>Pagination des dons</value></data>
   <data name="BackToActiveReferrals" xml:space="preserve"><value>Retour aux parrainages actifs</value></data>
+  <data name="NextCampaignTitle" xml:space="preserve"><value>Prochaine campagne</value></data>
+  <data name="NoNextCampaign" xml:space="preserve"><value>Aucune prochaine campagne n’est définie.</value></data>
+  <data name="Starts" xml:space="preserve"><value>Commence</value></data>
+  <data name="TimeUntilCampaignStarts" xml:space="preserve"><value>Temps restant avant le début</value></data>
+  <data name="HomepageImageTitle" xml:space="preserve"><value>Image centrale de la page d’accueil</value></data>
+  <data name="HomepageImageDescription" xml:space="preserve"><value>Téléversez une nouvelle image ou restaurez une version précédente. L’image actuelle change immédiatement.</value></data>
+  <data name="HomepageImageUploaded" xml:space="preserve"><value>L’image a été téléversée et est maintenant utilisée.</value></data>
+  <data name="HomepageImageRestored" xml:space="preserve"><value>La version sélectionnée est maintenant utilisée.</value></data>
+  <data name="HomepageImageUploadLabel" xml:space="preserve"><value>Choisir une image</value></data>
+  <data name="HomepageImageUploadHelp" xml:space="preserve"><value>Formats acceptés : PNG, JPEG et WebP. Taille maximale : 10 Mo.</value></data>
+  <data name="HomepageImageUploadButton" xml:space="preserve"><value>Téléverser l’image</value></data>
+  <data name="HomepageImageNoHistory" xml:space="preserve"><value>Aucune image n’a été téléversée. L’image par défaut est toujours utilisée.</value></data>
+  <data name="HomepageImagePreview" xml:space="preserve"><value>Aperçu</value></data>
+  <data name="HomepageImageUploadedAt" xml:space="preserve"><value>Date de téléversement</value></data>
+  <data name="HomepageImageUploadedBy" xml:space="preserve"><value>Téléversée par</value></data>
+  <data name="HomepageImageStatus" xml:space="preserve"><value>État</value></data>
+  <data name="HomepageImageCurrent" xml:space="preserve"><value>Actuelle</value></data>
+  <data name="HomepageImagePrevious" xml:space="preserve"><value>Précédente</value></data>
+  <data name="HomepageImageRestore" xml:space="preserve"><value>Restaurer</value></data>
+  <data name="CountdownDays" xml:space="preserve"><value>j</value></data>
+  <data name="CountdownHours" xml:space="preserve"><value>h</value></data>
+  <data name="CountdownMinutes" xml:space="preserve"><value>min</value></data>
+  <data name="CountdownSeconds" xml:space="preserve"><value>s</value></data>
+  <data name="HomepageImageUploadInvalidSize" xml:space="preserve"><value>L’image doit peser entre 1 octet et 10 Mo.</value></data>
+  <data name="HomepageImageUploadInvalidType" xml:space="preserve"><value>Téléversez une image PNG, JPEG ou WebP valide.</value></data>
 </root>
