@@ -304,4 +304,7 @@ by credit card.</value>
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Multibanco payment</value>
   </data>
+  <data name="MBWayPhoneInvalid" xml:space="preserve">
+    <value>Enter a valid Portuguese mobile number with 9 digits, starting with 9.</value>
+  </data>
 </root>
