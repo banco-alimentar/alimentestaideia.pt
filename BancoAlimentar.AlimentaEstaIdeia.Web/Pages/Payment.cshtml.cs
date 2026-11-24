@@ -265,32 +265,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return RedirectToPage("./Payment", new { Donation.PublicId, paymentMbwayError = MBWayError });
         }
 
-        private static string NormalizePortuguesePhoneNumber(string? phoneNumber)
-        {
-            string normalized = new string((phoneNumber ?? string.Empty)
-                .Trim()
-                .Where(character => !char.IsWhiteSpace(character) && character != '-' && character != '(' && character != ')' && character != '.')
-                .ToArray());
-
-            if (normalized.StartsWith("+351", StringComparison.Ordinal))
-            {
-                normalized = normalized.Substring("+351".Length);
-            }
-            else if (normalized.StartsWith("00351", StringComparison.Ordinal))
-            {
-                normalized = normalized.Substring("00351".Length);
-            }
-
-            return normalized;
-        }
-
-        private static bool IsValidPortugueseMobileNumber(string phoneNumber)
-        {
-            return phoneNumber.Length == 9
-                && phoneNumber[0] == '9'
-                && phoneNumber.All(char.IsAsciiDigit);
-        }
-
         /// <summary>
         /// Execute the payment using credit card.
         /// </summary>
@@ -493,6 +467,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
+        }
+
+        private static string NormalizePortuguesePhoneNumber(string? phoneNumber)
+        {
+            string normalized = new string((phoneNumber ?? string.Empty)
+                .Trim()
+                .Where(character => !char.IsWhiteSpace(character) && character != '-' && character != '(' && character != ')' && character != '.')
+                .ToArray());
+
+            if (normalized.StartsWith("+351", StringComparison.Ordinal))
+            {
+                normalized = normalized.Substring("+351".Length);
+            }
+            else if (normalized.StartsWith("00351", StringComparison.Ordinal))
+            {
+                normalized = normalized.Substring("00351".Length);
+            }
+
+            return normalized;
+        }
+
+        private static bool IsValidPortugueseMobileNumber(string phoneNumber)
+        {
+            return phoneNumber.Length == 9
+                && phoneNumber[0] == '9'
+                && phoneNumber.All(char.IsAsciiDigit);
         }
 
         private static bool IsPayPalAccountRestricted(PayPalHttp.HttpException exception)
