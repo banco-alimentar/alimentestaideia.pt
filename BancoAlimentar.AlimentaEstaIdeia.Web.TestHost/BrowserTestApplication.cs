@@ -108,7 +108,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.TestHost
                 application.factory.StartServer();
                 var server = application.Services.GetRequiredService<IServer>();
                 string address = server.Features.Get<IServerAddressesFeature>().Addresses.Single();
-                application.BaseAddress = new UriBuilder(address) { Host = "localhost" }.Uri;
+                application.BaseAddress = new Uri(address, UriKind.Absolute);
                 application.Configuration = application.Services.GetRequiredService<IConfiguration>();
                 application.Configuration["SeleniumTest:Local:BaseUrl"] = application.BaseAddress.AbsoluteUri;
                 application.Configuration["Easypay:BaseUrl"] = application.BaseAddress.GetLeftPart(UriPartial.Authority);
