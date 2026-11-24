@@ -119,8 +119,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
-        /// An Easypay webhook that races MBWay status polling retries instead of failing,
-        /// and still records the provider fees on the confirmed payment.
+        /// An Easypay webhook that races MBWay polling retries, claims the provider id,
+        /// and does not persist unverified fee values.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [Fact]
@@ -186,8 +186,187 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(paymentId, persisted.ConfirmedPayment.Id);
             var payment = Assert.IsType<MBWayPayment>(persisted.ConfirmedPayment);
             Assert.Equal(easyPayId, payment.EasyPayPaymentId);
-            Assert.Equal(0.1f, payment.FixedFee);
-            Assert.Equal(9.65f, payment.Transfer);
+            Assert.NotNull(payment.Completed);
+            Assert.Equal(0, payment.FixedFee);
+            Assert.Equal(0, payment.Transfer);
+        }
+
+        /// <summary>
+        /// A competing capture cannot replace a donation's already confirmed payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task EasyPayWebhookRejectsSecondSuccessfulCapture()
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using var seedContext = CreateContext(connection);
+            await seedContext.Database.EnsureCreatedAsync();
+            string confirmedKey = Guid.NewGuid().ToString();
+            string competingKey = Guid.NewGuid().ToString();
+            var donation = new Donation
+            {
+                DonationAmount = 10,
+                DonationDate = DateTime.UtcNow,
+                PaymentStatus = PaymentStatus.Payed,
+                PublicId = Guid.NewGuid(),
+            };
+            donation.PaymentList =
+            [
+                new CreditCardPayment
+                {
+                    Created = DateTime.UtcNow,
+                    Completed = DateTime.UtcNow,
+                    Paid = 10,
+                    Requested = 10,
+                    Status = "Success",
+                    TransactionKey = confirmedKey,
+                },
+                new CreditCardPayment
+                {
+                    Created = DateTime.UtcNow,
+                    Paid = 10,
+                    Requested = 10,
+                    TransactionKey = competingKey,
+                },
+            ];
+            seedContext.Donations.Add(donation);
+            await seedContext.SaveChangesAsync();
+            donation.ConfirmedPayment = donation.PaymentList.First();
+            await seedContext.SaveChangesAsync();
+
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            await using ApplicationDbContext webhookContext = CreateContext(connection);
+            var repository = new DonationRepository(
+                webhookContext,
+                cache,
+                new TelemetryClient(telemetryConfiguration));
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                repository.CompleteEasyPayPaymentAsync<CreditCardPayment>(
+                    Guid.NewGuid().ToString(),
+                    competingKey,
+                    Guid.NewGuid().ToString(),
+                    DateTime.UtcNow,
+                    requested: 10,
+                    paid: 10,
+                    fixedFee: 0.1f,
+                    variableFee: 0.2f,
+                    tax: 0.05f,
+                    transfer: 9.65f,
+                    configuration: null));
+
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            var payments = await verificationContext.CreditCardPayments
+                .OrderBy(payment => payment.Id)
+                .ToListAsync();
+            Assert.Equal(2, payments.Count);
+            Assert.Null(payments[1].EasyPayPaymentId);
+        }
+
+        /// <summary>
+        /// The first concurrent Easypay id claim wins and the retry rejects the other id.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task EasyPayWebhookRetriesConcurrentProviderIdClaim()
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using var seedContext = CreateContext(connection);
+            await seedContext.Database.EnsureCreatedAsync();
+            string transactionKey = Guid.NewGuid().ToString();
+            var donation = new Donation
+            {
+                DonationAmount = 10,
+                DonationDate = DateTime.UtcNow,
+                PaymentStatus = PaymentStatus.Payed,
+                PublicId = Guid.NewGuid(),
+            };
+            donation.PaymentList =
+            [
+                new MBWayPayment
+                {
+                    Created = DateTime.UtcNow,
+                    Completed = DateTime.UtcNow,
+                    Paid = 10,
+                    Requested = 10,
+                    Status = "Success",
+                    TransactionKey = transactionKey,
+                },
+            ];
+            seedContext.Donations.Add(donation);
+            await seedContext.SaveChangesAsync();
+            donation.ConfirmedPayment = donation.PaymentList.First();
+            await seedContext.SaveChangesAsync();
+
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            var telemetryClient = new TelemetryClient(telemetryConfiguration);
+            string winningId = Guid.NewGuid().ToString();
+            string losingId = Guid.NewGuid().ToString();
+            var concurrentClaim = new BeforeFirstSaveInterceptor(() =>
+            {
+                using ApplicationDbContext concurrentContext = CreateContext(connection);
+                var concurrentRepository = new DonationRepository(concurrentContext, cache, telemetryClient);
+                concurrentRepository.CompleteEasyPayPaymentAsync<MBWayPayment>(
+                    winningId,
+                    transactionKey,
+                    Guid.NewGuid().ToString(),
+                    DateTime.UtcNow,
+                    requested: 10,
+                    paid: 10,
+                    fixedFee: 0.1f,
+                    variableFee: 0.2f,
+                    tax: 0.05f,
+                    transfer: 9.65f,
+                    configuration: null).GetAwaiter().GetResult();
+            });
+            await using ApplicationDbContext webhookContext = CreateContext(connection, concurrentClaim);
+            var repository = new DonationRepository(webhookContext, cache, telemetryClient);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                repository.CompleteEasyPayPaymentAsync<MBWayPayment>(
+                    losingId,
+                    transactionKey,
+                    Guid.NewGuid().ToString(),
+                    DateTime.UtcNow,
+                    requested: 10,
+                    paid: 10,
+                    fixedFee: 0.3f,
+                    variableFee: 0.4f,
+                    tax: 0.05f,
+                    transfer: 9.25f,
+                    configuration: null));
+
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            var persisted = await verificationContext.MBWayPayments.SingleAsync();
+            Assert.Equal(winningId, persisted.EasyPayPaymentId);
+            Assert.Equal(0, persisted.FixedFee);
+            Assert.Equal(0, persisted.Transfer);
+        }
+
+        /// <summary>
+        /// Subscription capture rebuilds its state and retries after a concurrency exception.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task SubscriptionCaptureRetriesAfterConcurrencyException()
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            EasyPaySubscriptionPaymentEvidence evidence = await SeedSubscriptionAsync(seedContext);
+            var interceptor = new ThrowOnceConcurrencyExceptionInterceptor();
+            await using ApplicationDbContext context = CreateContext(connection, interceptor);
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            var repository = new SubscriptionRepository(context, cache, new TelemetryClient(telemetryConfiguration));
+
+            var result = repository.CompleteSubscriptionCapture(evidence);
+
+            Assert.True(result.DonationId > 0);
+            Assert.Equal(3, interceptor.Attempts);
+            Assert.Equal(2, await context.Donations.CountAsync());
+            Assert.Single(await context.Payments.ToListAsync());
         }
 
         /// <summary>
@@ -363,6 +542,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 }
 
                 return base.SavingChangesAsync(eventData, result, cancellationToken);
+            }
+        }
+
+        private sealed class ThrowOnceConcurrencyExceptionInterceptor : SaveChangesInterceptor
+        {
+            public int Attempts { get; private set; }
+
+            public override InterceptionResult<int> SavingChanges(
+                DbContextEventData eventData,
+                InterceptionResult<int> result)
+            {
+                this.Attempts++;
+                if (this.Attempts == 1)
+                {
+                    throw new DbUpdateConcurrencyException("Simulated optimistic concurrency conflict.");
+                }
+
+                return base.SavingChanges(eventData, result);
             }
         }
     }

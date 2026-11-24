@@ -1350,18 +1350,39 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     paid,
                     transactionKey))
                 {
+                    if (payment.Donation.PaymentStatus == PaymentStatus.Payed
+                        && !this.IsConfirmedPayment(
+                            payment.Donation,
+                            payment,
+                            this.GetConfirmedPaymentId(payment.Donation)))
+                    {
+                        throw new InvalidOperationException(
+                            $"EasyPay capture {easyPayId} belongs to a donation already confirmed by another payment.");
+                    }
+
                     return 0;
                 }
 
                 if (paymentWasAlreadyConfirmed)
                 {
-                    // The donation may have been completed by MBWay status polling, which does not
-                    // know the Easypay fees. Record them once, without overwriting another payment id.
-                    if (string.IsNullOrEmpty(payment.EasyPayPaymentId) || payment.EasyPayPaymentId == easyPayId)
+                    // The payment lookup verifies the id, status, merchant key and amount, but not
+                    // the callback's fee fields. Only claim an empty id and preserve stored values.
+                    if (string.IsNullOrEmpty(payment.EasyPayPaymentId))
                     {
-                        ApplyEasyPayProviderValues(payment, easyPayId, requested, paid, fixedFee, variableFee, tax, transfer);
+                        payment.EasyPayPaymentId = easyPayId;
+                        this.DbContext.Entry(payment.Donation)
+                            .Property(donation => donation.ConcurrencyToken)
+                            .IsModified = true;
                         DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
                         await this.DbContext.SaveChangesAsync();
+                    }
+                    else if (!string.Equals(
+                        payment.EasyPayPaymentId,
+                        easyPayId,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            $"EasyPay capture {easyPayId} conflicts with payment {payment.Id}'s recorded provider id.");
                     }
 
                     return donationId;
