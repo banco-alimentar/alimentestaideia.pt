@@ -31,6 +31,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class SubscriptionRepository : GenericRepository<Subscription, ApplicationDbContext>
     {
+        private const int MaxCaptureCompletionAttempts = 3;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionRepository"/> class.
         /// </summary>
@@ -179,17 +181,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             var strategy = this.DbContext.Database.CreateExecutionStrategy();
             return strategy.Execute(() =>
             {
-                using var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
-                try
+                for (int attempt = 1; ; attempt++)
                 {
-                    (int DonationId, string Reason) result = this.CompleteSubscriptionCaptureCore(evidence, status);
-                    transaction.Commit();
-                    return result;
-                }
-                catch
-                {
-                    this.DbContext.ChangeTracker.Clear();
-                    throw;
+                    try
+                    {
+                        using var transaction = this.DbContext.Database.BeginTransaction(IsolationLevel.Serializable);
+                        (int DonationId, string Reason) result = this.CompleteSubscriptionCaptureCore(evidence, status);
+                        transaction.Commit();
+                        return result;
+                    }
+                    catch (DbUpdateConcurrencyException) when (attempt < MaxCaptureCompletionAttempts)
+                    {
+                        this.DbContext.ChangeTracker.Clear();
+                        this.TelemetryClient.TrackEvent(
+                            "EasyPaySubscriptionCaptureConcurrencyConflict",
+                            new Dictionary<string, string>
+                            {
+                                { "TransactionKey", evidence?.TransactionKey ?? string.Empty },
+                                { "EasypayPaymentId", evidence?.EasypayPaymentId ?? string.Empty },
+                                { "Attempt", attempt.ToString() },
+                            });
+                    }
+                    catch
+                    {
+                        this.DbContext.ChangeTracker.Clear();
+                        throw;
+                    }
                 }
             });
         }

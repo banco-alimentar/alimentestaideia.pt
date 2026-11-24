@@ -6,6 +6,7 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 {
+    using System.Collections.Generic;
     using System.Security.Claims;
     using BancoAlimentar.AlimentaEstaIdeia.Model.Identity;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core;
@@ -90,17 +91,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
 
             if (platformContext.Items.ContainsKey(KeyNames.DonationIdKey))
             {
-                operationTelemetry.Properties.Add("DonationId", platformContext.Items[KeyNames.DonationIdKey].ToString());
+                operationTelemetry.Properties.TryAdd("DonationId", platformContext.Items[KeyNames.DonationIdKey].ToString());
             }
 
             if (platformContext.Request.Path.StartsWithSegments(new PathString("/easypay/generic")))
             {
                 if (platformContext.Items[KeyNames.GenericNotificationKey] is NotificationGeneric body)
                 {
-                    operationTelemetry.Properties.Add("GenericNotification-Id", body.Id.ToString());
-                    operationTelemetry.Properties.Add("GenericNotification-Key", body.Key);
-                    operationTelemetry.Properties.Add("GenericNotification-Type", body.Type?.ToString());
-                    operationTelemetry.Properties.Add("GenericNotification-Status", body.Status?.ToString());
+                    operationTelemetry.Properties.TryAdd("GenericNotification-Id", body.Id.ToString());
+                    operationTelemetry.Properties.TryAdd("GenericNotification-Key", body.Key);
+                    operationTelemetry.Properties.TryAdd("GenericNotification-Type", body.Type?.ToString());
+                    operationTelemetry.Properties.TryAdd("GenericNotification-Status", body.Status?.ToString());
                 }
             }
 
@@ -108,9 +109,9 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Telemetry.Api
             {
                 if (platformContext.Items[KeyNames.PaymentNotificationKey] is TransactionNotificationRequest body)
                 {
-                    operationTelemetry.Properties.Add("PaymentNotification-Id", body.Id.ToString());
-                    operationTelemetry.Properties.Add("PaymentNotification-Key", body.Key);
-                    operationTelemetry.Properties.Add("PaymentNotification-Method", body.Method);
+                    operationTelemetry.Properties.TryAdd("PaymentNotification-Id", body.Id.ToString());
+                    operationTelemetry.Properties.TryAdd("PaymentNotification-Key", body.Key);
+                    operationTelemetry.Properties.TryAdd("PaymentNotification-Method", body.Method);
                 }
             }
         }

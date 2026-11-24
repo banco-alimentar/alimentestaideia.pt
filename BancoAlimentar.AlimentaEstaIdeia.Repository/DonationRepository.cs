@@ -31,6 +31,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
     /// </summary>
     public class DonationRepository : GenericRepository<Donation, ApplicationDbContext>
     {
+        private const int MaxPaymentCompletionAttempts = 3;
+
         private static ConcurrentBag<TotalDonationsResult> totalDonationItems = new ConcurrentBag<TotalDonationsResult>();
 
         /// <summary>
@@ -831,72 +833,51 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     .FirstOrDefault();
             }
 
-            if (payment != null)
-            {
-                if (payment.Donation == null)
-                {
-                    // if the donation is null, we need to find it by the transaction key in the payment list.
-                    payment.Donation = this.DbContext.Donations
-                        .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionKey))
-                        .FirstOrDefault();
-                }
-
-                if (payment.Donation != null)
-                {
-                    donationId = payment.Donation.Id;
-                    bool paymentWasAlreadyConfirmed = payment.Donation.PaymentStatus == PaymentStatus.Payed
-                        && this.IsConfirmedPayment(
-                            payment.Donation,
-                            payment,
-                            this.GetConfirmedPaymentId(payment.Donation));
-                    if (!this.TryCompleteDonationPayment(
-                        payment.Donation,
-                        payment,
-                        requested,
-                        paid,
-                        transactionKey))
-                    {
-                        return (0, payment.Id);
-                    }
-
-                    if (paymentWasAlreadyConfirmed)
-                    {
-                        return (donationId, payment.Id);
-                    }
-                }
-                else
-                {
-                    EventTelemetry donationNotFound = new EventTelemetry($"Donation-{typeof(TPaymentType).Name}-NotFound");
-                    donationNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
-                    donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
-                    this.TelemetryClient.TrackEvent(donationNotFound);
-                }
-
-                payment.EasyPayPaymentId = easyPayId;
-                payment.Requested = requested;
-                payment.Paid = paid;
-                payment.FixedFee = fixedFee;
-                payment.VariableFee = variableFee;
-                payment.Tax = tax;
-                payment.Transfer = transfer;
-
-                bool donationCompleted = donationId > 0;
-                if (donationCompleted)
-                {
-                    DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
-                }
-
-                await this.DbContext.SaveChangesAsync();
-            }
-            else
+            if (payment == null)
             {
                 EventTelemetry creditCardPaymentNotFound = new EventTelemetry($"{typeof(TPaymentType).Name}-NotFound");
                 creditCardPaymentNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
                 creditCardPaymentNotFound.Properties.Add("EasyPayId", easyPayId);
                 this.TelemetryClient.TrackEvent(creditCardPaymentNotFound);
+                return (0, 0);
             }
 
-            return (donationId, payment != null ? payment.Id : 0);
+            for (int attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    donationId = await this.ApplyEasyPayPaymentCompletionAsync(
+                        payment,
+                        easyPayId,
+                        transactionKey,
+                        requested,
+                        paid,
+                        fixedFee,
+                        variableFee,
+                        tax,
+                        transfer);
+                    return (donationId, payment.Id);
+                }
+                catch (DbUpdateConcurrencyException ex) when (attempt < MaxPaymentCompletionAttempts)
+                {
+                    // Another request (MBWay status polling, a duplicate webhook, ...) updated the
+                    // donation after we loaded it. Reload the conflicting rows and re-evaluate.
+                    this.TelemetryClient.TrackEvent(
+                        "EasyPayPaymentCompletionConcurrencyConflict",
+                        new Dictionary<string, string>
+                        {
+                            { "TransactionKey", transactionKey ?? string.Empty },
+                            { "PaymentId", payment.Id.ToString(CultureInfo.InvariantCulture) },
+                            { "Attempt", attempt.ToString(CultureInfo.InvariantCulture) },
+                        });
+                    foreach (var entry in ex.Entries)
+                    {
+                        await entry.ReloadAsync();
+                    }
+
+                    await this.DbContext.Entry(payment).ReloadAsync();
+                }
+            }
         }
 
         /// <summary>
@@ -1312,6 +1293,117 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             return false;
+        }
+
+        private static void ApplyEasyPayProviderValues(
+            EasyPayWithValuesBaseClass payment,
+            string easyPayId,
+            float requested,
+            float paid,
+            float fixedFee,
+            float variableFee,
+            float tax,
+            float transfer)
+        {
+            payment.EasyPayPaymentId = easyPayId;
+            payment.Requested = requested;
+            payment.Paid = paid;
+            payment.FixedFee = fixedFee;
+            payment.VariableFee = variableFee;
+            payment.Tax = tax;
+            payment.Transfer = transfer;
+        }
+
+        private async Task<int> ApplyEasyPayPaymentCompletionAsync<TPaymentType>(
+            TPaymentType payment,
+            string easyPayId,
+            string transactionKey,
+            float requested,
+            float paid,
+            float fixedFee,
+            float variableFee,
+            float tax,
+            float transfer)
+            where TPaymentType : EasyPayWithValuesBaseClass
+        {
+            int donationId = 0;
+            if (payment.Donation == null)
+            {
+                // if the donation is null, we need to find it by the transaction key in the payment list.
+                payment.Donation = this.DbContext.Donations
+                    .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionKey))
+                    .FirstOrDefault();
+            }
+
+            if (payment.Donation != null)
+            {
+                donationId = payment.Donation.Id;
+                bool paymentWasAlreadyConfirmed = payment.Donation.PaymentStatus == PaymentStatus.Payed
+                    && this.IsConfirmedPayment(
+                        payment.Donation,
+                        payment,
+                        this.GetConfirmedPaymentId(payment.Donation));
+                if (!this.TryCompleteDonationPayment(
+                    payment.Donation,
+                    payment,
+                    requested,
+                    paid,
+                    transactionKey))
+                {
+                    if (payment.Donation.PaymentStatus == PaymentStatus.Payed
+                        && !this.IsConfirmedPayment(
+                            payment.Donation,
+                            payment,
+                            this.GetConfirmedPaymentId(payment.Donation)))
+                    {
+                        throw new InvalidOperationException(
+                            $"EasyPay capture {easyPayId} belongs to a donation already confirmed by another payment.");
+                    }
+
+                    return 0;
+                }
+
+                if (paymentWasAlreadyConfirmed)
+                {
+                    // The payment lookup verifies the id, status, merchant key and amount, but not
+                    // the callback's fee fields. Only claim an empty id and preserve stored values.
+                    if (string.IsNullOrEmpty(payment.EasyPayPaymentId))
+                    {
+                        payment.EasyPayPaymentId = easyPayId;
+                        this.DbContext.Entry(payment.Donation)
+                            .Property(donation => donation.ConcurrencyToken)
+                            .IsModified = true;
+                        DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
+                        await this.DbContext.SaveChangesAsync();
+                    }
+                    else if (!string.Equals(
+                        payment.EasyPayPaymentId,
+                        easyPayId,
+                        StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException(
+                            $"EasyPay capture {easyPayId} conflicts with payment {payment.Id}'s recorded provider id.");
+                    }
+
+                    return donationId;
+                }
+            }
+            else
+            {
+                EventTelemetry donationNotFound = new EventTelemetry($"Donation-{typeof(TPaymentType).Name}-NotFound");
+                donationNotFound.Properties.Add($"{typeof(TPaymentType).Name}TransactionKey", transactionKey);
+                donationNotFound.Properties.Add("PaymentId", payment.Id.ToString());
+                this.TelemetryClient.TrackEvent(donationNotFound);
+            }
+
+            ApplyEasyPayProviderValues(payment, easyPayId, requested, paid, fixedFee, variableFee, tax, transfer);
+            if (donationId > 0)
+            {
+                DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
+            }
+
+            await this.DbContext.SaveChangesAsync();
+            return donationId;
         }
 
         private IQueryable<Donation> GetUserDonationHistoryBaseQuery(string userId)

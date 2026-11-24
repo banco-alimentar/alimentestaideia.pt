@@ -26,6 +26,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Options considered:** Truncate extra digits or validate the Portuguese mobile number before sending the request.
   - **Decision:** Normalize common international prefixes and formatting, then require exactly nine digits starting with `9`. Show a localized correction prompt and leave the payment request unsent when the value is invalid.
   - **Rollout:** Deploy the web application. No migration or manual data change is required; donors with an invalid saved number can correct it on the payment page.
+- Prevented duplicate-key exceptions during repeated telemetry enrichment in [HttpTelemetryInitializer](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/HttpTelemetryInitializer.cs), with [regression tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/Services/HttpTelemetryInitializerTests.cs).
+  - **Context:** Reinitializing telemetry raised `ArgumentException: The key already existed in the dictionary` when donation or Easypay notification properties were already present.
+  - **Options considered:** Check `ContainsKey` before each insertion, overwrite existing values with the indexer, or use `TryAdd`.
+  - **Decision:** Use `TryAdd` for the previously unguarded donation and notification properties, preserving existing values while still adding missing properties.
+  - **Rollout:** Deploy the web application. No migration or configuration changes are required.
+- Handle optimistic concurrency conflicts in Easypay payment webhooks (`POST /easypay/payment`, e.g. method `MBW`) in [DonationRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/DonationRepository.cs), with a [regression test](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
+  - **Context:** `CompleteEasyPayPaymentAsync` threw "expected to affect 1 row(s), but actually affected 0 row(s)" while saving a donation. Concurrent MBWay status polling or a duplicate webhook can update the same donation and change its concurrency token; the stack trace does not identify the competing writer.
+  - **Options considered:** Remove the donation concurrency token, swallow the exception, or reload the conflicting entries and re-evaluate with bounded retries.
+  - **Decision:** Reload conflicting entries and re-evaluate over at most three attempts, keeping the optimistic-concurrency protection. When the payment is already confirmed, still record the Easypay payment id and fee values if the payment has no Easypay id yet or has the same one.
+  - **Rollout:** Deploy the application. No migration or data script is required.
 - Fixed the [homepage](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Index.cshtml) donated-food list with [scoped responsive styles](BancoAlimentar.AlimentaEstaIdeia.Web/wwwroot/css/customIndex.css).
   - **Context:** Separate floated name and quantity columns, fixed row heights, and a narrow desktop sidebar caused translated food names and totals to overlap or fall onto separate lines.
   - **Options considered:** Adjust the legacy float widths, reduce text sizes, or use paired grid rows and a responsive homepage grid.
