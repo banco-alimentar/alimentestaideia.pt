@@ -21,6 +21,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Apply the `HomepageImageVersions` migration before deploying the app. Ensure the App Service identity can write to its persistent `HOME/data/homepage-images` directory, or set `HomepageImages:StoragePath` to another persistent writable directory. No images are seeded; the existing static image remains active until the first upload.
 
 ### Fixed
+- Prevented duplicate-key exceptions during repeated telemetry enrichment in [HttpTelemetryInitializer](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/HttpTelemetryInitializer.cs), with [regression tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/Services/HttpTelemetryInitializerTests.cs).
+  - **Context:** Reinitializing telemetry raised `ArgumentException: The key already existed in the dictionary` when donation or Easypay notification properties were already present.
+  - **Options considered:** Check `ContainsKey` before each insertion, overwrite existing values with the indexer, or use `TryAdd`.
+  - **Decision:** Use `TryAdd` for the previously unguarded donation and notification properties, preserving existing values while still adding missing properties.
+  - **Rollout:** Deploy the web application. No migration or configuration changes are required.
 - Handle optimistic concurrency conflicts in Easypay payment webhooks (`POST /easypay/payment`, e.g. method `MBW`) in [DonationRepository](BancoAlimentar.AlimentaEstaIdeia.Repository/DonationRepository.cs), with a [regression test](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
   - **Context:** `CompleteEasyPayPaymentAsync` threw "expected to affect 1 row(s), but actually affected 0 row(s)" while saving a donation. Concurrent MBWay status polling or a duplicate webhook can update the same donation and change its concurrency token; the stack trace does not identify the competing writer.
   - **Options considered:** Remove the donation concurrency token, swallow the exception, or reload the conflicting entries and re-evaluate with bounded retries.
