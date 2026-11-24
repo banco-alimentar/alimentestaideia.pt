@@ -874,6 +874,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         await entry.ReloadAsync();
                     }
+
+                    await this.DbContext.Entry(payment).ReloadAsync();
                 }
             }
         }
@@ -1358,6 +1360,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     if (string.IsNullOrEmpty(payment.EasyPayPaymentId) || payment.EasyPayPaymentId == easyPayId)
                     {
                         ApplyEasyPayProviderValues(payment, easyPayId, requested, paid, fixedFee, variableFee, tax, transfer);
+                        DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
                         await this.DbContext.SaveChangesAsync();
                     }
 
