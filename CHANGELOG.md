@@ -21,6 +21,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Apply the `HomepageImageVersions` migration before deploying the app. Ensure the App Service identity can write to its persistent `HOME/data/homepage-images` directory, or set `HomepageImages:StoragePath` to another persistent writable directory. No images are seeded; the existing static image remains active until the first upload.
 
 ### Fixed
+- Prevented invalid numbers from reaching the [MB WAY payment request](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
+  - **Context:** EasyPay rejected the combined `+351` and customer phone when the national number contained ten digits, for example `9254045189`.
+  - **Options considered:** Truncate extra digits or validate the Portuguese mobile number before sending the request.
+  - **Decision:** Normalize common international prefixes and formatting, then require exactly nine digits starting with `9`. Show a localized correction prompt and leave the payment request unsent when the value is invalid.
+  - **Rollout:** Deploy the web application. No migration or manual data change is required; donors with an invalid saved number can correct it on the payment page.
 - Fixed the [homepage](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Index.cshtml) donated-food list with [scoped responsive styles](BancoAlimentar.AlimentaEstaIdeia.Web/wwwroot/css/customIndex.css).
   - **Context:** Separate floated name and quantity columns, fixed row heights, and a narrow desktop sidebar caused translated food names and totals to overlap or fall onto separate lines.
   - **Options considered:** Adjust the legacy float widths, reduce text sizes, or use paired grid rows and a responsive homepage grid.

@@ -16,7 +16,13 @@ else if (Model.PaymentStatusError)
     </div>
 }
 
-@if (!string.IsNullOrEmpty(Model.MBWayError))
+@if (Model.MBWayPhoneInvalid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Localizer["MBWayPhoneInvalid"]
+    </div>
+}
+else if (!string.IsNullOrEmpty(Model.MBWayError))
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         @Model.MBWayError
@@ -146,7 +152,7 @@ else if (Model.PaymentStatusError)
                     <label asp-for="@Model.PhoneNumber"></label>
                     <div class="input-group mb-3">
                         <span class="input-group-text">+351</span>
-                        <input asp-for="@Model.PhoneNumber" class="form-control" aria-label="Phone Number" />
+                        <input asp-for="@Model.PhoneNumber" class="form-control" aria-label="Phone Number" maxlength="9" />
                     </div>
                     <button type="submit" class="payment-action">
                         <img src="@Url.Content("~/img/doar-coracao.png")" alt="" />

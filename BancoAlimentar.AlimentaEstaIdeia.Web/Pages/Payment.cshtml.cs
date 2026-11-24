@@ -115,6 +115,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         public string MBWayError { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the MB WAY phone number is invalid.
+        /// </summary>
+        public bool MBWayPhoneInvalid { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether show PayPal or not.
         /// </summary>
         [BindProperty]
@@ -170,7 +175,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             Donation = this.context.Donation.GetFullDonationById(donationId);
             if (Donation != null && Donation.User != null)
             {
-                PhoneNumber = Donation.User.PhoneNumber;
+                PhoneNumber = NormalizePortuguesePhoneNumber(Donation.User.PhoneNumber);
             }
 
             MultiBankPayment = this.context.Donation.GetCurrentMultiBankPayment(donationId);
@@ -208,19 +213,24 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         public async Task<IActionResult> OnPostMbWayAsync()
         {
-            if (!string.IsNullOrEmpty(PhoneNumber) && PhoneNumber.StartsWith("+351"))
+            PhoneNumber = NormalizePortuguesePhoneNumber(PhoneNumber);
+            if (!IsValidPortugueseMobileNumber(PhoneNumber))
             {
-                PhoneNumber = PhoneNumber.Substring("+351".Length);
-            }
-
-            if (PhoneNumber.StartsWith("+"))
-            {
-                // greater than 10 means phone number is +(xx)xxxxxxxxx, so we can take the last 9 numbers
-                if (PhoneNumber.Length > 10)
+                ShowPayPal = this.HttpContext.GetTenant().IsPayPalEnabled;
+                Donation = this.context.Donation.GetFullDonationById(DonationId);
+                if (Donation == null)
                 {
-                    int portugalPhoneNumbersLenght = 9;
-                    PhoneNumber = PhoneNumber.Substring(PhoneNumber.Length - portugalPhoneNumbersLenght, portugalPhoneNumbersLenght);
+                    return RedirectToPage("./Donation");
                 }
+
+                MultiBankPayment = this.context.Donation.GetCurrentMultiBankPayment(DonationId);
+                if (MultiBankPayment != null && MultiBankPayment.Status == "Success")
+                {
+                    MultiBankPayment = null;
+                }
+
+                MBWayPhoneInvalid = true;
+                return Page();
             }
 
             string transactionKey = Guid.NewGuid().ToString();
@@ -457,6 +467,32 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             }
 
             return RedirectToAction("./Payment", new { Donation.PublicId, paymentStatus = result.Status });
+        }
+
+        private static string NormalizePortuguesePhoneNumber(string? phoneNumber)
+        {
+            string normalized = new string((phoneNumber ?? string.Empty)
+                .Trim()
+                .Where(character => !char.IsWhiteSpace(character) && character != '-' && character != '(' && character != ')' && character != '.')
+                .ToArray());
+
+            if (normalized.StartsWith("+351", StringComparison.Ordinal))
+            {
+                normalized = normalized.Substring("+351".Length);
+            }
+            else if (normalized.StartsWith("00351", StringComparison.Ordinal))
+            {
+                normalized = normalized.Substring("00351".Length);
+            }
+
+            return normalized;
+        }
+
+        private static bool IsValidPortugueseMobileNumber(string phoneNumber)
+        {
+            return phoneNumber.Length == 9
+                && phoneNumber[0] == '9'
+                && phoneNumber.All(char.IsAsciiDigit);
         }
 
         private static bool IsPayPalAccountRestricted(PayPalHttp.HttpException exception)
