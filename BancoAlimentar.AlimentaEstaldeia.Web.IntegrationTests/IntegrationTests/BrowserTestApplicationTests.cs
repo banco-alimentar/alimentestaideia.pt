@@ -64,6 +64,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
 
             Assert.Equal(Uri.UriSchemeHttp, application.BaseAddress.Scheme);
             Assert.True(application.BaseAddress.IsLoopback);
+            Assert.Equal(IPAddress.Loopback.ToString(), application.BaseAddress.Host);
             Assert.True(application.BaseAddress.Port > 0);
 
             using var response = await client.GetAsync("/Identity/Account/ForgotPassword");

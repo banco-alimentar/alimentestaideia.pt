@@ -6,8 +6,10 @@
 
 namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant.Naming;
     using Microsoft.AspNetCore.Http;
 
@@ -33,7 +35,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
         /// <inheritdoc/>
         public TenantData GetTenantData(HttpContext context)
         {
-            if (context.Request.Host.Host == "localhost")
+            string host = context.Request.Host.Host;
+            if (string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase)
+                || (IPAddress.TryParse(host, out IPAddress? hostAddress)
+                    && IsLoopbackAddress(hostAddress)
+                    && IsLoopbackAddress(context.Connection.RemoteIpAddress)))
             {
                 return this.localDevelopmentOverride.GetOverrideTenantName();
             }
@@ -45,6 +51,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tenant
 
                 return tenantNaming.GetTenantName(context);
             }
+        }
+
+        private static bool IsLoopbackAddress(IPAddress? address)
+        {
+            if (address == null)
+            {
+                return false;
+            }
+
+            IPAddress normalizedAddress = address.IsIPv4MappedToIPv6 ? address.MapToIPv4() : address;
+            return IPAddress.IsLoopback(normalizedAddress);
         }
     }
 }

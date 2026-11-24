@@ -21,6 +21,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Apply the `HomepageImageVersions` migration before deploying the app. Ensure the App Service identity can write to its persistent `HOME/data/homepage-images` directory, or set `HomepageImages:StoragePath` to another persistent writable directory. No images are seeded; the existing static image remains active until the first upload.
 
 ### Fixed
+- Aligned the [self-contained browser test host](BancoAlimentar.AlimentaEstaIdeia.Web.TestHost/BrowserTestApplication.cs) with its IPv4 loopback listener and preserved local tenant routing for loopback requests.
+  - **Context:** Selenium navigated to `localhost` while Kestrel listened only on IPv4 loopback; Linux browsers can resolve `localhost` to IPv6 and stall before page load.
+  - **Options considered:** Keep `localhost` and add another listener, or use the listener's IPv4 address and route loopback clients through the local tenant override.
+  - **Decision:** Advertise the actual IPv4 address. Treat an IP-literal loopback host as local only when the client connection is also loopback, preserving the configured `localhost` tenant without trusting a spoofed Host header from remote clients.
+  - **Rollout:** No runtime deployment or configuration change is required; this affects the self-contained test host and loopback tenant selection only.
+- Prevented invalid numbers from reaching the [MB WAY payment request](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payment.cshtml.cs).
+  - **Context:** EasyPay rejected the combined `+351` and customer phone when the national number contained ten digits, for example `9254045189`.
+  - **Options considered:** Truncate extra digits or validate the Portuguese mobile number before sending the request.
+  - **Decision:** Normalize common international prefixes and formatting, then require exactly nine digits starting with `9`. Show a localized correction prompt and leave the payment request unsent when the value is invalid.
+  - **Rollout:** Deploy the web application. No migration or manual data change is required; donors with an invalid saved number can correct it on the payment page.
 - Prevented duplicate-key exceptions during repeated telemetry enrichment in [HttpTelemetryInitializer](BancoAlimentar.AlimentaEstaIdeia.Web/Telemetry/HttpTelemetryInitializer.cs), with [regression tests](BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests/Services/HttpTelemetryInitializerTests.cs).
   - **Context:** Reinitializing telemetry raised `ArgumentException: The key already existed in the dictionary` when donation or Easypay notification properties were already present.
   - **Options considered:** Check `ContainsKey` before each insertion, overwrite existing values with the indexer, or use `TryAdd`.

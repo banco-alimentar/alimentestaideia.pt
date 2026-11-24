@@ -303,4 +303,7 @@
   <data name="PagarMultibanco" xml:space="preserve">
     <value>Pagar Multibanco</value>
   </data>
+  <data name="MBWayPhoneInvalid" xml:space="preserve">
+    <value>Introduza um número de telemóvel português válido com 9 algarismos, começado por 9.</value>
+  </data>
 </root>
