@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Stabilized the CI backoff and isolated browser-host tests.
+  - **Context:** `BootstrapTimeoutEnforcesBackoff` used a 50 ms load deadline, and an isolated browser-host login request exceeded its 20-second client timeout during the integration suite.
+  - **Options considered:** Keep the short deadlines and rerun intermittent failures, implement virtual timer support, or use a realistic timeout and run browser-host tests outside other parallel test collections.
+  - **Decision:** Give the backoff test a two-second load deadline with a five-second outer wait and include retry diagnostics on failure. Disable parallel execution for the browser-host test collection.
+  - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
+
 ### Changed
 - Aligned [Donation2 product names](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml.cs) with the localized labels used by `/Donation`.
   - **Context:** `/Donation2` used product catalogue names directly, so misspellings or catalogue labels that differed from the established donation labels appeared in the form.
