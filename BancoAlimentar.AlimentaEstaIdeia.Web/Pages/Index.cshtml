@@ -1,5 +1,6 @@
 ﻿@page
 @model IndexModel
+@using System.Globalization
 @using Microsoft.Extensions.Localization
 @inject IStringLocalizer<HeaderResources> HeaderLocalizer
 @inject BancoAlimentar.AlimentaEstaIdeia.Model.ApplicationDbContext HomepageImageDbContext
@@ -8,6 +9,8 @@
     ViewData["Title"] = "Home page";
     var currentImageVersion = await HomepageImageDbContext.HomepageImageVersions.AsNoTracking().Where(image => image.IsCurrent).Select(image => image.Id).FirstOrDefaultAsync();
     var homepageImageUrl = Url.Content("~/img/comida.png") + (currentImageVersion > 0 ? $"?v={currentImageVersion}" : string.Empty);
+    var donationNumberFormat = (NumberFormatInfo)CultureInfo.GetCultureInfo("pt-PT").NumberFormat.Clone();
+    donationNumberFormat.NumberGroupSeparator = ".";
 }
 
 
@@ -40,27 +43,27 @@
             <dl class="home-food-list">
                 <div class="home-food-item">
                     <dt><img src='@Url.Content("~/img/azeite.png")' alt="" /><span>@Localizer["Azeite"]</span></dt>
-                    <dd><span class="home-food-total">@Model.TotalDonations[0].Total.ToString("00000")</span><small>@Model.ProductCatalogue[0].UnitOfMeasure</small></dd>
+                    <dd><span class="home-food-total">@Model.TotalDonations[0].Total.ToString("#,##0", donationNumberFormat)</span><small>@Model.ProductCatalogue[0].UnitOfMeasure</small></dd>
                 </div>
                 <div class="home-food-item">
                     <dt><img src='@Url.Content("~/img/oleo.png")' alt="" /><span>@Localizer["Oleo"]</span></dt>
-                    <dd><span class="home-food-total">@Model.TotalDonations[1].Total.ToString("00000")</span><small>@Model.ProductCatalogue[1].UnitOfMeasure</small></dd>
+                    <dd><span class="home-food-total">@Model.TotalDonations[1].Total.ToString("#,##0", donationNumberFormat)</span><small>@Model.ProductCatalogue[1].UnitOfMeasure</small></dd>
                 </div>
                 <div class="home-food-item">
                     <dt><img src='@Url.Content("~/img/leite.png")' alt="" /><span>@Localizer["Leite"]</span></dt>
-                    <dd><span class="home-food-total">@Model.TotalDonations[2].Total.ToString("00000")</span><small>@Model.ProductCatalogue[2].UnitOfMeasure</small></dd>
+                    <dd><span class="home-food-total">@Model.TotalDonations[2].Total.ToString("#,##0", donationNumberFormat)</span><small>@Model.ProductCatalogue[2].UnitOfMeasure</small></dd>
                 </div>
                 <div class="home-food-item">
                     <dt><img src='@Url.Content("~/img/atum.png")' alt="" /><span>@Localizer["Atum"]</span></dt>
-                    <dd><span class="home-food-total">@Model.TotalDonations[3].Total.ToString("00000")</span><small>@Model.ProductCatalogue[3].UnitOfMeasure</small></dd>
+                    <dd><span class="home-food-total">@Model.TotalDonations[3].Total.ToString("#,##0", donationNumberFormat)</span><small>@Model.ProductCatalogue[3].UnitOfMeasure</small></dd>
                 </div>
                 <div class="home-food-item">
                     <dt><img src='@Url.Content("~/img/salsichas.png")' alt="" /><span>@Localizer["Salsichas"]</span></dt>
-                    <dd><span class="home-food-total">@Model.TotalDonations[4].Total.ToString("00000")</span><small>@Model.ProductCatalogue[4].UnitOfMeasure</small></dd>
+                    <dd><span class="home-food-total">@Model.TotalDonations[4].Total.ToString("#,##0", donationNumberFormat)</span><small>@Model.ProductCatalogue[4].UnitOfMeasure</small></dd>
                 </div>
                 <div class="home-food-item">
                     <dt><img src='@Url.Content("~/img/acucar.png")' alt="" /><span>@Localizer["Açucar"]</span></dt>
-                    <dd><span class="home-food-total">@Model.TotalDonations[5].Total.ToString("00000")</span><small>@Model.ProductCatalogue[5].UnitOfMeasure</small></dd>
+                    <dd><span class="home-food-total">@Model.TotalDonations[5].Total.ToString("#,##0", donationNumberFormat)</span><small>@Model.ProductCatalogue[5].UnitOfMeasure</small></dd>
                 </div>
             </dl>
         </section>

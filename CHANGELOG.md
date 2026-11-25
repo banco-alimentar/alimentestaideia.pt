@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
+- Aligned [Donation2 product names](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml.cs) with the localized labels used by `/Donation`.
+  - **Context:** `/Donation2` used product catalogue names directly, so misspellings or catalogue labels that differed from the established donation labels appeared in the form.
+  - **Options considered:** Correct each stored catalogue name or map known product icons to the existing localized resource keys at display time.
+  - **Decision:** Use the existing `/Donation` resource keys for known product icons, preserving catalogue names for other products. This fixes displayed labels without changing stored product data.
+  - **Rollout:** Deploy the web application. No migration or data change is required.
 - Aligned the centrally managed Hosting and related Microsoft.Extensions packages with [Microsoft.AspNetCore.Mvc.Testing](Directory.Packages.props).
   - **Context:** `dotnet test` restore failed with NU1109 because `Microsoft.AspNetCore.Mvc.Testing` 10.0.15 requires Hosting 10.0.15, while central package management pinned Hosting and Hosting.Abstractions to 10.0.14.
   - **Options considered:** Downgrade the test host package or update the centrally pinned Hosting package family to the required patch version.
