@@ -12,6 +12,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Options considered:** Correct each stored catalogue name or map known product icons to the existing localized resource keys at display time.
   - **Decision:** Use the existing `/Donation` resource keys for known product icons, preserving catalogue names for other products. This fixes displayed labels without changing stored product data.
   - **Rollout:** Deploy the web application. No migration or data change is required.
+- Allowed repository admins to bypass the [developer branch ruleset](https://github.com/banco-alimentar/alimentestaideia.pt/rules/27791240) for direct pushes and clarified the [contribution workflow](Documentation/CONTRIBUTING.md).
+  - **Context:** Direct pushes to `developer` were subject to the required `developer-debug` check, secret-alert resolution, and branch deletion protection; the ruleset had no bypass actors.
+  - **Options considered:** Remove the rules for everyone, or retain them and allow repository admins to bypass the ruleset.
+  - **Decision:** Keep the rules active for normal updates and add the repository-admin role as an always-on bypass actor. This permits admins to push directly without a pull request while leaving the rules in force for other contributors.
+  - **Rollout:** The ruleset change is active. Admin direct pushes can bypass validation and may trigger the developer-slot deployment; contributors without admin access continue to use pull requests.
 - Aligned the centrally managed Hosting and related Microsoft.Extensions packages with [Microsoft.AspNetCore.Mvc.Testing](Directory.Packages.props).
   - **Context:** `dotnet test` restore failed with NU1109 because `Microsoft.AspNetCore.Mvc.Testing` 10.0.15 requires Hosting 10.0.15, while central package management pinned Hosting and Hosting.Abstractions to 10.0.14.
   - **Options considered:** Downgrade the test host package or update the centrally pinned Hosting package family to the required patch version.

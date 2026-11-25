@@ -14,7 +14,7 @@ The process is straight-forward.
  - Keep package versions in `Directory.Packages.props`; project files should declare package references without versions.
  - Run `dotnet restore BancoAlimentar.AlimentaEstaIdeia.Web.sln` and `dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --vulnerable --include-transitive --no-restore` when changing dependencies. The solution includes the maintained tool projects and their tests.
  - [Mark any commit with the issue that you're working on](https://gitdailies.com/articles/link-github-commit-to-issue/)
- - Create a Pull Request against the [developer](https://github.com/banco-alimentar/alimentestaideia.pt/tree/developer) branch. Pick an approver (eg: tiagonmas)
+ - Repository admins can push commits directly to the [developer](https://github.com/banco-alimentar/alimentestaideia.pt/tree/developer) branch. Admin direct pushes bypass its ruleset, including required status checks, secret-alert resolution, and branch deletion protection. Contributors without admin access should create a Pull Request against `developer` and pick an approver (eg: tiagonmas).
 
 We make an effor to follow Microsoft's [Code With Engineering Playbook](https://github.com/Microsoft/code-with-engineering-playbook)
 
