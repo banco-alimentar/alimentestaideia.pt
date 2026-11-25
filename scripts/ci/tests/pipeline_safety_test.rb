@@ -305,7 +305,7 @@ class PipelineSafetyTest < Minitest::Test
     refute_nil audit
     assert_match(/Build.Reason.*Schedule/, stage['condition'])
     assert_match(/Build.Reason.*Manual/, stage['condition'])
-    scripts = audit.fetch('steps').filter_map { |step| step['bash'] }
+    scripts = audit.fetch('steps').map { |step| step['bash'] }.compact
     assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--vulnerable') }
     assert scripts.any? { |source| source.include?('dotnet list') && source.include?('--outdated') }
     assert scripts.all? { |source| !source.include?('Tools.Tests') }, 'Audit must not reference the removed standalone Tools.Tests project'
@@ -321,6 +321,10 @@ class PipelineSafetyTest < Minitest::Test
     paths = Dir.glob('azure-pipelines/**/*.yml', base: ROOT)
     paths.each do |path|
       pools = hashes(read_yaml(path)).select { |entry| entry.key?('pool') }.map { |entry| entry.fetch('pool') }
+      if path == SELENIUM_PIPELINE
+        assert_shared_job_reference(read_yaml(path).dig('stages', 0, 'jobs'), path)
+        pools.concat(hashes(read_yaml(TEMPLATE)).select { |entry| entry.key?('pool') }.map { |entry| entry.fetch('pool') })
+      end
       next if pools.empty? && path.end_with?('templates/report-disk-usage.yml')
 
       refute_empty pools, "#{path} must declare its agent pool"
@@ -377,9 +381,11 @@ class PipelineSafetyTest < Minitest::Test
       end
       scenarios.each do |variables|
         expanded = pipeline(path, variables)
-        expected = path == VALIDATION_PIPELINE ? %w[Validation DependencyAudit] : []
+        expected = path == VALIDATION_PIPELINE ? %w[Validation DependencyAudit] : %w[NoReleaseBuild]
         assert_equal expected, expanded.fetch('stages').map { |stage| stage['stage'] },
-                     "#{path} must omit credentialed stages at compile time for #{variables.inspect}"
+                     "#{path} must retain only safe stages at compile time for #{variables.inspect}"
+        assert_equal [], dependency_names(expanded.fetch('stages').first),
+                     "#{path} must have a root stage for #{variables.inspect}"
         assert_no_credentials(expanded)
         refute hashes(expanded).any? { |entry| entry['artifact'] == 'drop' },
                "#{path} must not consume or publish deployment artifacts in untrusted contexts"
@@ -426,7 +432,7 @@ class PipelineSafetyTest < Minitest::Test
           assert_equal false, Expression.new(condition, context(reason), dependencies).value,
                        "#{stage['stage']} allowed unapproved reason #{reason}"
         end
-        dependencies.each_key do |dependency|
+        dependencies.fetch(stage.fetch('stage')).each do |dependency|
           (UNHEALTHY + [nil]).each do |result|
             assert_equal false, Expression.new(condition, context, dependencies.merge(dependency => result)).value,
                          "#{stage['stage']} allowed #{dependency}=#{result.inspect}"

@@ -32,6 +32,22 @@ variables:
   KeyVaultName: alimentaestaideia-key
 
 stages:
+  # Keep a credential-free root stage when release packaging is not allowed. Azure may
+  # still queue this pipeline for PR validation even though YAML declares pr: none.
+  - ${{ if not(and(ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'), in(variables['Build.SourceBranch'], 'refs/heads/developer', 'refs/heads/master'))) }}:
+    - stage: NoReleaseBuild
+      displayName: No release build for this run
+      jobs:
+        - job: SkipReleaseBuild
+          displayName: Skip release packaging
+          pool:
+            name: Default
+          workspace:
+            clean: all
+          steps:
+            - bash: echo "Core release packaging runs only for trusted developer and master builds."
+              displayName: Explain skipped release build
+
   # Omit credentialed stages entirely for PRs, tags, feature refs, and unknown reasons.
   - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'), in(variables['Build.SourceBranch'], 'refs/heads/developer', 'refs/heads/master')) }}:
     - stage: Build

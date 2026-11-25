@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Kept Core pipeline validation stage-safe for pull requests without restoring Selenium.
+  - **Context:** A GitHub PR to `master` queued Core despite `pr: none`. Removing Selenium left no stages after compile-time guards excluded release packaging, so Azure rejected the run because it had no root stage.
+  - **Options considered:** Restore Selenium as a PR stage, expose the credentialed release stage and skip it at runtime, or include a credential-free no-op stage for excluded run contexts.
+  - **Decision:** Add a root stage that only logs why release packaging is skipped. Keep release packaging omitted at compile time for PRs, feature branches, tags, and unsupported run reasons.
+  - **Rollout:** No deployment or database change. PRs and other untrusted contexts now complete the Core pipeline's no-op stage; trusted developer/master builds still run the release package stage.
 - Stabilized the CI backoff and isolated browser-host tests.
   - **Context:** `BootstrapTimeoutEnforcesBackoff` used a 50 ms load deadline, and an isolated browser-host login request exceeded its 20-second client timeout during the integration suite.
   - **Options considered:** Keep the short deadlines and rerun intermittent failures, implement virtual timer support, or use a realistic timeout and run browser-host tests outside other parallel test collections.
