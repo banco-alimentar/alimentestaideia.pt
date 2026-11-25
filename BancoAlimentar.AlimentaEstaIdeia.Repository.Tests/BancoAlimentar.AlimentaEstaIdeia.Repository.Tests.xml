@@ -617,9 +617,9 @@
             Uses CreatedAt for evidence when Date is present but invalid.
             </summary>
         </member>
-        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.EasyPaySubscriptionTransactionSelectorTests.SelectsFailedTransactionEvidence">
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.EasyPaySubscriptionTransactionSelectorTests.RejectsUnpaidTransactionWithoutTerminalFailureEvidence">
             <summary>
-            Selects a failed transaction only when its requested amount and zero paid value match.
+            Matching identity, amount and date do not prove that an unpaid capture has failed.
             </summary>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.EasyPaySubscriptionTransactionSelectorTests.RejectsPaidTransactionAsFailureEvidence">
@@ -1417,6 +1417,20 @@
             Creates a new donation and payment when capture date differs from the initial donation date.
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the result of the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionRepositoryTests.CompleteSubscriptionCaptureReusesInitialDonationLink">
+            <summary>
+            A same-day capture reuses the existing initial-donation link.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionRepositoryTests.CompleteSubscriptionCapturePreservesPaidInitialDonation(Easypay.Rest.Client.Model.NotificationGeneric.StatusEnum,System.Boolean)">
+            <summary>
+            A same-day unmatched capture cannot replace a paid or confirmed initial donation.
+            </summary>
+            <param name="status">Incoming capture status.</param>
+            <param name="confirmed">Whether the initial donation has a confirmed payment.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.SubscriptionRepositoryTests.CanSubscriptionCaptureExistingPayment">
             <summary>
