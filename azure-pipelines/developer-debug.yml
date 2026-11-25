@@ -1,5 +1,5 @@
 # Merged from classic build "developer-debug" (id=11) and release "[DEV] AlimentaEstaIdeia" (id=3).
-# Owns PR/push validation for developer/master and the weekly dependency audit.
+# Owns .NET PR/push validation for developer/master and the weekly dependency audit.
 # Uses the self-hosted Default Linux agent pool; only developer can deploy.
 #
 # Setup in Azure DevOps before first run:
@@ -9,8 +9,8 @@
 #   3. Ensure pipeline extensions are installed: Replace Tokens
 #   4. Create Environments: Developer, Function developer (or rename below)
 #   5. Keep YAML build id=11; disable classic release id=3 after validation
-#   6. Require this pipeline on PRs before disabling the standalone Selenium definition
-#   Isolated .NET/Selenium validation gates packaging/deployment; slot tests remain manual.
+#   6. Selenium runs separately from its manual-only pipeline definition.
+#   .NET validation gates packaging/deployment; slot tests remain manual.
 
 trigger:
   branches:
@@ -50,8 +50,8 @@ variables:
   DeveloperSlot: developer
 
 stages:
-  - stage: BrowserRegression
-    displayName: Build, test and isolated browser regression
+  - stage: Validation
+    displayName: Build and test .NET solution
     condition: ne(variables['Build.Reason'], 'Schedule')
     jobs:
       - job: DotNetTests
@@ -188,21 +188,15 @@ stages:
               artifact: code-coverage
               publishLocation: pipeline
 
-      - template: templates/selenium-job.yml
-        parameters:
-          dependsOn:
-            - DotNetTests
-          condition: succeededOrFailed()
-
   # Omit credentialed stages entirely for PRs, tags, feature refs, and unknown reasons.
   - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'), eq(variables['Build.SourceBranch'], 'refs/heads/developer')) }}:
     - stage: Build
       displayName: Build and package (Debug)
-      dependsOn: BrowserRegression
+      dependsOn: Validation
       condition: >-
         and(
           succeeded(),
-          eq(dependencies.BrowserRegression.result, 'Succeeded'),
+          eq(dependencies.Validation.result, 'Succeeded'),
           ne(variables['Build.Reason'], 'PullRequest'),
           in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
           eq(variables['Build.SourceBranch'], 'refs/heads/developer')
@@ -290,12 +284,12 @@ stages:
 
     - stage: DeployDeveloper
       displayName: Deploy developer slot
-      dependsOn: [Build, BrowserRegression]
+      dependsOn: [Build, Validation]
       condition: >-
         and(
           succeeded(),
           eq(dependencies.Build.result, 'Succeeded'),
-          eq(dependencies.BrowserRegression.result, 'Succeeded'),
+          eq(dependencies.Validation.result, 'Succeeded'),
           ne(variables['Build.Reason'], 'PullRequest'),
           in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
           eq(variables['Build.SourceBranch'], 'refs/heads/developer')
@@ -330,13 +324,13 @@ stages:
 
     - stage: DeployFunctionDeveloper
       displayName: Deploy function developer slot
-      dependsOn: [DeployDeveloper, Build, BrowserRegression]
+      dependsOn: [DeployDeveloper, Build, Validation]
       condition: >-
         and(
           succeeded(),
           eq(dependencies.DeployDeveloper.result, 'Succeeded'),
           eq(dependencies.Build.result, 'Succeeded'),
-          eq(dependencies.BrowserRegression.result, 'Succeeded'),
+          eq(dependencies.Validation.result, 'Succeeded'),
           ne(variables['Build.Reason'], 'PullRequest'),
           in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
           eq(variables['Build.SourceBranch'], 'refs/heads/developer')

@@ -157,12 +157,12 @@ pool:
 ```
 
 Apply that selection at the actual job/template level, including
-[`selenium-job.yml`](../azure-pipelines/templates/selenium-job.yml) when intended;
+[`selenium-job.yml`](../azure-pipelines/templates/selenium-job.yml) for the manual Selenium pipeline;
 a root-level pool cannot override its explicit job pool. Classic definitions
 need separate pool changes in Azure DevOps. Existing pipeline policy tests
 deliberately check hosted pool selections and must be reviewed if YAML is changed.
 
-The Selenium job and Core Release packaging are Linux-compatible. Keep
+The manual Selenium job and Core Release packaging are Linux-compatible. Keep
 `UseDotNet@2` and other tool-installer tasks. No SQL Server, Functions host, or
 cloud credentials are needed for self-contained browser tests.
 

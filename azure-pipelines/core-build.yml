@@ -32,20 +32,13 @@ variables:
   KeyVaultName: alimentaestaideia-key
 
 stages:
-  - stage: BrowserRegression
-    displayName: Isolated browser regression
-    jobs:
-      - template: templates/selenium-job.yml
-
   # Omit credentialed stages entirely for PRs, tags, feature refs, and unknown reasons.
   - ${{ if and(ne(variables['Build.Reason'], 'PullRequest'), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'), in(variables['Build.SourceBranch'], 'refs/heads/developer', 'refs/heads/master')) }}:
     - stage: Build
       displayName: Build and publish
-      dependsOn: BrowserRegression
       condition: >-
         and(
           succeeded(),
-          eq(dependencies.BrowserRegression.result, 'Succeeded'),
           ne(variables['Build.Reason'], 'PullRequest'),
           in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual'),
           in(variables['Build.SourceBranch'], 'refs/heads/developer', 'refs/heads/master')

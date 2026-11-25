@@ -294,14 +294,14 @@ Tools ──► Model, Repository, Sas.*
 
 **Shared:** `Testing.Common` and `Web.TestHost` for `CustomWebApplicationFactory`.
 
-**Selenium prerequisites:** CI uses Chrome/ChromeDriver, Docker Mailpit, and a self-contained host without Azure credentials. Run via `azure-pipelines/developer-debug.yml` or locally before release; live developer-slot tests require separate configuration.
+**Selenium prerequisites:** The manually queued `azure-pipelines/selenium-regression-tests.yml` pipeline uses Chrome/ChromeDriver, Docker Mailpit, and a self-contained host without Azure credentials. Live developer-slot tests require separate configuration.
 
 ### 6.2 Gaps
 
 - No dedicated tests for `Sas.ConfigurationProvider`, **Function** triggers, or **Paypal** project.
 - **Payment webhooks** — limited automated contract/security tests (not enough evidence of full EasyPay signature coverage).
 - **TenantManagement** — no test project.
-- **CI tests** — Azure DevOps runs the test projects and Selenium checks for PRs.
+- **CI tests** — Azure DevOps runs the .NET test projects for PRs. Selenium regression checks run only when the dedicated pipeline is queued manually.
 - Repository/SAS tests depend on **full Web** project.
 
 ### 6.3 Highest-value tests to add first
@@ -321,7 +321,7 @@ Tools ──► Model, Repository, Sas.*
 | **Target frameworks** | Almost all **net9.0**; **Easypay.Rest.Client** is **net8.0**. |
 | **Warnings as errors** | Most projects; undermined on `Sas.ConfigurationProvider` (`WarningLevel` 0). |
 | **Missing pipeline file** | `azure-pipeline-core.yml` in solution, absent on disk. |
-| **Azure DevOps** | PR build, five test projects, Selenium, coverage, and scheduled NuGet audit on the `Default` Linux pool. |
+| **Azure DevOps** | PR build and five .NET test projects, coverage, and scheduled NuGet audit on the `Default` Linux pool; Selenium runs in a separate manual pipeline. |
 | **Package drift** | `Microsoft.AspNetCore.Http.Abstractions` **2.3.0** on some net9 projects alongside `FrameworkReference`. |
 | **Migrations** | Two contexts, two migration assemblies — deploy must run both. |
 | **Publish size** | Large `wwwroot`, tenant themes, PDF generation — `TenantStaticSyncHostedService` for static sync. |

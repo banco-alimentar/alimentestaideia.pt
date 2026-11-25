@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
 
 ### Changed
+- Separated Selenium regression checks into a [manual-only Azure pipeline](azure-pipelines/selenium-regression-tests.yml).
+  - **Context:** Selenium browser tests ran as required stages in both `developer-debug` and Core, extending routine validation and blocking builds/deployments on browser-test results.
+  - **Options considered:** Keep Selenium as an automatic gate in both pipelines, retain it only in one automatic pipeline, or run it through a dedicated manual pipeline.
+  - **Decision:** Remove Selenium from `developer-debug` and Core and make the dedicated regression pipeline manual-only with `trigger: none` and `pr: none`.
+  - **Rollout:** Update Azure DevOps pipeline definition id=15 to use `azure-pipelines/selenium-regression-tests.yml` and ensure definition-level CI, PR, and schedule triggers are disabled. No production or database change is required.
 - Aligned [Donation2 product names](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml.cs) with the localized labels used by `/Donation`.
   - **Context:** `/Donation2` used product catalogue names directly, so misspellings or catalogue labels that differed from the established donation labels appeared in the form.
   - **Options considered:** Correct each stored catalogue name or map known product icons to the existing localized resource keys at display time.
