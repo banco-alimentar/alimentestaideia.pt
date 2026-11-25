@@ -35,6 +35,7 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
     /// <summary>
     /// Exercises the isolated browser application's public contract and real dependencies.
     /// </summary>
+    [Collection(nameof(BrowserTestApplicationCollection))]
     [Trait("Category", "Offline")]
     public class BrowserTestApplicationTests
     {

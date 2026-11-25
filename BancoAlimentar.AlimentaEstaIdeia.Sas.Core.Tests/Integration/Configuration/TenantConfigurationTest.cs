@@ -163,7 +163,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
             using InfrastructureDbContext database = CreateVaultDatabase();
             var cache = new KeyVaultConfigurationCache();
             var clock = new TestClock();
-            var options = new TenantRuntimeOptions { ConfigurationLoadTimeout = TimeSpan.FromMilliseconds(50) };
+            var options = new TenantRuntimeOptions { ConfigurationLoadTimeout = TimeSpan.FromSeconds(2) };
             var pending = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
             int reads = 0;
             Mock<SecretClient> core = CreateSecretClient("Test--Core", () =>
@@ -171,14 +171,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Sas.Core.Tests.Integration.Configurat
             KeyVaultConfigurationManager manager = this.CreateManager(new ConfigurationBuilder().Build(), cache, database, _ => core.Object, options, clock);
             try
             {
-                await manager.LoadTenantConfigurationAsync().WaitAsync(TimeSpan.FromSeconds(2));
+                await manager.LoadTenantConfigurationAsync().WaitAsync(TimeSpan.FromSeconds(5));
                 Assert.Equal("ConfigurationBootstrapTimedOut", manager.GetLastLoadDiagnostics().Stage);
                 Assert.False(cache.GetStatus(1).BootstrapReady);
                 Assert.False(await manager.LoadTenantConfigurationAsync());
                 Assert.Equal(1, reads);
 
                 clock.Advance(options.InitialRetryDelay);
-                Assert.True(await manager.LoadTenantConfigurationAsync());
+                bool retrySucceeded = await manager.LoadTenantConfigurationAsync();
+                var retryDiagnostics = manager.GetLastLoadDiagnostics();
+                Assert.True(retrySucceeded, retryDiagnostics?.Stage);
                 Assert.Equal(2, reads);
             }
             finally

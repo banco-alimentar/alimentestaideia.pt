@@ -7,6 +7,7 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
 {
     using System;
+    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
@@ -117,12 +118,15 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.IntegrationTests
             var repository = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
             var products = repository.ProductCatalogue.GetCurrentProductCatalogue().ProductCatalogues;
             var totals = repository.Donation.GetTotalDonations(products);
+            var donationNumberFormat = (NumberFormatInfo)CultureInfo.GetCultureInfo("pt-PT").NumberFormat.Clone();
+            donationNumberFormat.NumberGroupSeparator = ".";
             Assert.Equal(products.Count, rows.Length);
             Assert.Equal(oliveOilName, rows[0].QuerySelector("dt span").TextContent);
             for (int index = 0; index < rows.Length; index++)
             {
                 Assert.NotNull(rows[index].QuerySelector("dt img[alt='']"));
-                Assert.Equal(totals[index].Total.ToString("00000"), rows[index].QuerySelector("dd .home-food-total").TextContent);
+                var expectedTotal = totals[index].Total.ToString("#,##0", donationNumberFormat);
+                Assert.Equal(expectedTotal, rows[index].QuerySelector("dd .home-food-total").TextContent);
                 Assert.Equal(products[index].UnitOfMeasure, rows[index].QuerySelector("dd small").TextContent);
             }
 

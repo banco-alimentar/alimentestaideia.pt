@@ -1,0 +1,10 @@
+# Manually queued Selenium regression tests.
+
+trigger: none
+pr: none
+
+stages:
+  - stage: SeleniumRegression
+    displayName: Selenium regression tests
+    jobs:
+      - template: templates/selenium-job.yml

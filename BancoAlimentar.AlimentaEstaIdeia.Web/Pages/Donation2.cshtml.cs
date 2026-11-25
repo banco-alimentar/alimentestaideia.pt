@@ -9,6 +9,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -211,6 +212,20 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
             return this.RedirectToPage("/Payment", new { donation.PublicId });
         }
 
+        private static string GetProductNameResourceKey(ProductCatalogue product)
+        {
+            return Path.GetFileName(product.IconUrl)?.ToLowerInvariant() switch
+            {
+                "azeite.png" => "Azeite",
+                "oleo.png" => "Oleo",
+                "leite.png" => "Leite",
+                "atum.png" => "Atum",
+                "salsichas.png" => "Salsichas",
+                "acucar.png" => "Açucar",
+                _ => product.Name,
+            };
+        }
+
         private static IReadOnlyList<SelectListItem> BuildCountries()
         {
             return CultureInfo.GetCultures(CultureTypes.SpecificCultures)
@@ -273,7 +288,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages
                 .Select(product => new Donation2ProductViewModel
                 {
                     Id = product.Id,
-                    Name = product.Name,
+                    Name = GetProductNameResourceKey(product),
                     IconUrl = product.IconUrl,
                     UnitOfMeasure = product.UnitOfMeasure,
                     QuantityPerUnit = product.Quantity ?? 0d,

@@ -6,7 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Stabilized the CI backoff and isolated browser-host tests.
+  - **Context:** `BootstrapTimeoutEnforcesBackoff` used a 50 ms load deadline, and an isolated browser-host login request exceeded its 20-second client timeout during the integration suite.
+  - **Options considered:** Keep the short deadlines and rerun intermittent failures, implement virtual timer support, or use a realistic timeout and run browser-host tests outside other parallel test collections.
+  - **Decision:** Give the backoff test a two-second load deadline with a five-second outer wait and include retry diagnostics on failure. Disable parallel execution for the browser-host test collection.
+  - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
+
 ### Changed
+- Separated Selenium regression checks into a [manual-only Azure pipeline](azure-pipelines/selenium-regression-tests.yml).
+  - **Context:** Selenium browser tests ran as required stages in both `developer-debug` and Core, extending routine validation and blocking builds/deployments on browser-test results.
+  - **Options considered:** Keep Selenium as an automatic gate in both pipelines, retain it only in one automatic pipeline, or run it through a dedicated manual pipeline.
+  - **Decision:** Remove Selenium from `developer-debug` and Core and make the dedicated regression pipeline manual-only with `trigger: none` and `pr: none`.
+  - **Rollout:** Update Azure DevOps pipeline definition id=15 to use `azure-pipelines/selenium-regression-tests.yml` and ensure definition-level CI, PR, and schedule triggers are disabled. No production or database change is required.
+- Aligned [Donation2 product names](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Donation2.cshtml.cs) with the localized labels used by `/Donation`.
+  - **Context:** `/Donation2` used product catalogue names directly, so misspellings or catalogue labels that differed from the established donation labels appeared in the form.
+  - **Options considered:** Correct each stored catalogue name or map known product icons to the existing localized resource keys at display time.
+  - **Decision:** Use the existing `/Donation` resource keys for known product icons, preserving catalogue names for other products. This fixes displayed labels without changing stored product data.
+  - **Rollout:** Deploy the web application. No migration or data change is required.
+- Allowed repository admins to bypass the [developer branch ruleset](https://github.com/banco-alimentar/alimentestaideia.pt/rules/27791240) for direct pushes and clarified the [contribution workflow](Documentation/CONTRIBUTING.md).
+  - **Context:** Direct pushes to `developer` were subject to the required `developer-debug` check, secret-alert resolution, and branch deletion protection; the ruleset had no bypass actors.
+  - **Options considered:** Remove the rules for everyone, or retain them and allow repository admins to bypass the ruleset.
+  - **Decision:** Keep the rules active for normal updates and add the repository-admin role as an always-on bypass actor. This permits admins to push directly without a pull request while leaving the rules in force for other contributors.
+  - **Rollout:** The ruleset change is active. Admin direct pushes can bypass validation and may trigger the developer-slot deployment; contributors without admin access continue to use pull requests.
 - Aligned the centrally managed Hosting and related Microsoft.Extensions packages with [Microsoft.AspNetCore.Mvc.Testing](Directory.Packages.props).
   - **Context:** `dotnet test` restore failed with NU1109 because `Microsoft.AspNetCore.Mvc.Testing` 10.0.15 requires Hosting 10.0.15, while central package management pinned Hosting and Hosting.Abstractions to 10.0.14.
   - **Options considered:** Downgrade the test host package or update the centrally pinned Hosting package family to the required patch version.
