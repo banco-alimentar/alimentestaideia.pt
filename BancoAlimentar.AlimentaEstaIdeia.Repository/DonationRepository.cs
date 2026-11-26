@@ -557,7 +557,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     this.DbContext.Entry(payment).Reload();
                     if (donation != null)
                     {
+                        double previousDonationAmount = donation.DonationAmount;
                         this.DbContext.Entry(donation).Reload();
+                        if (donation.DonationAmount != previousDonationAmount)
+                        {
+                            throw;
+                        }
                     }
 
                     if (this.DbContext.Entry(payment).State == EntityState.Detached
