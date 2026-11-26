@@ -19,6 +19,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
 
 ### Changed
+- Consolidated the current Dependabot package updates in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** Ten Dependabot PRs independently changed central NuGet versions; several targeted the same Application Insights packages, and six proposed major upgrades outside the repository's current .NET 10 compatibility range.
+  - **Options considered:** Merge the individual PRs separately, combine the compatible minor/patch updates, or migrate the application to newer major package APIs and target frameworks as part of this change.
+  - **Decision:** Combine the compatible minor/patch updates. Keep Application Insights 2.23.0 because version 3.x requires an instrumentation migration; keep EF Core, SQLite, and caching packages on 10.0.15 because version 11 targets .NET 11. Preserve the separate future Dependabot grouping rule for minor/patch updates.
+  - **Rollout:** Validate restore, build, and the five test projects before merging the PR into `developer`. No database or production configuration changes are included.
 - Grouped minor and patch NuGet updates in the [Dependabot configuration](.github/dependabot.yml), while keeping major updates separate.
   - **Context:** The weekly Dependabot run opened ten separate NuGet PRs against `developer`; no version-update groups were configured.
   - **Options considered:** Group every NuGet update together, group only minor/patch updates, or keep all updates separate and lower the open-PR limit.
