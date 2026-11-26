@@ -558,7 +558,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                     {
                         double previousDonationAmount = donation.DonationAmount;
                         this.DbContext.Entry(donation).Reload();
-                        if (donation.DonationAmount != previousDonationAmount)
+                        if (Math.Abs(donation.DonationAmount - previousDonationAmount) > 0.000001d)
                         {
                             throw;
                         }
