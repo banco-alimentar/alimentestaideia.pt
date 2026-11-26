@@ -19,6 +19,8 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Caching.Memory;
     using Xunit;
+    using NotificationGeneric = Easypay.Rest.Client.Model.NotificationGeneric;
+    using SinglePaymentStatus = Easypay.Rest.Client.Model.SinglePaymentStatus;
 
     /// <summary>
     /// Relational constraint tests for concurrency-sensitive entities.
@@ -189,6 +191,95 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.NotNull(payment.Completed);
             Assert.Equal(0, payment.FixedFee);
             Assert.Equal(0, payment.Transfer);
+        }
+
+        /// <summary>
+        /// Generic notifications re-evaluate their status when polling completes the payment.
+        /// </summary>
+        /// <param name="status">Incoming notification status.</param>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Theory]
+        [InlineData(NotificationGeneric.StatusEnum.Success)]
+        [InlineData(NotificationGeneric.StatusEnum.Failed)]
+        public async Task GenericWebhookRetriesWhenPollingCompletesDonationConcurrently(NotificationGeneric.StatusEnum status)
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            Donation donation = await SeedGenericDonationAsync(seedContext);
+            string transactionKey = donation.PaymentList.Single().TransactionKey;
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            var telemetryClient = new TelemetryClient(telemetryConfiguration);
+            var pollingCompletion = new BeforeFirstSaveInterceptor(() =>
+            {
+                using ApplicationDbContext pollingContext = CreateContext(connection);
+                Assert.True(new DonationRepository(pollingContext, cache, telemetryClient)
+                    .UpdatePaymentStatus<MBWayPayment>(donation.PublicId, SinglePaymentStatus.Paid));
+            });
+            await using ApplicationDbContext webhookContext = CreateContext(connection, pollingCompletion);
+            var repository = new DonationRepository(webhookContext, cache, telemetryClient);
+
+            (int paymentId, int donationId) = repository.UpdatePaymentTransaction(
+                Guid.NewGuid().ToString(),
+                transactionKey,
+                status,
+                string.Empty);
+
+            Assert.True(pollingCompletion.Executed);
+            Assert.Equal(donation.Id, donationId);
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            Donation persisted = await verificationContext.Donations
+                .Include(value => value.ConfirmedPayment)
+                .SingleAsync();
+            Assert.Equal(PaymentStatus.Payed, persisted.PaymentStatus);
+            Assert.Equal(paymentId, persisted.ConfirmedPayment.Id);
+            Assert.NotEqual(NotificationGeneric.StatusEnum.Failed.ToString(), persisted.ConfirmedPayment.Status);
+            Assert.Equal(status == NotificationGeneric.StatusEnum.Success, persisted.ConfirmedPayment.Completed.HasValue);
+        }
+
+        /// <summary>
+        /// A concurrent successful capture cannot replace a different confirmed payment.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task GenericWebhookRetryPreservesCompetingConfirmedPayment()
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            Donation donation = await SeedGenericDonationAsync(seedContext, includeSecondPayment: true);
+            string transactionKey = donation.PaymentList.First().TransactionKey;
+            int winningPaymentId = donation.PaymentList.Last().Id;
+            var competingCompletion = new BeforeFirstSaveInterceptor(() =>
+            {
+                using ApplicationDbContext competingContext = CreateContext(connection);
+                Donation current = competingContext.Donations.Include(value => value.PaymentList).Single();
+                current.PaymentStatus = PaymentStatus.Payed;
+                current.ConfirmedPayment = current.PaymentList.Single(value => value.Id == winningPaymentId);
+                current.ConfirmedPayment.Status = "Success";
+                competingContext.SaveChanges();
+            });
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            await using ApplicationDbContext webhookContext = CreateContext(connection, competingCompletion);
+            var repository = new DonationRepository(webhookContext, cache, new TelemetryClient(telemetryConfiguration));
+
+            (int paymentId, int donationId) = repository.UpdatePaymentTransaction(
+                Guid.NewGuid().ToString(),
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                string.Empty);
+
+            Assert.True(competingCompletion.Executed);
+            Assert.Equal(donation.Id, donationId);
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            Donation persisted = await verificationContext.Donations
+                .Include(value => value.ConfirmedPayment)
+                .SingleAsync();
+            Assert.Equal(PaymentStatus.Payed, persisted.PaymentStatus);
+            Assert.Equal(winningPaymentId, persisted.ConfirmedPayment.Id);
+            var losingPayment = await verificationContext.Payments.SingleAsync(value => value.Id == paymentId);
+            Assert.NotEqual("Success", losingPayment.Status);
+            Assert.Null(losingPayment.Completed);
         }
 
         /// <summary>
@@ -481,6 +572,33 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             };
         }
 
+        private static async Task<Donation> SeedGenericDonationAsync(
+            ApplicationDbContext context,
+            bool includeSecondPayment = false)
+        {
+            await context.Database.EnsureCreatedAsync();
+            var donation = new Donation
+            {
+                DonationAmount = 10,
+                DonationDate = DateTime.UtcNow,
+                PaymentStatus = PaymentStatus.WaitingPayment,
+                PublicId = Guid.NewGuid(),
+                PaymentList =
+                [
+                    new MBWayPayment { Created = DateTime.UtcNow, TransactionKey = Guid.NewGuid().ToString() },
+                ],
+            };
+            if (includeSecondPayment)
+            {
+                donation.PaymentList.Add(
+                    new MBWayPayment { Created = DateTime.UtcNow, TransactionKey = Guid.NewGuid().ToString() });
+            }
+
+            context.Donations.Add(donation);
+            await context.SaveChangesAsync();
+            return donation;
+        }
+
         private static async Task<EasyPaySubscriptionPaymentEvidence> SeedSubscriptionAsync(ApplicationDbContext context)
         {
             await context.Database.EnsureCreatedAsync();
@@ -529,6 +647,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         private sealed class BeforeFirstSaveInterceptor(Action action) : SaveChangesInterceptor
         {
             public bool Executed { get; private set; }
+
+            public override InterceptionResult<int> SavingChanges(
+                DbContextEventData eventData,
+                InterceptionResult<int> result)
+            {
+                if (!this.Executed)
+                {
+                    this.Executed = true;
+                    action();
+                }
+
+                return base.SavingChanges(eventData, result);
+            }
 
             public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
                 DbContextEventData eventData,

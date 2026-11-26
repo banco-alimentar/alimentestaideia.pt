@@ -521,117 +521,70 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         /// <returns>Returns the base payment id.</returns>
         public (int BasePaymentId, int DonationId) UpdatePaymentTransaction(string easyPayId, string transactionkey, NotificationGeneric.StatusEnum? status, string message)
         {
-            int basePaymentId = 0;
-            int donationId = 0;
             BasePayment payment = this.DbContext.Payments
                 .Where(p => p.TransactionKey == transactionkey)
                 .FirstOrDefault();
-            if (payment != null)
+            if (payment == null)
             {
-                basePaymentId = payment.Id;
-                Donation donation = this.DbContext.Donations
-                    .Include(p => p.ConfirmedPayment)
-                    .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionkey))
-                    .FirstOrDefault();
-
-                if (donation != null)
-                {
-                    switch (status)
-                    {
-                        case NotificationGeneric.StatusEnum.Failed:
-                            {
-                                if (donation.PaymentStatus == PaymentStatus.Payed)
-                                {
-                                    this.TelemetryClient.TrackEvent(
-                                        "PayedDonation-To-Failed-Payment-Try",
-                                        new Dictionary<string, string>()
-                                        {
-                                            { "DonationId", donation.Id.ToString() },
-                                            { "EasyPayId", easyPayId },
-                                            { "TransactionKey", transactionkey },
-                                            { "BasePaymentId", basePaymentId.ToString() },
-                                            { "Message", $"The donation already has a Payed status but it was trying to set to Failed by EasyPay. Cancelling this." },
-                                        });
-                                }
-                                else
-                                {
-                                    payment.Status = status.ToString();
-                                    donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                                }
-
-                                break;
-                            }
-
-                        case NotificationGeneric.StatusEnum.Success:
-                            {
-                                if (this.IsTransactionKeySubcriptionBased(transactionkey)
-                                    && payment is EasyPayWithValuesBaseClass subscriptionPayment
-                                    && (subscriptionPayment.Requested <= 0 || subscriptionPayment.Paid <= 0))
-                                {
-                                    break;
-                                }
-
-                                if (!this.IsTransactionKeySubcriptionBased(transactionkey))
-                                {
-                                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
-                                }
-
-                                if (!this.TryCompleteDonationPayment(
-                                        donation,
-                                        payment,
-                                        transactionKey: transactionkey,
-                                        trustProviderPaidStatus: true))
-                                {
-                                    break;
-                                }
-
-                                payment.Status = status.ToString();
-                                DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
-
-                                this.TelemetryClient.TrackEvent(
-                                    "UpdatePaymentTransaction-Donation-Payed",
-                                    new Dictionary<string, string>()
-                                    {
-                                        { "EasyPayId", easyPayId },
-                                        { "TransactionKey", transactionkey },
-                                        { "BasePaymentId", basePaymentId.ToString() },
-                                        { "DonationId", donation.Id.ToString() },
-                                        { "PaymentStatus", donation.PaymentStatus.ToString() },
-                                        { "Message", $"EasyPay Generic Notification status changed." },
-                                    });
-                                break;
-                            }
-
-                        default:
-                            {
-                                if (donation.PaymentStatus != PaymentStatus.Payed)
-                                {
-                                    payment.Status = status.ToString();
-                                }
-
-                                break;
-                            }
-                    }
-
-                    donationId = donation.Id;
-                }
-                else
-                {
-                    this.TelemetryClient.TrackEvent(
-                        "UpdatePaymentTransaction-Donation-Is-Null",
-                        new Dictionary<string, string>()
-                        {
-                            { "EasyPayId", easyPayId },
-                            { "TransactionKey", transactionkey },
-                            { "BasePaymentId", basePaymentId.ToString() },
-                            { "Message", $"The transaction key {transactionkey} was found for the BasePaymentId {basePaymentId} but not for a donation. So it's null." },
-                        });
-                }
-
-                this.DbContext.SaveChanges();
+                return (0, 0);
             }
 
-            return (basePaymentId, donationId);
+            Donation donation = this.DbContext.Donations
+                .Include(p => p.ConfirmedPayment)
+                .Where(p => p.PaymentList.Any(q => q.TransactionKey == transactionkey))
+                .FirstOrDefault();
+
+            for (int attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    return this.ApplyGenericPaymentNotification(payment, donation, easyPayId, transactionkey, status);
+                }
+                catch (DbUpdateConcurrencyException ex) when (
+                    attempt < MaxPaymentCompletionAttempts
+                    && ex.Entries.Count > 0
+                    && ex.Entries.All(entry => ReferenceEquals(entry.Entity, donation) || ReferenceEquals(entry.Entity, payment)))
+                {
+                    this.TelemetryClient.TrackEvent(
+                        "EasyPayGenericNotificationConcurrencyConflict",
+                        new Dictionary<string, string>
+                        {
+                            { "TransactionKey", transactionkey ?? string.Empty },
+                            { "PaymentId", payment.Id.ToString(CultureInfo.InvariantCulture) },
+                            { "Attempt", attempt.ToString(CultureInfo.InvariantCulture) },
+                        });
+
+                    this.DbContext.Entry(payment).Reload();
+                    if (donation != null)
+                    {
+                        this.DbContext.Entry(donation).Reload();
+                    }
+
+                    if (this.DbContext.Entry(payment).State == EntityState.Detached
+                        || (donation != null && (this.DbContext.Entry(donation).State == EntityState.Detached
+                            || this.DbContext.Entry(payment).Property<int?>("DonationId").CurrentValue != donation.Id))
+                        || payment.TransactionKey != transactionkey)
+                    {
+                        throw;
+                    }
+
+                    if (donation != null)
+                    {
+                        int? confirmedPaymentId = this.GetConfirmedPaymentId(donation);
+                        if (donation.ConfirmedPayment == null && confirmedPaymentId.HasValue)
+                        {
+                            var confirmedPayment = this.DbContext.Entry(donation).Reference(value => value.ConfirmedPayment);
+                            confirmedPayment.IsLoaded = false;
+                            confirmedPayment.Load();
+                        }
+
+                        if (donation.ConfirmedPayment?.Id != confirmedPaymentId)
+                        {
+                            throw;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1312,6 +1265,116 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             payment.VariableFee = variableFee;
             payment.Tax = tax;
             payment.Transfer = transfer;
+        }
+
+        private (int BasePaymentId, int DonationId) ApplyGenericPaymentNotification(
+            BasePayment payment,
+            Donation donation,
+            string easyPayId,
+            string transactionKey,
+            NotificationGeneric.StatusEnum? status)
+        {
+            if (donation != null)
+            {
+                switch (status)
+                {
+                    case NotificationGeneric.StatusEnum.Failed:
+                        if (donation.PaymentStatus == PaymentStatus.Payed)
+                        {
+                            this.TelemetryClient.TrackEvent(
+                                "PayedDonation-To-Failed-Payment-Try",
+                                new Dictionary<string, string>
+                                {
+                                    { "DonationId", donation.Id.ToString() },
+                                    { "EasyPayId", easyPayId },
+                                    { "TransactionKey", transactionKey },
+                                    { "BasePaymentId", payment.Id.ToString() },
+                                    { "Message", "The donation already has a Payed status but it was trying to set to Failed by EasyPay. Cancelling this." },
+                                });
+                        }
+                        else
+                        {
+                            payment.Status = status.ToString();
+                            donation.PaymentStatus = PaymentStatus.ErrorPayment;
+                        }
+
+                        break;
+
+                    case NotificationGeneric.StatusEnum.Success:
+                        if (this.IsTransactionKeySubcriptionBased(transactionKey)
+                            && payment is EasyPayWithValuesBaseClass subscriptionPayment
+                            && (subscriptionPayment.Requested <= 0 || subscriptionPayment.Paid <= 0))
+                        {
+                            break;
+                        }
+
+                        int? confirmedPaymentId = this.GetConfirmedPaymentId(donation);
+                        if ((confirmedPaymentId.HasValue || donation.ConfirmedPayment != null)
+                            && !this.IsConfirmedPayment(donation, payment, confirmedPaymentId))
+                        {
+                            this.TryCompleteDonationPayment(donation, payment, transactionKey: transactionKey);
+                            break;
+                        }
+
+                        if (!this.IsTransactionKeySubcriptionBased(transactionKey))
+                        {
+                            DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
+                        }
+
+                        if (!this.TryCompleteDonationPayment(
+                                donation,
+                                payment,
+                                transactionKey: transactionKey,
+                                trustProviderPaidStatus: true))
+                        {
+                            break;
+                        }
+
+                        payment.Status = status.ToString();
+                        DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
+                        this.TelemetryClient.TrackEvent(
+                            "UpdatePaymentTransaction-Donation-Payed",
+                            new Dictionary<string, string>
+                            {
+                                { "EasyPayId", easyPayId },
+                                { "TransactionKey", transactionKey },
+                                { "BasePaymentId", payment.Id.ToString() },
+                                { "DonationId", donation.Id.ToString() },
+                                { "PaymentStatus", donation.PaymentStatus.ToString() },
+                                { "Message", "EasyPay Generic Notification status changed." },
+                            });
+                        break;
+
+                    default:
+                        if (donation.PaymentStatus != PaymentStatus.Payed)
+                        {
+                            payment.Status = status.ToString();
+                        }
+
+                        break;
+                }
+
+                this.DbContext.ChangeTracker.DetectChanges();
+                if (this.DbContext.Entry(payment).State == EntityState.Modified)
+                {
+                    this.DbContext.Entry(donation).Property(value => value.ConcurrencyToken).IsModified = true;
+                }
+            }
+            else
+            {
+                this.TelemetryClient.TrackEvent(
+                    "UpdatePaymentTransaction-Donation-Is-Null",
+                    new Dictionary<string, string>
+                    {
+                        { "EasyPayId", easyPayId },
+                        { "TransactionKey", transactionKey },
+                        { "BasePaymentId", payment.Id.ToString() },
+                        { "Message", $"The transaction key {transactionKey} was found for the BasePaymentId {payment.Id} but not for a donation. So it's null." },
+                    });
+            }
+
+            this.DbContext.SaveChanges();
+            return (payment.Id, donation?.Id ?? 0);
         }
 
         private async Task<int> ApplyEasyPayPaymentCompletionAsync<TPaymentType>(
