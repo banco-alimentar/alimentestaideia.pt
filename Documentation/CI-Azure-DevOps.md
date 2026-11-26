@@ -75,8 +75,9 @@ Manual queues bypass the path filters; the weekly dependency audit and manual pr
 release remain available.
 
 Core still sets `pr: none`; `developer-debug` now owns PR validation for both protected branches.
-Core starts with its release **Build** stage. `developer-debug` starts with **Validation** and
-skips that stage for the weekly audit. Neither pipeline runs Selenium.
+Core runs its release **Build** stage only for trusted branch builds and uses a credential-free
+no-op stage for other run contexts. `developer-debug` starts with **Validation** and skips that
+stage for the weekly audit. Neither pipeline runs Selenium.
 Credentialed stages are included only for the following trusted contexts:
 
 | Pipeline | Source refs | Allowed run reasons | After successful validation |
@@ -86,6 +87,8 @@ Credentialed stages are included only for the following trusted contexts:
 
 For PR refs, tags, feature branches, missing context, or other run reasons, compile-time guards
 omit the stages containing Key Vault, token replacement, release artifact publication, and deployments.
+Core retains a credential-free no-op root stage for those runs so Azure's PR/branch validation
+cannot fail on a pipeline with no stages.
 In `developer-debug`, this also applies to every `master` run: PRs/pushes validate only, while
 scheduled runs audit and manual runs validate/audit. None can deploy a developer slot from `master`.
 Runtime guards repeat the branch/reason checks and require each named dependency to be exactly
