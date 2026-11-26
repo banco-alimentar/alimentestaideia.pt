@@ -19,6 +19,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
 
 ### Changed
+- Grouped minor and patch NuGet updates in the [Dependabot configuration](.github/dependabot.yml), while keeping major updates separate.
+  - **Context:** The weekly Dependabot run opened ten separate NuGet PRs against `developer`; no version-update groups were configured.
+  - **Options considered:** Group every NuGet update together, group only minor/patch updates, or keep all updates separate and lower the open-PR limit.
+  - **Decision:** Group minor and patch updates together and leave major updates individual for separate compatibility review. Preserve `target-branch: developer`.
+  - **Rollout:** Merge this configuration to the repository's default branch (`master`) so Dependabot reads it. Future version-update runs will create a grouped minor/patch PR targeting `developer`; existing PRs remain as they are until manually consolidated or closed.
 - Separated Selenium regression checks into a [manual-only Azure pipeline](azure-pipelines/selenium-regression-tests.yml).
   - **Context:** Selenium browser tests ran as required stages in both `developer-debug` and Core, extending routine validation and blocking builds/deployments on browser-test results.
   - **Options considered:** Keep Selenium as an automatic gate in both pipelines, retain it only in one automatic pipeline, or run it through a dedicated manual pipeline.
