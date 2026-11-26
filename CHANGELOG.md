@@ -19,6 +19,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
 
 ### Changed
+- Made `developer` the required pull-request target and documented that it must remain present in [AGENTS.md](AGENTS.md).
+  - **Context:** Merging PR #934 from `developer` into `master` was followed by GitHub automatically deleting the `developer` head branch.
+  - **Options considered:** Continue opening PRs from `developer` into `master` and rely on restoration, or target all project PRs at `developer` and preserve that integration branch.
+  - **Decision:** Require `developer` as the base for project PRs, prohibit PRs targeting `master`, and prohibit deleting or auto-deleting `developer`.
+  - **Rollout:** The `developer` branch has been restored at its last known commit and its active ruleset protects it. Do not use `developer` as a PR head into `master`; repository-wide automatic head-branch deletion remains enabled.
 - Separated Selenium regression checks into a [manual-only Azure pipeline](azure-pipelines/selenium-regression-tests.yml).
   - **Context:** Selenium browser tests ran as required stages in both `developer-debug` and Core, extending routine validation and blocking builds/deployments on browser-test results.
   - **Options considered:** Keep Selenium as an automatic gate in both pipelines, retain it only in one automatic pipeline, or run it through a dedicated manual pipeline.
