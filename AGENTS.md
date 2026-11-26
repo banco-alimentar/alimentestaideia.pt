@@ -85,5 +85,7 @@ per tenant and run in dry-run mode by default (transaction + rollback).
 - Use conventional commits with a meaningful scope, for example:
   `ci(ado): use Zip Deploy for preprod App Service`.
 - Keep commits focused and reviewable. Run the relevant tests before committing.
+- Target every project pull request at `developer`. Never create a pull request targeting `master`.
+- Keep the remote `developer` branch present and protected. Never delete it, use it as the head branch of a pull request into `master`, or allow automatic post-merge branch deletion to remove it. If it is missing, restore it from its last known commit and verify its protection ruleset.
 - Prefer pull requests for protected branches. Do not bypass branch protection or required checks.
 - Check `git status` before editing and preserve unrelated user changes.
