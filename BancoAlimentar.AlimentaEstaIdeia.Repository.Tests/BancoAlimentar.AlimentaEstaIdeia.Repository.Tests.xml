@@ -1170,6 +1170,18 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the operation.</returns>
         </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.RelationalConcurrencyModelTests.GenericWebhookRejectsAlreadyConfirmedCompetingPayment">
+            <summary>
+            A successful notification for an already superseded payment must be rejected.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the operation.</returns>
+        </member>
+        <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.RelationalConcurrencyModelTests.GenericWebhookReloadsDonationBeforePayment">
+            <summary>
+            A completion between reloads must not be overwritten using a newer donation token.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the operation.</returns>
+        </member>
         <member name="M:BancoAlimentar.AlimentaEstaIdeia.Repository.Tests.RelationalConcurrencyModelTests.EasyPayWebhookRejectsSecondSuccessfulCapture">
             <summary>
             A competing capture cannot replace a donation's already confirmed payment.

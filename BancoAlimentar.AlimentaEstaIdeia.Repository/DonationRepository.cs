@@ -554,7 +554,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                             { "Attempt", attempt.ToString(CultureInfo.InvariantCulture) },
                         });
 
-                    this.DbContext.Entry(payment).Reload();
                     if (donation != null)
                     {
                         double previousDonationAmount = donation.DonationAmount;
@@ -565,6 +564,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         }
                     }
 
+                    this.DbContext.Entry(payment).Reload();
                     if (this.DbContext.Entry(payment).State == EntityState.Detached
                         || (donation != null && (this.DbContext.Entry(donation).State == EntityState.Detached
                             || this.DbContext.Entry(payment).Property<int?>("DonationId").CurrentValue != donation.Id))
@@ -1279,6 +1279,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             string transactionKey,
             NotificationGeneric.StatusEnum? status)
         {
+            bool donationPayed = false;
             if (donation != null)
             {
                 switch (status)
@@ -1306,18 +1307,19 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
                         break;
 
                     case NotificationGeneric.StatusEnum.Success:
-                        if (this.IsTransactionKeySubcriptionBased(transactionKey)
-                            && payment is EasyPayWithValuesBaseClass subscriptionPayment
-                            && (subscriptionPayment.Requested <= 0 || subscriptionPayment.Paid <= 0))
-                        {
-                            break;
-                        }
-
                         int? confirmedPaymentId = this.GetConfirmedPaymentId(donation);
                         if ((confirmedPaymentId.HasValue || donation.ConfirmedPayment != null)
                             && !this.IsConfirmedPayment(donation, payment, confirmedPaymentId))
                         {
                             this.TryCompleteDonationPayment(donation, payment, transactionKey: transactionKey);
+                            throw new InvalidOperationException(
+                                $"EasyPay capture {easyPayId} belongs to a donation already confirmed by another payment.");
+                        }
+
+                        if (this.IsTransactionKeySubcriptionBased(transactionKey)
+                            && payment is EasyPayWithValuesBaseClass subscriptionPayment
+                            && (subscriptionPayment.Requested <= 0 || subscriptionPayment.Paid <= 0))
+                        {
                             break;
                         }
 
@@ -1337,17 +1339,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
 
                         payment.Status = status.ToString();
                         DonationPaymentCompletion.MarkSuccessfulEasyPayPayment(payment);
-                        this.TelemetryClient.TrackEvent(
-                            "UpdatePaymentTransaction-Donation-Payed",
-                            new Dictionary<string, string>
-                            {
-                                { "EasyPayId", easyPayId },
-                                { "TransactionKey", transactionKey },
-                                { "BasePaymentId", payment.Id.ToString() },
-                                { "DonationId", donation.Id.ToString() },
-                                { "PaymentStatus", donation.PaymentStatus.ToString() },
-                                { "Message", "EasyPay Generic Notification status changed." },
-                            });
+                        donationPayed = true;
                         break;
 
                     default:
@@ -1379,6 +1371,21 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             }
 
             this.DbContext.SaveChanges();
+            if (donationPayed)
+            {
+                this.TelemetryClient.TrackEvent(
+                    "UpdatePaymentTransaction-Donation-Payed",
+                    new Dictionary<string, string>
+                    {
+                        { "EasyPayId", easyPayId },
+                        { "TransactionKey", transactionKey },
+                        { "BasePaymentId", payment.Id.ToString() },
+                        { "DonationId", donation.Id.ToString() },
+                        { "PaymentStatus", donation.PaymentStatus.ToString() },
+                        { "Message", "EasyPay Generic Notification status changed." },
+                    });
+            }
+
             return (payment.Id, donation?.Id ?? 0);
         }
 

@@ -7,12 +7,16 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Data.Common;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Common.EasyPay;
     using BancoAlimentar.AlimentaEstaIdeia.Model;
     using Microsoft.ApplicationInsights;
+    using Microsoft.ApplicationInsights.Channel;
+    using Microsoft.ApplicationInsights.DataContracts;
     using Microsoft.ApplicationInsights.Extensibility;
     using Microsoft.Data.Sqlite;
     using Microsoft.EntityFrameworkCore;
@@ -208,13 +212,16 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Donation donation = await SeedGenericDonationAsync(seedContext);
             string transactionKey = donation.PaymentList.Single().TransactionKey;
             using var cache = new MemoryCache(new MemoryCacheOptions());
-            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            using var channel = new EventChannel();
+            using var telemetryConfiguration = new TelemetryConfiguration { TelemetryChannel = channel };
             var telemetryClient = new TelemetryClient(telemetryConfiguration);
+            Guid tokenAfterPolling = Guid.Empty;
             var pollingCompletion = new BeforeFirstSaveInterceptor(() =>
             {
                 using ApplicationDbContext pollingContext = CreateContext(connection);
                 Assert.True(new DonationRepository(pollingContext, cache, telemetryClient)
                     .UpdatePaymentStatus<MBWayPayment>(donation.PublicId, SinglePaymentStatus.Paid));
+                tokenAfterPolling = pollingContext.Donations.Single().ConcurrencyToken;
             });
             await using ApplicationDbContext webhookContext = CreateContext(connection, pollingCompletion);
             var repository = new DonationRepository(webhookContext, cache, telemetryClient);
@@ -235,6 +242,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
             Assert.Equal(paymentId, persisted.ConfirmedPayment.Id);
             Assert.NotEqual(NotificationGeneric.StatusEnum.Failed.ToString(), persisted.ConfirmedPayment.Status);
             Assert.Equal(status == NotificationGeneric.StatusEnum.Success, persisted.ConfirmedPayment.Completed.HasValue);
+            Assert.Equal(status == NotificationGeneric.StatusEnum.Success ? 1 : 0, channel.Events.Count(value => value == "UpdatePaymentTransaction-Donation-Payed"));
+            if (status == NotificationGeneric.StatusEnum.Success)
+            {
+                Assert.NotEqual(tokenAfterPolling, persisted.ConcurrencyToken);
+            }
         }
 
         /// <summary>
@@ -259,27 +271,107 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 competingContext.SaveChanges();
             });
             using var cache = new MemoryCache(new MemoryCacheOptions());
-            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            using var channel = new EventChannel();
+            using var telemetryConfiguration = new TelemetryConfiguration { TelemetryChannel = channel };
             await using ApplicationDbContext webhookContext = CreateContext(connection, competingCompletion);
             var repository = new DonationRepository(webhookContext, cache, new TelemetryClient(telemetryConfiguration));
 
-            (int paymentId, int donationId) = repository.UpdatePaymentTransaction(
+            Assert.Throws<InvalidOperationException>(() => repository.UpdatePaymentTransaction(
                 Guid.NewGuid().ToString(),
                 transactionKey,
                 NotificationGeneric.StatusEnum.Success,
-                string.Empty);
+                string.Empty));
 
             Assert.True(competingCompletion.Executed);
-            Assert.Equal(donation.Id, donationId);
+            Assert.DoesNotContain("UpdatePaymentTransaction-Donation-Payed", channel.Events);
             await using ApplicationDbContext verificationContext = CreateContext(connection);
             Donation persisted = await verificationContext.Donations
                 .Include(value => value.ConfirmedPayment)
                 .SingleAsync();
             Assert.Equal(PaymentStatus.Payed, persisted.PaymentStatus);
             Assert.Equal(winningPaymentId, persisted.ConfirmedPayment.Id);
-            var losingPayment = await verificationContext.Payments.SingleAsync(value => value.Id == paymentId);
+            var losingPayment = await verificationContext.Payments.SingleAsync(value => value.TransactionKey == transactionKey);
             Assert.NotEqual("Success", losingPayment.Status);
             Assert.Null(losingPayment.Completed);
+        }
+
+        /// <summary>
+        /// A successful notification for an already superseded payment must be rejected.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task GenericWebhookRejectsAlreadyConfirmedCompetingPayment()
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            Donation donation = await SeedGenericDonationAsync(seedContext, includeSecondPayment: true);
+            string transactionKey = donation.PaymentList.First().TransactionKey;
+            int winningPaymentId = donation.PaymentList.Last().Id;
+            donation.PaymentStatus = PaymentStatus.Payed;
+            donation.ConfirmedPayment = donation.PaymentList.Last();
+            await seedContext.SaveChangesAsync();
+
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            await using ApplicationDbContext webhookContext = CreateContext(connection);
+            var repository = new DonationRepository(webhookContext, cache, new TelemetryClient(telemetryConfiguration));
+            Assert.Throws<InvalidOperationException>(() => repository.UpdatePaymentTransaction(
+                Guid.NewGuid().ToString(),
+                transactionKey,
+                NotificationGeneric.StatusEnum.Success,
+                string.Empty));
+
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            Donation persisted = await verificationContext.Donations.Include(value => value.ConfirmedPayment).SingleAsync();
+            Assert.Equal(winningPaymentId, persisted.ConfirmedPayment.Id);
+            Assert.Null((await verificationContext.Payments.SingleAsync(value => value.TransactionKey == transactionKey)).Completed);
+        }
+
+        /// <summary>
+        /// A completion between reloads must not be overwritten using a newer donation token.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Fact]
+        public async Task GenericWebhookReloadsDonationBeforePayment()
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            Donation donation = await SeedGenericDonationAsync(seedContext);
+            string transactionKey = donation.PaymentList.Single().TransactionKey;
+            DateTime completed = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            var reloads = new BetweenReloadsInterceptor(() =>
+            {
+                using ApplicationDbContext competingContext = CreateContext(connection);
+                Donation current = competingContext.Donations.Include(value => value.PaymentList).Single();
+                var payment = (MBWayPayment)current.PaymentList.Single();
+                current.PaymentStatus = PaymentStatus.Payed;
+                current.ConfirmedPayment = payment;
+                payment.Status = "Success";
+                payment.Completed = completed;
+                payment.Requested = 10;
+                payment.Paid = 10;
+                competingContext.SaveChanges();
+            });
+            var conflict = new BeforeFirstSaveInterceptor(() =>
+            {
+                using ApplicationDbContext competingContext = CreateContext(connection);
+                Donation current = competingContext.Donations.Single();
+                competingContext.Entry(current).Property(value => value.ConcurrencyToken).IsModified = true;
+                competingContext.SaveChanges();
+                reloads.Armed = true;
+            });
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            await using ApplicationDbContext webhookContext = CreateContext(connection, conflict, reloads);
+            var repository = new DonationRepository(webhookContext, cache, new TelemetryClient(telemetryConfiguration));
+
+            repository.UpdatePaymentTransaction(Guid.NewGuid().ToString(), transactionKey, NotificationGeneric.StatusEnum.Success, string.Empty);
+
+            Assert.True(reloads.Executed);
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            var persisted = (MBWayPayment)await verificationContext.Payments.SingleAsync();
+            Assert.Equal(completed, persisted.Completed);
+            Assert.Equal(10, persisted.Paid);
         }
 
         /// <summary>
@@ -673,6 +765,55 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
                 }
 
                 return base.SavingChangesAsync(eventData, result, cancellationToken);
+            }
+        }
+
+        private sealed class BetweenReloadsInterceptor(Action action) : DbCommandInterceptor
+        {
+            private int reads;
+
+            public bool Armed { get; set; }
+
+            public bool Executed { get; private set; }
+
+            public override InterceptionResult<DbDataReader> ReaderExecuting(
+                DbCommand command,
+                CommandEventData eventData,
+                InterceptionResult<DbDataReader> result)
+            {
+                if (this.Armed && !this.Executed && command.CommandText.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase)
+                    && ++this.reads == 2)
+                {
+                    this.Executed = true;
+                    action();
+                }
+
+                return base.ReaderExecuting(command, eventData, result);
+            }
+        }
+
+        private sealed class EventChannel : ITelemetryChannel
+        {
+            public List<string> Events { get; } = [];
+
+            public bool? DeveloperMode { get; set; }
+
+            public string EndpointAddress { get; set; }
+
+            public void Send(ITelemetry item)
+            {
+                if (item is EventTelemetry eventTelemetry)
+                {
+                    this.Events.Add(eventTelemetry.Name);
+                }
+            }
+
+            public void Flush()
+            {
+            }
+
+            public void Dispose()
+            {
             }
         }
 

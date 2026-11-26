@@ -8,10 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - Retried concurrent [Easypay generic payment notifications](BancoAlimentar.AlimentaEstaIdeia.Repository/DonationRepository.cs), with [regression tests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
-  - **Context:** `UpdatePaymentTransaction` could throw `DbUpdateConcurrencyException` when another request updated the same donation during a generic notification.
-  - **Options considered:** Remove the concurrency check, ignore the conflict, or reload the affected records and re-evaluate the notification.
-  - **Decision:** Preserve the concurrency check and retry up to three times using the latest payment and donation state, without replacing an already confirmed payment.
-  - **Rollout:** Deploy the application. No database migration or data script is required.
+  - **Context:** `UpdatePaymentTransaction` could conflict with another update, report an uncommitted success, or acknowledge a capture for a different payment without recording it.
+  - **Options considered:** Ignore conflicts, retain separate capture evidence, or reject competing captures while retrying with current state.
+  - **Decision:** Retry up to three times, reload the donation before the payment, reject competing captures without replacing the confirmation, and emit success telemetry only after saving.
+  - **Rollout:** Deploy the application. Investigate rejected competing captures against provider evidence; no database migration or data script is required.
 - Kept Core pipeline validation stage-safe for pull requests without restoring Selenium.
   - **Context:** A GitHub PR to `master` queued Core despite `pr: none`. Removing Selenium left no stages after compile-time guards excluded release packaging, so Azure rejected the run because it had no root stage.
   - **Options considered:** Restore Selenium as a PR stage, expose the credentialed release stage and skip it at runtime, or include a credential-free no-op stage for excluded run contexts.
