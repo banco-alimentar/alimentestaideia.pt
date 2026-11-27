@@ -446,4 +446,13 @@
   <data name="EmailCommunicationsSentAt" xml:space="preserve"><value>Sent at</value></data>
   <data name="EmailCommunicationsSubject" xml:space="preserve"><value>Subject</value></data>
   <data name="EmailCommunicationsPayment" xml:space="preserve"><value>Payment</value></data>
+  <data name="DonationDetails" xml:space="preserve"><value>Donation details</value></data>
+  <data name="DonationDate" xml:space="preserve"><value>Donation date</value></data>
+  <data name="DonationFoodBank" xml:space="preserve"><value>Food bank</value></data>
+  <data name="DonationAmount" xml:space="preserve"><value>Amount</value></data>
+  <data name="DonationPaymentStatus" xml:space="preserve"><value>Payment status</value></data>
+  <data name="BackToCommunications" xml:space="preserve"><value>Back to communications</value></data>
+  <data name="NotPayed" xml:space="preserve"><value>Not paid</value></data>
+  <data name="WaitingPayment" xml:space="preserve"><value>Awaiting payment</value></data>
+  <data name="ErrorPayment" xml:space="preserve"><value>Payment error</value></data>
 </root>

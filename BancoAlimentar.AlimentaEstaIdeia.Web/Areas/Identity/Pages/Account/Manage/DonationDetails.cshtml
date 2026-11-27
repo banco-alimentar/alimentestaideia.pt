@@ -1,0 +1,19 @@
+﻿@page
+@model BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Manage.DonationDetailsModel
+@{
+    ViewData["Title"] = IdentitySharedLocalizer["DonationDetails"];
+    ViewData["ActivePage"] = ManageNavPages.Communications;
+}
+
+<h4>@IdentitySharedLocalizer["DonationDetails"] #@Model.Donation.Id</h4>
+<dl class="row">
+    <dt class="col-sm-3">@IdentitySharedLocalizer["DonationDate"]</dt>
+    <dd class="col-sm-9">@Model.Donation.DonationDate.ToLocalTime()</dd>
+    <dt class="col-sm-3">@IdentitySharedLocalizer["DonationFoodBank"]</dt>
+    <dd class="col-sm-9">@(Model.Donation.FoodBank?.Name ?? "—")</dd>
+    <dt class="col-sm-3">@IdentitySharedLocalizer["DonationAmount"]</dt>
+    <dd class="col-sm-9">@Model.Donation.DonationAmount.ToString("N2") €</dd>
+    <dt class="col-sm-3">@IdentitySharedLocalizer["DonationPaymentStatus"]</dt>
+    <dd class="col-sm-9">@IdentitySharedLocalizer[Model.Donation.PaymentStatus.ToString()]</dd>
+</dl>
+<a asp-page="./Communications">@IdentitySharedLocalizer["BackToCommunications"]</a>
