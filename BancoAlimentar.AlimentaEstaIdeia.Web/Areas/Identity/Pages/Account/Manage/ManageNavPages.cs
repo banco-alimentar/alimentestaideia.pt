@@ -40,11 +40,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         public static string DonationHistory => "DonationHistory";
 
         /// <summary>
-        /// Gets the payment notifications page name.
-        /// </summary>
-        public static string PaymentNotifications => "PaymentNotifications";
-
-        /// <summary>
         /// Gets the communications page name.
         /// </summary>
         public static string Communications => "Communications";
@@ -73,11 +68,6 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Identity.Pages.Account.Mana
         /// Gets the navigation nav class..
         /// </summary>
         public static string DonationHistoryNavClass(ViewContext viewContext) => PageNavClass(viewContext, DonationHistory);
-
-        /// <summary>
-        /// Gets the payment notifications navigation class.
-        /// </summary>
-        public static string PaymentNotificationsNavClass(ViewContext viewContext) => PageNavClass(viewContext, PaymentNotifications);
 
         /// <summary>
         /// Gets the active navigation class for the communications page.

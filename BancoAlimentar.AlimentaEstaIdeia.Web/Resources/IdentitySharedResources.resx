@@ -324,6 +324,15 @@
   <data name="NewPassword" xml:space="preserve">
     <value>Nova password</value>
   </data>
+  <data name="CurrentPassword" xml:space="preserve">
+    <value>Password atual</value>
+  </data>
+  <data name="ChangePassword" xml:space="preserve">
+    <value>Alterar password</value>
+  </data>
+  <data name="UpdatePassword" xml:space="preserve">
+    <value>Atualizar password</value>
+  </data>
   <data name="ManageAccountMessage" xml:space="preserve">
     <value>Altere os parâmetros da sua conta aqui</value>
   </data>
@@ -434,4 +443,13 @@
   <data name="EmailCommunicationsSentAt" xml:space="preserve"><value>Data de envio</value></data>
   <data name="EmailCommunicationsSubject" xml:space="preserve"><value>Assunto</value></data>
   <data name="EmailCommunicationsPayment" xml:space="preserve"><value>Pagamento</value></data>
+  <data name="DonationDetails" xml:space="preserve"><value>Detalhes da doação</value></data>
+  <data name="DonationDate" xml:space="preserve"><value>Data da doação</value></data>
+  <data name="DonationFoodBank" xml:space="preserve"><value>Banco Alimentar</value></data>
+  <data name="DonationAmount" xml:space="preserve"><value>Valor</value></data>
+  <data name="DonationPaymentStatus" xml:space="preserve"><value>Estado do pagamento</value></data>
+  <data name="BackToCommunications" xml:space="preserve"><value>Voltar às comunicações</value></data>
+  <data name="NotPayed" xml:space="preserve"><value>Não pago</value></data>
+  <data name="WaitingPayment" xml:space="preserve"><value>A aguardar pagamento</value></data>
+  <data name="ErrorPayment" xml:space="preserve"><value>Erro no pagamento</value></data>
 </root>

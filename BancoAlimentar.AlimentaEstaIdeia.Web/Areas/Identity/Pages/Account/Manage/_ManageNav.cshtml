@@ -19,20 +19,6 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link @ManageNavPages.PaymentNotificationsNavClass(ViewContext)" id="payment-notifications" asp-area="Identity" asp-page="/Account/Manage/PaymentNotifications"
-           aria-current="@(ManageNavPages.PaymentNotificationsNavClass(ViewContext) == "active" ? "page" : null)">
-            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-bell"></i></span>
-            <span>@IdentitySharedLocalizer["PaymentNotifications"]</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link @ManageNavPages.CommunicationsNavClass(ViewContext)" id="communications" asp-area="Identity" asp-page="/Account/Manage/Communications"
-           aria-current="@(ManageNavPages.CommunicationsNavClass(ViewContext) == "active" ? "page" : null)">
-            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-envelope-open-text"></i></span>
-            <span>@IdentitySharedLocalizer["EmailCommunicationsTitle"]</span>
-        </a>
-    </li>
-    <li class="nav-item">
         <a class="nav-link @ManageNavPages.SubscriptionManagementNavClass(ViewContext)" id="subscription-management" asp-area="Identity" asp-page="/Account/Manage/Subscriptions/Index"
            aria-current="@(ManageNavPages.SubscriptionManagementNavClass(ViewContext) == "active" ? "page" : null)">
             <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-sync-alt"></i></span>
@@ -61,6 +47,13 @@
            aria-current="@(ManageNavPages.ChangePasswordNavClass(ViewContext) == "active" ? "page" : null)">
             <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-lock"></i></span>
             <span>@IdentitySharedLocalizer["Password"]</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @ManageNavPages.CommunicationsNavClass(ViewContext)" id="communications" asp-area="Identity" asp-page="/Account/Manage/Communications"
+           aria-current="@(ManageNavPages.CommunicationsNavClass(ViewContext) == "active" ? "page" : null)">
+            <span class="account-manage-nav-icon" aria-hidden="true"><i class="fas fa-envelope-open-text"></i></span>
+            <span>@IdentitySharedLocalizer["EmailCommunicationsTitle"]</span>
         </a>
     </li>
     @if (hasExternalLogins)
