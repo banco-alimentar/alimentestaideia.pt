@@ -6,7 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- Added confidence-filtered batch payment reconciliation to [CleanProdHarden](BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden/Components/Pages/Groups.razor), with a [batch review panel](BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden/Components/Shared/BatchReview.razor) and [workflow guidance](Documentation/CleanProdHarden-Tool.md).
+  - **Context:** Reviewing duplicate EasyPay payment groups one at a time is repetitive when several share the same pattern and confidence.
+  - **Options considered:** Apply one action to every selected group, run an all-or-nothing transaction, automatically execute EF migrations, or reuse each group's recommended decision and existing transaction/audit checks.
+  - **Decision:** Support explicit filtered selection, per-group recommendation previews, a complete batch dry run, typed database confirmation, and sequential per-group applies that stop on the first failure. Preserve manual and deferred decisions; keep EF migrations in the normal deployment workflow.
+  - **Rollout:** Run the updated local tool against a restored copy first. Before applying to each target tenant, back up, pause writers, review recommendations and follow-ups, and dry-run the exact selected batch. Earlier commits remain after a later failure; verify per-group results and audit history before retrying. No schema migration is introduced.
+
 ### Fixed
+- Retry concurrent [MB WAY status updates](BancoAlimentar.AlimentaEstaIdeia.Repository/DonationRepository.cs) and make the [status page](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payments/MBWayPayment.cshtml.cs) check the persisted result before redirecting.
+  - **Context:** The status page could hit `DbUpdateConcurrencyException` while saving a donation another request had updated, and reported the conflict as an Easypay lookup error.
+  - **Options considered:** Suppress the exception on the page, or retry the write after reloading the donation and payment.
+  - **Decision:** Retry eligible conflicts up to three total attempts, preserve an existing confirmation, and redirect only when the database confirms the donation is paid. Conflicts that cannot be resolved still produce exception telemetry.
+  - **Rollout:** Deploy the web application. No migration or data changes are required.
 - Reject single-label email domains in [Donation2](BancoAlimentar.AlimentaEstaIdeia.Web/Model/Pages/Donation2/Donation2InputModel.cs).
   - **Context:** SMTP rejected recipient addresses such as `sfcorreia@pt` because the domain had no dot.
   - **Options considered:** Add a Donation2-only domain check or reuse the established email pattern from the other donation forms.

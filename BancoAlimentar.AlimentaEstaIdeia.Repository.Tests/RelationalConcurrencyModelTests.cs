@@ -198,6 +198,100 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository.Tests
         }
 
         /// <summary>
+        /// A poll racing a successful capture preserves the webhook's confirmation and payment status.
+        /// </summary>
+        /// <param name="status">Status the poll received.</param>
+        /// <param name="initialStatus">Donation status before the capture.</param>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Theory]
+        [InlineData(SinglePaymentStatus.Paid, PaymentStatus.WaitingPayment)]
+        [InlineData(SinglePaymentStatus.Failed, PaymentStatus.WaitingPayment)]
+        [InlineData(SinglePaymentStatus.Failed, PaymentStatus.ErrorPayment)]
+        public async Task PaymentStatusPollPreservesConcurrentWebhookCompletion(SinglePaymentStatus status, PaymentStatus initialStatus)
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            Donation donation = await SeedGenericDonationAsync(seedContext);
+            donation.PaymentStatus = initialStatus;
+            await seedContext.SaveChangesAsync();
+            BasePayment payment = donation.PaymentList.Single();
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var channel = new EventChannel();
+            using var telemetryConfiguration = new TelemetryConfiguration { TelemetryChannel = channel };
+            var telemetryClient = new TelemetryClient(telemetryConfiguration);
+            var webhookCompletion = new BeforeFirstSaveInterceptor(() =>
+            {
+                using ApplicationDbContext webhookContext = CreateContext(connection);
+                var webhook = new DonationRepository(webhookContext, cache, telemetryClient);
+                Assert.Equal(
+                    (payment.Id, donation.Id),
+                    webhook.UpdatePaymentTransaction(
+                        Guid.NewGuid().ToString(),
+                        payment.TransactionKey,
+                        NotificationGeneric.StatusEnum.Success,
+                        string.Empty));
+            });
+            await using ApplicationDbContext pollingContext = CreateContext(connection, webhookCompletion);
+            var repository = new DonationRepository(pollingContext, cache, telemetryClient);
+
+            Assert.True(repository.UpdatePaymentStatus<MBWayPayment>(donation.PublicId, status));
+            Assert.Contains("EasyPayPaymentStatusConcurrencyRetry", channel.Events);
+
+            await using ApplicationDbContext verificationContext = CreateContext(connection);
+            Donation persisted = await verificationContext.Donations
+                .Include(value => value.ConfirmedPayment)
+                .SingleAsync();
+            Assert.Equal(PaymentStatus.Payed, persisted.PaymentStatus);
+            Assert.Equal(payment.Id, persisted.ConfirmedPayment.Id);
+            Assert.Equal(NotificationGeneric.StatusEnum.Success.ToString(), persisted.ConfirmedPayment.Status);
+            Assert.NotNull(persisted.ConfirmedPayment.Completed);
+        }
+
+        /// <summary>
+        /// A poll retries a conflicting write when still needed, but does not hide an exhausted retry.
+        /// </summary>
+        /// <param name="persistentConflict">Whether the conflict recurs on every attempt.</param>
+        /// <returns>A <see cref="Task"/> representing the operation.</returns>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task PaymentStatusPollRetriesUnappliedUpdateUntilLimit(bool persistentConflict)
+        {
+            await using SqliteConnection connection = await CreateOpenConnectionAsync();
+            await using ApplicationDbContext seedContext = CreateContext(connection);
+            Donation donation = await SeedGenericDonationAsync(seedContext);
+            bool madeCompetingUpdate = false;
+            var competingUpdate = new BeforeEverySaveInterceptor(() =>
+            {
+                if (!madeCompetingUpdate || persistentConflict)
+                {
+                    using ApplicationDbContext competingContext = CreateContext(connection);
+                    Donation current = competingContext.Donations.Single();
+                    competingContext.Entry(current).Property(value => value.ConcurrencyToken).IsModified = true;
+                    competingContext.SaveChanges();
+                    madeCompetingUpdate = true;
+                }
+            });
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            using var telemetryConfiguration = TelemetryConfiguration.CreateDefault();
+            await using ApplicationDbContext pollingContext = CreateContext(connection, competingUpdate);
+            var repository = new DonationRepository(pollingContext, cache, new TelemetryClient(telemetryConfiguration));
+
+            if (persistentConflict)
+            {
+                Assert.Throws<DbUpdateConcurrencyException>(
+                    () => repository.UpdatePaymentStatus<MBWayPayment>(donation.PublicId, SinglePaymentStatus.Paid));
+            }
+            else
+            {
+                Assert.True(repository.UpdatePaymentStatus<MBWayPayment>(donation.PublicId, SinglePaymentStatus.Paid));
+            }
+
+            Assert.Equal(persistentConflict ? 3 : 2, competingUpdate.Attempts);
+            Assert.Equal(!persistentConflict, repository.IsDonationPaid(donation.PublicId));
+        }
+
+        /// <summary>
         /// Generic notifications re-evaluate their status when polling completes the payment.
         /// </summary>
         /// <param name="status">Incoming notification status.</param>

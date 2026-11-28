@@ -1,0 +1,251 @@
+@implements IDisposable
+@using Microsoft.Extensions.Logging
+@inject ReviewWorkflow Workflow
+@inject ReviewerSession Reviewer
+@inject ILogger<BatchReview> Logger
+
+<section class="card">
+    <h2>Batch reconciliation (@Groups.Count selected)</h2>
+    <p class="hint">Uses each group's recommendation, not one shared action. Each group has its own transaction and audit. The batch stops on the first failure; earlier commits remain. EF migrations are not run here.</p>
+
+    @if (Groups.Count == 0)
+    {
+        <p class="muted">Filter by pattern and confidence, then select the groups to review.</p>
+    }
+    else
+    {
+        <div class="scroll-x">
+            <table class="table compact">
+                <thead><tr><th>Group</th><th>Confidence</th><th>Action / owner</th><th>Reason and required follow-ups</th></tr></thead>
+                <tbody>
+                    @foreach (AnalyzedGroup group in Groups)
+                    {
+                        <tr>
+                            <td><a href="@($"groups/{group.GroupId}")">@group.GroupId</a><br />@GroupPatternClassifier.Title(group.Recommendation.Pattern)</td>
+                            <td><span class="@Display.ConfidenceCss(group.Recommendation.Confidence)">@group.Recommendation.Confidence</span></td>
+                            <td>
+                                @Display.ActionLabel(group.Recommendation.Action)
+                                @if (group.Recommendation.CanonicalPaymentId.HasValue)
+                                {
+                                    <span> → @group.Recommendation.CanonicalPaymentId</span>
+                                }
+                            </td>
+                            <td>
+                                @group.Recommendation.SuggestedReason
+                                @if (group.Recommendation.FollowUps.Count > 0)
+                                {
+                                    <ul class="followups">
+                                        @foreach (string followUp in group.Recommendation.FollowUps)
+                                        {
+                                            <li>@followUp</li>
+                                        }
+                                    </ul>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <fieldset disabled="@busy">
+            <label class="field">
+                Approved by
+                <input class="input" @bind="approvedBy" @bind:event="oninput" @bind:after="ResetDryRun" placeholder="Reviewer name" />
+            </label>
+            <label class="field">
+                <span><input type="checkbox" @bind="reviewed" @bind:after="ResetDryRun" /> I reviewed every selected recommendation and completed its required follow-ups.</span>
+            </label>
+            <button class="btn primary" disabled="@(busy || !reviewed || string.IsNullOrWhiteSpace(approvedBy) || Target == null)" @onclick="() => RunAsync(dryRun: true)">Dry run selected groups</button>
+            <div class="apply-box">
+                <h3>Apply batch</h3>
+                @if (!Workflow.AllowApply)
+                {
+                    <p class="muted small">Applying is disabled. Enable CleanProdHarden:AllowApply and restart to commit changes.</p>
+                }
+                else if (!DryRunMatches())
+                {
+                    <p class="muted small">Every selected group must pass a dry run of this exact batch and reviewer first.</p>
+                }
+                else
+                {
+                    <p>Pause application/background writers and type <code>@Target?.DatabaseName</code> to commit the batch to <strong>@Target?.ServerName / @Target?.DatabaseName</strong>.</p>
+                    <input class="input" @bind="confirmDatabase" @bind:event="oninput" placeholder="Database name" />
+                    <button class="btn danger" disabled="@(busy || confirmDatabase != Target?.DatabaseName)" @onclick="() => RunAsync(dryRun: false)">Apply selected groups</button>
+                }
+            </div>
+        </fieldset>
+    }
+
+    @if (busy)
+    {
+        <p role="status">Processed @results.Count of @runCount groups. @results.Count(result => result.Committed) committed.</p>
+    }
+    @if (message != null)
+    {
+        <p role="status" class="@(messageIsError ? "text-bad" : "text-ok")">@message</p>
+    }
+    @foreach (ExecutionResult result in results)
+    {
+        <details open="@(!result.Succeeded)">
+            <summary>Group @result.Request.GroupId: @(result.Committed ? "committed" : result.Succeeded ? "dry run passed" : "failed / not started")</summary>
+            <ExecutionResultPanel Result="result" />
+        </details>
+    }
+</section>
+
+@code {
+    private readonly CancellationTokenSource cancellation = new CancellationTokenSource();
+    private readonly List<ExecutionResult> results = new List<ExecutionResult>();
+    private string approvedBy = string.Empty;
+    private string confirmDatabase = string.Empty;
+    private string? selectionKey;
+    private string? dryRunFingerprint;
+    private string? message;
+    private bool messageIsError;
+    private bool reviewed;
+    private bool busy;
+    private int runCount;
+
+    /// <summary>
+    /// Gets or sets the selected groups in execution order.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyList<AnalyzedGroup> Groups { get; set; } = Array.Empty<AnalyzedGroup>();
+
+    /// <summary>
+    /// Gets or sets existing decisions for this target.
+    /// </summary>
+    [Parameter]
+    public IReadOnlyDictionary<int, GroupDecisionRecord> Decisions { get; set; } = new Dictionary<int, GroupDecisionRecord>();
+
+    /// <summary>
+    /// Gets or sets the connected database identity.
+    /// </summary>
+    [Parameter]
+    public TargetIdentity? Target { get; set; }
+
+    /// <summary>
+    /// Gets or sets the callback that locks selection and refreshes decisions after execution.
+    /// </summary>
+    [Parameter]
+    public EventCallback<bool> BusyChanged { get; set; }
+
+    /// <inheritdoc />
+    protected override void OnInitialized()
+    {
+        approvedBy = Reviewer.ReviewerName;
+    }
+
+    /// <inheritdoc />
+    protected override void OnParametersSet()
+    {
+        string key = (Target?.Key ?? string.Empty) + "|" + string.Join("|", Groups.Select(group =>
+            new DecisionInput(group.GroupId, group.Evaluation.EasyPayPaymentId, group.EvidenceHash, group.Recommendation.Action, group.Recommendation.CanonicalPaymentId, group.Recommendation.SuggestedReason, string.Empty, null).Fingerprint(Target?.Key ?? string.Empty)));
+        if (!busy && key != selectionKey)
+        {
+            selectionKey = key;
+            reviewed = false;
+            ResetDryRun();
+        }
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        cancellation.Cancel();
+        cancellation.Dispose();
+    }
+
+    private void ResetDryRun()
+    {
+        dryRunFingerprint = null;
+        confirmDatabase = string.Empty;
+    }
+
+    private DecisionInput[] Inputs()
+    {
+        return Groups.Select(group => BatchSelection.Input(group, approvedBy, Decisions.TryGetValue(group.GroupId, out GroupDecisionRecord? record) ? record : null)).ToArray();
+    }
+
+    private static string Fingerprint(TargetIdentity target, IEnumerable<DecisionInput> inputs)
+    {
+        return string.Join("|", inputs.Select(input => input.Fingerprint(target.Key)));
+    }
+
+    private bool DryRunMatches()
+    {
+        if (Target == null || Groups.Count == 0 || !reviewed || dryRunFingerprint == null)
+        {
+            return false;
+        }
+
+        DecisionInput[] inputs = Inputs();
+        return dryRunFingerprint == Fingerprint(Target, inputs)
+            && inputs.All(input => Decisions.TryGetValue(input.GroupId, out GroupDecisionRecord? record)
+                && record.Status == DecisionStatus.DryRunPassed
+                && record.DryRunFingerprint == input.Fingerprint(Target.Key));
+    }
+
+    private async Task RunAsync(bool dryRun)
+    {
+        busy = true;
+        message = null;
+        results.Clear();
+        runCount = Groups.Count;
+        try
+        {
+            await BusyChanged.InvokeAsync(true);
+            TargetIdentity target = Target ?? throw new InvalidOperationException("The target database is not loaded.");
+            if (!reviewed || string.IsNullOrWhiteSpace(approvedBy))
+            {
+                throw new InvalidOperationException("Review every selected recommendation and enter a reviewer name.");
+            }
+
+            DecisionInput[] inputs = Inputs();
+            string fingerprint = Fingerprint(target, inputs);
+            if (!dryRun && (!Workflow.AllowApply || !DryRunMatches() || confirmDatabase != target.DatabaseName))
+            {
+                throw new InvalidOperationException("Enable apply, pass a dry run of the exact batch, and confirm the target database first.");
+            }
+
+            dryRunFingerprint = null;
+            IReadOnlyList<ExecutionResult> outcomes = dryRun
+                ? await Workflow.DryRunBatchAsync(target, inputs, OnCompletedAsync, cancellation.Token)
+                : await Workflow.ApplyBatchAsync(target, inputs, confirmDatabase, OnCompletedAsync, cancellation.Token);
+            bool succeeded = outcomes.Count == inputs.Length && outcomes.All(result => result.Succeeded && (dryRun || result.Committed));
+            if (dryRun && succeeded)
+            {
+                dryRunFingerprint = fingerprint;
+            }
+
+            messageIsError = !succeeded;
+            message = succeeded
+                ? dryRun ? $"All {inputs.Length} dry runs passed; target database changes were rolled back." : $"All {inputs.Length} groups committed. Refresh the dashboard to check migration readiness."
+                : $"Batch stopped at group {outcomes.Last().Request.GroupId}. {outcomes.Count(result => result.Committed)} groups committed; earlier commits remain. {inputs.Length - outcomes.Count} groups were not attempted. Review the logs before retrying.";
+        }
+        catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+            messageIsError = true;
+            message = $"Batch cancelled. {results.Count(result => result.Committed)} groups committed; earlier commits remain. Check the audit history before retrying.";
+            Logger.LogWarning("Batch reconciliation cancelled after {Count} reported commits.", results.Count(result => result.Committed));
+        }
+        catch (Exception exception)
+        {
+            messageIsError = true;
+            message = $"Batch interrupted: {exception.Message}. {results.Count(result => result.Committed)} groups reported committed; earlier commits remain. Check the database audit history before retrying.";
+            Logger.LogError(exception, "Batch reconciliation interrupted after {Count} reported commits.", results.Count(result => result.Committed));
+        }
+        finally
+        {
+            busy = false;
+            confirmDatabase = string.Empty;
+            await BusyChanged.InvokeAsync(false);
+        }
+    }
+
+    private async Task OnCompletedAsync(ExecutionResult result)
+    {
+        results.Add(result);
+        await InvokeAsync(StateHasChanged);
+    }
+}
