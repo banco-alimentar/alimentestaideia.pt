@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Reject single-label email domains in [Donation2](BancoAlimentar.AlimentaEstaIdeia.Web/Model/Pages/Donation2/Donation2InputModel.cs).
+  - **Context:** SMTP rejected recipient addresses such as `sfcorreia@pt` because the domain had no dot.
+  - **Options considered:** Add a Donation2-only domain check or reuse the established email pattern from the other donation forms.
+  - **Decision:** Reuse the existing donation form pattern, which requires a dotted domain and reports the localized email validation message.
+  - **Rollout:** Deploy the web application. Correct existing donor records with single-label domains separately; no schema migration is required.
 - Kept Core pipeline validation stage-safe for pull requests without restoring Selenium.
   - **Context:** A GitHub PR to `master` queued Core despite `pr: none`. Removing Selenium left no stages after compile-time guards excluded release packaging, so Azure rejected the run because it had no root stage.
   - **Options considered:** Restore Selenium as a PR stage, expose the credentialed release stage and skip it at runtime, or include a credential-free no-op stage for excluded run contexts.
