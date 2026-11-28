@@ -192,6 +192,17 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
+        /// Checks the persisted payment status, independent of any tracked changes.
+        /// </summary>
+        /// <param name="publicId">Public donation id.</param>
+        /// <returns>True if the donation is paid in the database.</returns>
+        public bool IsDonationPaid(Guid publicId)
+        {
+            return this.DbContext.Donations.Any(donation =>
+                donation.PublicId == publicId && donation.PaymentStatus == PaymentStatus.Payed);
+        }
+
+        /// <summary>
         /// Gets the donation id from the transaction id.
         /// </summary>
         /// <param name="transactionKey">Transaction id.</param>
@@ -320,77 +331,59 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
         }
 
         /// <summary>
-        /// Update the status of the credit card payment.
+        /// Updates a donation from a payment status lookup.
         /// </summary>
         /// <param name="publicId">Public donation id.</param>
-        /// <param name="status">New status for the credit card payment.</param>
-        /// <returns>Returns true on successfull update.</returns>
+        /// <param name="status">Status returned by the payment provider.</param>
+        /// <returns>True when the status was applied or did not require a change.</returns>
         /// <typeparam name="TPaymentType">Payment type.</typeparam>
         public bool UpdatePaymentStatus<TPaymentType>(Guid publicId, SinglePaymentStatus status)
             where TPaymentType : BasePayment
         {
-            bool result = false;
             Donation donation = this.DbContext.Donations.Where(p => p.PublicId == publicId).FirstOrDefault();
-            if (donation != null)
+            if (donation == null)
             {
-                TPaymentType targetPayment = this.FindPaymentByType<TPaymentType>(donation.Id);
-                bool isSuccessfulStatus = status == SinglePaymentStatus.Paid
-                    || status == SinglePaymentStatus.Authorised;
-                if (donation.PaymentStatus == PaymentStatus.Payed)
-                {
-                    if (!isSuccessfulStatus)
-                    {
-                        return true;
-                    }
-
-                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, targetPayment);
-                    return targetPayment != null
-                        && this.TryCompleteDonationPayment(
-                            donation,
-                            targetPayment,
-                            trustProviderPaidStatus: true);
-                }
-
-                if (isSuccessfulStatus)
-                {
-                    if (targetPayment == null)
-                    {
-                        return false;
-                    }
-
-                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, targetPayment);
-                    if (!this.TryCompleteDonationPayment(
-                            donation,
-                            targetPayment,
-                            trustProviderPaidStatus: true))
-                    {
-                        return false;
-                    }
-
-                    targetPayment.Status = status.ToString();
-                }
-                else if (status == SinglePaymentStatus.Failed)
-                {
-                    donation.PaymentStatus = PaymentStatus.ErrorPayment;
-                    if (targetPayment != null)
-                    {
-                        targetPayment.Status = status.ToString();
-                    }
-                }
-                else if (status == SinglePaymentStatus.Pending)
-                {
-                    donation.PaymentStatus = PaymentStatus.WaitingPayment;
-                    if (targetPayment != null)
-                    {
-                        targetPayment.Status = status.ToString();
-                    }
-                }
-
-                this.DbContext.SaveChanges();
-                result = true;
+                return false;
             }
 
-            return result;
+            TPaymentType payment = this.FindPaymentByType<TPaymentType>(donation.Id);
+            string transactionKey = payment?.TransactionKey;
+            double donationAmount = donation.DonationAmount;
+            for (int attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    return this.ApplyPolledPaymentStatus(donation, payment, status);
+                }
+                catch (DbUpdateConcurrencyException ex) when (
+                    attempt < MaxPaymentCompletionAttempts
+                    && ex.Entries.Count > 0
+                    && ex.Entries.All(entry => ReferenceEquals(entry.Entity, donation) || ReferenceEquals(entry.Entity, payment)))
+                {
+                    var donationEntry = this.DbContext.Entry(donation);
+                    donationEntry.Reload();
+                    var paymentEntry = payment == null ? null : this.DbContext.Entry(payment);
+                    paymentEntry?.Reload();
+                    if (donationEntry.State == EntityState.Detached
+                        || donation.PublicId != publicId
+                        || Math.Abs(donation.DonationAmount - donationAmount) > 0.000001d
+                        || (paymentEntry != null && (paymentEntry.State == EntityState.Detached
+                            || paymentEntry.Property<int?>("DonationId").CurrentValue != donation.Id
+                            || payment.TransactionKey != transactionKey)))
+                    {
+                        throw;
+                    }
+
+                    this.TelemetryClient.TrackEvent(
+                        "EasyPayPaymentStatusConcurrencyRetry",
+                        new Dictionary<string, string>
+                        {
+                            { "DonationId", donation.Id.ToString(CultureInfo.InvariantCulture) },
+                            { "PaymentId", payment?.Id.ToString(CultureInfo.InvariantCulture) ?? string.Empty },
+                            { "Attempt", attempt.ToString(CultureInfo.InvariantCulture) },
+                        });
+                }
+            }
         }
 
         /// <summary>
@@ -1270,6 +1263,62 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Repository
             payment.VariableFee = variableFee;
             payment.Tax = tax;
             payment.Transfer = transfer;
+        }
+
+        private bool ApplyPolledPaymentStatus(Donation donation, BasePayment payment, SinglePaymentStatus status)
+        {
+            bool wasPaid = donation.PaymentStatus == PaymentStatus.Payed;
+            bool isSuccessfulStatus = status == SinglePaymentStatus.Paid || status == SinglePaymentStatus.Authorised;
+            if (wasPaid && !isSuccessfulStatus)
+            {
+                return true;
+            }
+
+            if (isSuccessfulStatus)
+            {
+                if (payment == null)
+                {
+                    return false;
+                }
+
+                int? confirmedPaymentId = this.GetConfirmedPaymentId(donation);
+                if ((!confirmedPaymentId.HasValue && donation.ConfirmedPayment == null)
+                    || this.IsConfirmedPayment(donation, payment, confirmedPaymentId))
+                {
+                    DonationPaymentCompletion.EnsureEasyPayAmountsFromDonation(donation, payment);
+                }
+
+                if (!this.TryCompleteDonationPayment(donation, payment, trustProviderPaidStatus: true))
+                {
+                    return false;
+                }
+
+                if (wasPaid)
+                {
+                    return true;
+                }
+
+                payment.Status = status.ToString();
+            }
+            else if (status == SinglePaymentStatus.Failed || status == SinglePaymentStatus.Pending)
+            {
+                donation.PaymentStatus = status == SinglePaymentStatus.Failed
+                    ? PaymentStatus.ErrorPayment
+                    : PaymentStatus.WaitingPayment;
+                if (payment != null)
+                {
+                    payment.Status = status.ToString();
+                }
+            }
+
+            if (payment != null && this.DbContext.Entry(payment).State == EntityState.Modified)
+            {
+                // A payment-only change must still check whether the donation was concurrently confirmed.
+                this.DbContext.Entry(donation).Property(value => value.ConcurrencyToken).IsModified = true;
+            }
+
+            this.DbContext.SaveChanges();
+            return true;
         }
 
         private (int BasePaymentId, int DonationId) ApplyGenericPaymentNotification(

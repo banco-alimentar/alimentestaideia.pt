@@ -7,7 +7,10 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
 {
     using System.Collections.Generic;
+    using System.Linq;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Analysis;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Data;
+    using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Decisions;
     using Xunit;
 
     /// <summary>
@@ -15,6 +18,78 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Tests
     /// </summary>
     public class RecommendationEngineTests
     {
+        /// <summary>
+        /// Batch filters combine pattern and exact confidence instead of treating confidence as a threshold.
+        /// </summary>
+        [Fact]
+        public void BatchFiltersMatchPatternAndExactConfidence()
+        {
+            GroupEvaluation first = GroupScenarios.ReconciliationToolCopy();
+            GroupEvaluation second = GroupScenarios.ZeroValueRetries();
+            var high = new AnalyzedGroup(first, "HASH1", GroupContext.Empty, RecommendationEngine.Recommend(first, GroupContext.Empty), false);
+            var otherPattern = new AnalyzedGroup(second, "HASH2", GroupContext.Empty, RecommendationEngine.Recommend(second, GroupContext.Empty), false);
+            var medium = high with { EvidenceHash = "HASH3", Recommendation = high.Recommendation with { Confidence = RecommendationConfidence.Medium } };
+            AnalyzedGroup[] groups = { high, otherPattern, medium };
+
+            Assert.Equal(new[] { high }, BatchSelection.Filter(groups, high.Recommendation.Pattern.ToString(), "High"));
+            Assert.Equal(new[] { medium }, BatchSelection.Filter(groups, high.Recommendation.Pattern.ToString(), "Medium"));
+            Assert.Equal(new[] { high, otherPattern }, BatchSelection.Filter(groups, null, "High"));
+            Assert.Equal(groups, BatchSelection.Filter(groups, null, null).ToArray());
+        }
+
+        /// <summary>
+        /// A batch keeps the recommended owner and reason for each group rather than sharing one action.
+        /// </summary>
+        [Fact]
+        public void BatchSelectionUsesEachRecommendation()
+        {
+            GroupEvaluation[] evaluations = { GroupScenarios.ReconciliationToolCopy(), GroupScenarios.ZeroValueRetries(), GroupScenarios.SupersededAttempts() };
+            var inputs = new List<DecisionInput>();
+            foreach (GroupEvaluation evaluation in evaluations)
+            {
+                var group = new AnalyzedGroup(evaluation, $"HASH{evaluation.GroupId}", GroupContext.Empty, RecommendationEngine.Recommend(evaluation, GroupContext.Empty), false);
+                Assert.Null(BatchSelection.Blocker(group, null));
+                inputs.Add(BatchSelection.Input(group, "Batch Reviewer", null));
+            }
+
+            Assert.Equal(102, inputs[0].CanonicalPaymentId);
+            Assert.Equal(200, inputs[1].CanonicalPaymentId);
+            Assert.Equal(ReconciliationAction.RetireIdentifier, inputs[2].Action);
+            Assert.Null(inputs[2].CanonicalPaymentId);
+            Assert.All(inputs, input => Assert.Equal("Batch Reviewer", input.ApprovedBy));
+            Assert.NotEqual(inputs[0].Reason, inputs[1].Reason);
+        }
+
+        /// <summary>
+        /// Batch selection preserves manual decisions, deferrals, final decisions, and missing recommendations.
+        /// </summary>
+        [Fact]
+        public void BatchSelectionBlocksManualOrIncompleteDecisions()
+        {
+            GroupEvaluation evaluation = GroupScenarios.ReconciliationToolCopy();
+            var group = new AnalyzedGroup(evaluation, "HASH", GroupContext.Empty, RecommendationEngine.Recommend(evaluation, GroupContext.Empty), false);
+            var matching = new GroupDecisionRecord
+            {
+                EvidenceHash = "HASH",
+                Action = group.Recommendation.Action,
+                CanonicalPaymentId = group.Recommendation.CanonicalPaymentId,
+                Reason = group.Recommendation.SuggestedReason,
+                Notes = "Retain my private notes.",
+            };
+            Assert.Null(BatchSelection.Blocker(group, matching));
+            Assert.Equal(matching.Notes, BatchSelection.Input(group, "Reviewer", matching).Notes);
+
+            matching.Reason = "A different, manually reviewed choice.";
+            Assert.NotNull(BatchSelection.Blocker(group, matching));
+            matching.Reason = group.Recommendation.SuggestedReason;
+            matching.Status = DecisionStatus.Deferred;
+            Assert.NotNull(BatchSelection.Blocker(group, matching));
+            matching.Status = DecisionStatus.Applied;
+            Assert.NotNull(BatchSelection.Blocker(group, matching));
+            Assert.NotNull(BatchSelection.Blocker(group with { Recommendation = group.Recommendation with { Action = null } }, null));
+            Assert.NotNull(BatchSelection.Blocker(group with { Recommendation = group.Recommendation with { CanonicalPaymentId = 999 } }, null));
+        }
+
         /// <summary>
         /// Each scenario is classified as the pattern it was built to represent.
         /// </summary>

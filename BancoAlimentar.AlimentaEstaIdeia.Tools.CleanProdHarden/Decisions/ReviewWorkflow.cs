@@ -7,6 +7,8 @@
 namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Decisions
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Analysis;
@@ -95,6 +97,130 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden.Decisions
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Dry-runs the selected decisions sequentially, stopping at the first failure.
+        /// </summary>
+        /// <param name="target">Target identity.</param>
+        /// <param name="inputs">Selected decisions.</param>
+        /// <param name="onCompleted">Reports each completed group.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The outcomes of the attempted groups.</returns>
+        public async Task<IReadOnlyList<ExecutionResult>> DryRunBatchAsync(
+            TargetIdentity target,
+            IReadOnlyList<DecisionInput> inputs,
+            Func<ExecutionResult, Task> onCompleted,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(target);
+            DecisionInput[] snapshot = BatchSnapshot(inputs);
+            foreach (DecisionInput input in snapshot)
+            {
+                GroupDecisionRecord? record = await this.store.GetAsync(target.Key, input.GroupId, cancellationToken);
+                if (record?.Status is DecisionStatus.Applied or DecisionStatus.Deferred)
+                {
+                    throw new InvalidOperationException($"Group {input.GroupId} is applied or deferred. Review it individually instead of overwriting its decision.");
+                }
+            }
+
+            return await RunBatchAsync(snapshot, input => this.DryRunAsync(target, input, cancellationToken), onCompleted, cancellationToken);
+        }
+
+        /// <summary>
+        /// Checks every selected dry run before applying one group at a time. Earlier commits remain if a later group fails.
+        /// </summary>
+        /// <param name="target">Target identity.</param>
+        /// <param name="inputs">Selected decisions.</param>
+        /// <param name="confirmDatabaseName">Database name typed by the reviewer.</param>
+        /// <param name="onCompleted">Reports each completed group.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The outcomes of the attempted groups, or a preflight rejection.</returns>
+        public async Task<IReadOnlyList<ExecutionResult>> ApplyBatchAsync(
+            TargetIdentity target,
+            IReadOnlyList<DecisionInput> inputs,
+            string? confirmDatabaseName,
+            Func<ExecutionResult, Task> onCompleted,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(target);
+            ArgumentNullException.ThrowIfNull(onCompleted);
+            DecisionInput[] snapshot = BatchSnapshot(inputs);
+            foreach (DecisionInput input in snapshot)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ExecutionRequest request = ToRequest(input, dryRun: false, confirmDatabaseName);
+                ExecutionResult? rejection = null;
+                if (!this.AllowApply)
+                {
+                    rejection = Rejected(request, ValidationCodes.ApplyDisabled, "Applying is disabled.");
+                }
+                else if (!string.Equals(confirmDatabaseName?.Trim(), target.DatabaseName, StringComparison.Ordinal))
+                {
+                    rejection = Rejected(request, ValidationCodes.TargetNotConfirmed, $"Type the database name '{target.DatabaseName}' exactly to apply the batch.");
+                }
+                else
+                {
+                    GroupDecisionRecord? record = await this.store.GetAsync(target.Key, input.GroupId, cancellationToken);
+                    if (record?.Status != DecisionStatus.DryRunPassed || record.DryRunFingerprint != input.Fingerprint(target.Key))
+                    {
+                        rejection = Rejected(request, ValidationCodes.DryRunRequired, $"Group {input.GroupId} needs a passing dry run of this exact decision. No batch changes were started.");
+                    }
+                }
+
+                if (rejection != null)
+                {
+                    await onCompleted(rejection);
+                    return new[] { rejection };
+                }
+            }
+
+            return await RunBatchAsync(snapshot, input => this.ApplyAsync(target, input, confirmDatabaseName, cancellationToken), onCompleted, cancellationToken);
+        }
+
+        /// <summary>
+        /// Executes a fixed selection without starting later groups after failure or cancellation.
+        /// </summary>
+        /// <param name="inputs">Selected decisions.</param>
+        /// <param name="run">Per-group workflow.</param>
+        /// <param name="onCompleted">Per-group progress.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>The completed outcomes.</returns>
+        internal static async Task<IReadOnlyList<ExecutionResult>> RunBatchAsync(
+            IReadOnlyList<DecisionInput> inputs,
+            Func<DecisionInput, Task<ExecutionResult>> run,
+            Func<ExecutionResult, Task> onCompleted,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(run);
+            ArgumentNullException.ThrowIfNull(onCompleted);
+            DecisionInput[] snapshot = BatchSnapshot(inputs);
+            var results = new List<ExecutionResult>();
+            foreach (DecisionInput input in snapshot)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ExecutionResult result = await run(input);
+                results.Add(result);
+                await onCompleted(result);
+                if (!result.Succeeded || (!result.Request.DryRun && !result.Committed))
+                {
+                    break;
+                }
+            }
+
+            return results;
+        }
+
+        private static DecisionInput[] BatchSnapshot(IReadOnlyList<DecisionInput> inputs)
+        {
+            ArgumentNullException.ThrowIfNull(inputs);
+            DecisionInput[] snapshot = inputs.ToArray();
+            if (snapshot.Length == 0 || snapshot.Select(input => input.GroupId).Distinct().Count() != snapshot.Length)
+            {
+                throw new ArgumentException("Select at least one group, without duplicate group IDs.", nameof(inputs));
+            }
+
+            return snapshot;
         }
 
         private static ExecutionRequest ToRequest(DecisionInput input, bool dryRun, string? confirmDatabaseName)

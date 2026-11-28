@@ -4,7 +4,7 @@
 
 Migration `20261024174319_HardenPaymentConcurrency` adds the unique filtered index `IX_Payments_EasyPayPaymentId` and fails with SQL error `51000` while any non-null `EasyPayPaymentId` appears on more than one payment. [CleanProdHarden](../BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden) is a local Blazor Server app that lets an operator resolve those duplicate groups one at a time, instead of signing one JSON plan for every group.
 
-For each group the app shows the raw payment, donation, donor, invoice, subscription, notification, and audit evidence. It also shows a plain-language narrative and a recommended action with its reasoning. The operator chooses the action, dry-runs it, and then applies it.
+For each group the app shows the raw payment, donation, donor, invoice, subscription, notification, and audit evidence. It also shows a plain-language narrative and a recommended action with its reasoning. The operator chooses the action, dry-runs it, and then applies it. The Groups page also supports reviewed batches selected by pattern and exact confidence.
 
 The app is a C# port of the rules, validations, and audit tables in [MergeDuplicateEasyPayPaymentIds.sql](../BancoAlimentar.AlimentaEstaIdeia.Web/Migrations/Scripts/MergeDuplicateEasyPayPaymentIds.sql). The [approval workflow](EasyPay-Payment-Reconciliation-Workflow.md) describes the same actions and evidence rules. The app reuses `ApplicationDbContext` and the entities from `BancoAlimentar.AlimentaEstaIdeia.Model`, so it reads the target database through Entity Framework Core like the website does. It does not call the EasyPay API and does not apply EF migrations.
 
@@ -15,6 +15,7 @@ The app is a C# port of the rules, validations, and audit tables in [MergeDuplic
 - **One group per transaction.** Each dry run or apply opens a serializable transaction. It locks `Payments` (`TABLOCKX, HOLDLOCK`) and `Donations` and `Invoices` (`TABLOCK, HOLDLOCK`), then re-reads the group. Dry runs always roll back. Pause writers before applying to production.
 - **Evidence hash.** The group's evidence hash is computed the same way as the SQL planner's. It is recomputed inside the transaction. If the data changed since the operator reviewed it, the run stops with `51007`.
 - **Dry run before apply.** An apply is accepted only when the latest dry run passed for exactly the same target server and database, group, evidence, action, owner, reason, and reviewer. Notes can change without a new dry run.
+- **Batch safety.** Selection is explicit and uses each group's own recommendation. Every selected decision must pass a dry run before any batch apply starts. Execution is sequential and stops on the first failure or cancellation. Each group commits separately: earlier commits remain if a later group fails. Per-group results and audit history identify what committed; a batch is not an all-or-nothing transaction.
 - **Typed confirmation.** Apply asks for the database name. A mismatch is rejected (`51100`) before anything changes.
 - **Audited changes.** The app creates the script's audit tables on first use and writes to them inside the same transaction:
   - `dbo.EasyPayPaymentIdReconciliationPlans`
@@ -75,12 +76,24 @@ dotnet run
 ## Workflow
 
 1. **Dashboard (`/`).** Shows the target server and database and the review progress by pattern. Shows the audit tables and their row counts. Shows whether `HardenPaymentConcurrency` is applied, ready, or blocked, based on duplicate groups, provider IDs over 50 characters, and conflicting invoice groups. The dashboard never applies migrations.
-2. **Groups (`/groups`).** Filter by pattern, rule, recommended action, decision status, or search text. Filters are kept in the URL.
+2. **Groups (`/groups`).** Filter by pattern, exact confidence, rule, recommended action, decision status, or search text. Filters are kept in the URL. Select individual checkboxes or select all eligible filtered groups, then use the batch review panel below the table.
 3. **Group review (`/groups/{id}`).** Read the narrative, member comparison, raw cards, and recommendation. Pick an action, owner, and reason (the suggested reason follows the selected action). Save or defer, then dry-run and review the log. With apply enabled, type the database name and apply.
 4. **History (`/history`).** Lists every recorded event for the current target.
 5. After the last group, the dashboard should show zero duplicates. Back up, then apply the EF migrations in order, as described in the [approval workflow](EasyPay-Payment-Reconciliation-Workflow.md).
 
 Repeat the workflow per tenant database. Decisions made on a local copy do not carry over: the server and database are part of every decision and dry-run fingerprint.
+
+### Batch Review
+
+1. Choose a pattern and confidence (for example, **Reconciliation tool copy / High**). "Select all eligible filtered groups" selects only the visible matching groups; individual checkboxes let you exclude any member of the batch. Changing filters clears selection. Selected groups stay in the batch preview if a decision-status filter hides them after a dry run, so the reviewed batch can still be applied.
+2. Review each selected group's action, recommended owner, reason, and required follow-ups in the batch preview. Confidence is not approval: Low and Medium recommendations still require their external evidence checks.
+3. Enter the reviewer name and explicitly acknowledge reviewing every recommendation and completing its follow-ups. Dry-run the selected groups. Each dry run rolls back target database changes and records its outcome in the local decision history.
+4. With `AllowApply` enabled, type the connected database name and apply the batch. Every group's exact decision must still have a passing dry run. Changing the selection, evidence, or reviewer requires a new complete batch dry run.
+5. Inspect per-group results. A failure stops the batch; previously committed groups are not rolled back. Refresh the database view and select only the remaining eligible groups for a new review and dry run. If execution was interrupted, verify the database audit history before retrying.
+
+Groups without a complete recommendation, applied or deferred decisions, and saved decisions whose evidence, action, owner, or reason differs from the recommendation are not eligible. Review those groups individually; batch selection does not overwrite manual decisions or choose deletion alternatives. Private notes on matching decisions are preserved.
+
+Batch reconciliation does **not** apply EF migrations. Once the dashboard reports readiness, back up and use the normal ordered migration/deployment workflow.
 
 ## Validation Codes
 
@@ -116,6 +129,7 @@ The unit tests cover:
 - Pattern classification and recommendations.
 - Every validation code.
 - The decision store and the dry-run-before-apply gate.
+- Batch recommendation selection, sequential stop-on-failure/cancellation, preservation of existing decisions, and whole-selection dry-run and target-confirmation gates.
 - The loopback restriction.
 
 Three SQL Server tests run only when `CLEANPRODHARDEN_TEST_SQL` contains a connection string. They dry-run the recommended action for one group of each pattern, check stale-evidence and unconfirmed-apply rejection, and assert that the evidence hashes are unchanged. They never commit.

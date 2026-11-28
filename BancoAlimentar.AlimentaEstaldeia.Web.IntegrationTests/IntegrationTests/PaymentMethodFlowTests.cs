@@ -323,6 +323,33 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
         }
 
         /// <summary>
+        /// A paid provider response redirects only if the donation can actually be marked paid.
+        /// </summary>
+        /// <param name="removePayment">Whether the local payment is missing.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task MBWayPayment_PaidResponse_RequiresPersistedConfirmation(bool removePayment)
+        {
+            using var response = await this.GetMbWayStatusPageAsync(
+                MbWayFailedPaymentId,
+                lookupStatus: "paid",
+                removePayment: removePayment);
+
+            if (removePayment)
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains("We could not verify the payment status", await response.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+                Assert.Contains("/Thanks", response.Headers.Location?.ToString());
+            }
+        }
+
+        /// <summary>
         /// Anonymous donor starting Multibanco payment is redirected to the Multibanco page and a payment row is stored.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -525,6 +552,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             string lookupStatus = "pending",
             ApiException lookupException = null)
         {
+            using var response = await this.GetMbWayStatusPageAsync(paymentId, lookupStatus, lookupException);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        private async Task<HttpResponseMessage> GetMbWayStatusPageAsync(
+            string paymentId,
+            string lookupStatus,
+            ApiException lookupException = null,
+            bool removePayment = false)
+        {
             var webFactory = this.factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
@@ -557,9 +595,17 @@ namespace BancoAlimentar.AlimentaEstaldeia.Web.IntegrationTests.IntegrationTests
             var mbWayResponse = await client.PostAsync("/Payment?handler=MbWay", mbWayRequest);
             Assert.Equal(HttpStatusCode.Redirect, mbWayResponse.StatusCode);
 
-            var mbWayPageResponse = await client.GetAsync(mbWayResponse.Headers.Location);
-            mbWayPageResponse.EnsureSuccessStatusCode();
-            return await mbWayPageResponse.Content.ReadAsStringAsync();
+            if (removePayment)
+            {
+                using var scope = webFactory.Services.CreateScope();
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                int id = int.Parse(donationId);
+                var payment = await context.MBWayPayments.SingleAsync(value => value.Donation.Id == id);
+                context.MBWayPayments.Remove(payment);
+                await context.SaveChangesAsync();
+            }
+
+            return await client.GetAsync(mbWayResponse.Headers.Location);
         }
     }
 }
