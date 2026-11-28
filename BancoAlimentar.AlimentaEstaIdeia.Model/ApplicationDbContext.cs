@@ -310,6 +310,14 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Model
                     .HasForeignKey(e => e.CampaignId);
             });
 
+            modelBuilder.Entity<BasePayment>(payment =>
+            {
+                payment.Property(value => value.TransactionKey)
+                    .IsConcurrencyToken();
+                payment.Property<int?>("DonationId")
+                    .IsConcurrencyToken();
+            });
+
             modelBuilder.Entity<DonationItem>(item =>
             {
                 item.HasOne(i => i.Donation)
