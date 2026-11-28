@@ -132,6 +132,7 @@
   <data name="Description" xml:space="preserve"><value>Descripción</value></data>
   <data name="Details" xml:space="preserve"><value>Detalles</value></data>
   <data name="Donation" xml:space="preserve"><value>Donación</value></data>
+  <data name="DonationId" xml:space="preserve"><value>ID de donación</value></data>
   <data name="DonationAmount" xml:space="preserve"><value>Importe de la donación</value></data>
   <data name="DonationDate" xml:space="preserve"><value>Fecha de la donación</value></data>
   <data name="DonationSubscriptionInitial" xml:space="preserve"><value>Donación inicial de la suscripción</value></data>
@@ -214,6 +215,7 @@
   <data name="TwoFactorEnabled" xml:space="preserve"><value>Autenticación de dos factores</value></data>
   <data name="UnitOfMeasure" xml:space="preserve"><value>Unidad de medida</value></data>
   <data name="UserDetails" xml:space="preserve"><value>Detalles del usuario</value></data>
+  <data name="NoUserLinkedToDonation" xml:space="preserve"><value>No hay ningún usuario registrado asociado a esta donación.</value></data>
   <data name="UserDetailsTableOfContents" xml:space="preserve"><value>En esta página</value></data>
   <data name="UserDonations" xml:space="preserve"><value>Donaciones del usuario</value></data>
   <data name="UserName" xml:space="preserve"><value>Nombre de usuario</value></data>

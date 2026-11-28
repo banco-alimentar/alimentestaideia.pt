@@ -107,6 +107,51 @@
     </dl>
 </div>
 
+<h4 class="mt-4">@AdminSharedLocalizer["UserDetails"]</h4>
+<hr />
+@if (Model.Donation.User == null)
+{
+    <p class="text-muted">@AdminSharedLocalizer["NoUserLinkedToDonation"]</p>
+    <dl class="row">
+        <dt class="col-sm-2">@AdminSharedLocalizer["Nif"]</dt>
+        <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.Nif) ? "—" : Model.Donation.Nif)</dd>
+    </dl>
+}
+else
+{
+    <dl class="row">
+        <dt class="col-sm-2">@AdminSharedLocalizer["FullName"]</dt>
+        <dd class="col-sm-10">
+            <a asp-area="Admin" asp-page="/Users/Details" asp-route-id="@Model.Donation.User.Id">
+                @(string.IsNullOrWhiteSpace(Model.Donation.User.FullName) ? "—" : Model.Donation.User.FullName)
+            </a>
+        </dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["Email"]</dt>
+        <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Email) ? "—" : Model.Donation.User.Email)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["Nif"]</dt>
+        <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Nif) ? Model.Donation.Nif ?? "—" : Model.Donation.User.Nif)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["CompanyName"]</dt>
+        <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.CompanyName) ? "—" : Model.Donation.User.CompanyName)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["PhoneNumber"]</dt>
+        <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.PhoneNumber) ? "—" : Model.Donation.User.PhoneNumber)</dd>
+        <dt class="col-sm-2">@AdminSharedLocalizer["UserName"]</dt>
+        <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.UserName) ? "—" : Model.Donation.User.UserName)</dd>
+        @if (Model.Donation.User.Address != null)
+        {
+            <dt class="col-sm-2">@AdminSharedLocalizer["Address1"]</dt>
+            <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Address.Address1) ? "—" : Model.Donation.User.Address.Address1)</dd>
+            <dt class="col-sm-2">@AdminSharedLocalizer["Address2"]</dt>
+            <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Address.Address2) ? "—" : Model.Donation.User.Address.Address2)</dd>
+            <dt class="col-sm-2">@AdminSharedLocalizer["City"]</dt>
+            <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Address.City) ? "—" : Model.Donation.User.Address.City)</dd>
+            <dt class="col-sm-2">@AdminSharedLocalizer["PostalCode"]</dt>
+            <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Address.PostalCode) ? "—" : Model.Donation.User.Address.PostalCode)</dd>
+            <dt class="col-sm-2">@AdminSharedLocalizer["Country"]</dt>
+            <dd class="col-sm-10">@(string.IsNullOrWhiteSpace(Model.Donation.User.Address.Country) ? "—" : Model.Donation.User.Address.Country)</dd>
+        }
+    </dl>
+}
+
 <h4 class="mt-4">@AdminSharedLocalizer["PaymentsTitle"]</h4>
 <hr />
 @if (Model.Payments.Count == 0)
