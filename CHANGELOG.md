@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Fixed
+- Reject single-label email domains in [Donation2](BancoAlimentar.AlimentaEstaIdeia.Web/Model/Pages/Donation2/Donation2InputModel.cs).
+  - **Context:** SMTP rejected recipient addresses such as `sfcorreia@pt` because the domain had no dot.
+  - **Options considered:** Add a Donation2-only domain check or reuse the established email pattern from the other donation forms.
+  - **Decision:** Reuse the existing donation form pattern, which requires a dotted domain and reports the localized email validation message.
+  - **Rollout:** Deploy the web application. Correct existing donor records with single-label domains separately; no schema migration is required.
 - Retried concurrent [Easypay generic payment notifications](BancoAlimentar.AlimentaEstaIdeia.Repository/DonationRepository.cs), with [regression tests](BancoAlimentar.AlimentaEstaIdeia.Repository.Tests/RelationalConcurrencyModelTests.cs).
   - **Context:** `UpdatePaymentTransaction` could conflict with another update, report an uncommitted success, or acknowledge a capture for a different payment without recording it.
   - **Options considered:** Ignore conflicts, retain separate capture evidence, or reject competing captures while retrying with current state.
@@ -24,6 +29,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
 
 ### Changed
+- Consolidated the current Dependabot package updates in [Directory.Packages.props](Directory.Packages.props).
+  - **Context:** Ten Dependabot PRs independently changed central NuGet versions; several targeted the same Application Insights packages, and six proposed major upgrades outside the repository's current .NET 10 compatibility range.
+  - **Options considered:** Merge the individual PRs separately, combine the compatible minor/patch updates, or migrate the application to newer major package APIs and target frameworks as part of this change.
+  - **Decision:** Combine the compatible minor/patch updates. Keep Application Insights 2.23.0 because version 3.x requires an instrumentation migration; keep EF Core, SQLite, and caching packages on 10.0.15 because version 11 targets .NET 11. Preserve the separate future Dependabot grouping rule for minor/patch updates.
+  - **Rollout:** Validate restore, build, and the five test projects before merging the PR into `developer`. No database or production configuration changes are included.
+- Grouped minor and patch NuGet updates in the [Dependabot configuration](.github/dependabot.yml), while keeping major updates separate.
+  - **Context:** The weekly Dependabot run opened ten separate NuGet PRs against `developer`; no version-update groups were configured.
+  - **Options considered:** Group every NuGet update together, group only minor/patch updates, or keep all updates separate and lower the open-PR limit.
+  - **Decision:** Group minor and patch updates together and leave major updates individual for separate compatibility review. Preserve `target-branch: developer`.
+  - **Rollout:** Merge this configuration to the repository's default branch (`master`) so Dependabot reads it. Future version-update runs will create a grouped minor/patch PR targeting `developer`; existing PRs remain as they are until manually consolidated or closed.
+- Made `developer` the required pull-request target and documented that it must remain present in [AGENTS.md](AGENTS.md).
+  - **Context:** Merging PR #934 from `developer` into `master` was followed by GitHub automatically deleting the `developer` head branch.
+  - **Options considered:** Continue opening PRs from `developer` into `master` and rely on restoration, or target all project PRs at `developer` and preserve that integration branch.
+  - **Decision:** Require `developer` as the base for project PRs, prohibit PRs targeting `master`, and prohibit deleting or auto-deleting `developer`.
+  - **Rollout:** The `developer` branch has been restored at its last known commit and its active ruleset protects it. Do not use `developer` as a PR head into `master`; repository-wide automatic head-branch deletion remains enabled.
 - Separated Selenium regression checks into a [manual-only Azure pipeline](azure-pipelines/selenium-regression-tests.yml).
   - **Context:** Selenium browser tests ran as required stages in both `developer-debug` and Core, extending routine validation and blocking builds/deployments on browser-test results.
   - **Options considered:** Keep Selenium as an automatic gate in both pipelines, retain it only in one automatic pipeline, or run it through a dedicated manual pipeline.

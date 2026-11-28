@@ -43,7 +43,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Model.Pages.Donation2
         /// Gets or sets the donor email address.
         /// </summary>
         [StringLength(256, ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailStringLength")]
-        [EmailAddress(ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailInvalid")]
+        [RegularExpression(@"\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*", ErrorMessageResourceType = typeof(ValidationMessages), ErrorMessageResourceName = "EmailInvalid")]
         public string? Email { get; set; }
 
         /// <summary>

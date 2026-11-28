@@ -123,6 +123,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
                 .Include(donation => donation.Campaign)
                 .Include(donation => donation.FoodBank)
                 .Include(donation => donation.User)
+                    .ThenInclude(user => user.Address)
                 .Include(donation => donation.ConfirmedPayment)
                 .Include(donation => donation.PaymentList)
                 .FirstOrDefaultAsync(donation => donation.Id == id);

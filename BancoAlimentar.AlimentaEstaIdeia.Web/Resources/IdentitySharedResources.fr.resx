@@ -383,4 +383,13 @@
   <data name="EmailCommunicationsSentAt" xml:space="preserve"><value>Envoyé le</value></data>
   <data name="EmailCommunicationsSubject" xml:space="preserve"><value>Objet</value></data>
   <data name="EmailCommunicationsPayment" xml:space="preserve"><value>Paiement</value></data>
+  <data name="DonationDetails" xml:space="preserve"><value>Détails du don</value></data>
+  <data name="DonationDate" xml:space="preserve"><value>Date du don</value></data>
+  <data name="DonationFoodBank" xml:space="preserve"><value>Banque alimentaire</value></data>
+  <data name="DonationAmount" xml:space="preserve"><value>Montant</value></data>
+  <data name="DonationPaymentStatus" xml:space="preserve"><value>Statut du paiement</value></data>
+  <data name="BackToCommunications" xml:space="preserve"><value>Retour aux communications</value></data>
+  <data name="NotPayed" xml:space="preserve"><value>Non payé</value></data>
+  <data name="WaitingPayment" xml:space="preserve"><value>En attente de paiement</value></data>
+  <data name="ErrorPayment" xml:space="preserve"><value>Erreur de paiement</value></data>
 </root>
