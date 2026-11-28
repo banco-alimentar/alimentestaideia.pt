@@ -229,7 +229,13 @@
             message = $"Batch cancelled. {results.Count(result => result.Committed)} groups committed; earlier commits remain. Check the audit history before retrying.";
             Logger.LogWarning("Batch reconciliation cancelled after {Count} reported commits.", results.Count(result => result.Committed));
         }
-        catch (Exception exception)
+        catch (InvalidOperationException exception)
+        {
+            messageIsError = true;
+            message = $"Batch interrupted: {exception.Message}. {results.Count(result => result.Committed)} groups reported committed; earlier commits remain. Check the database audit history before retrying.";
+            Logger.LogError(exception, "Batch reconciliation interrupted after {Count} reported commits.", results.Count(result => result.Committed));
+        }
+        catch (WorkflowException exception)
         {
             messageIsError = true;
             message = $"Batch interrupted: {exception.Message}. {results.Count(result => result.Committed)} groups reported committed; earlier commits remain. Check the database audit history before retrying.";
