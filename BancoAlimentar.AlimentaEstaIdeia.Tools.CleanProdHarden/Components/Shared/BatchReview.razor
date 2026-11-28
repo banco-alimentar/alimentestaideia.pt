@@ -235,12 +235,6 @@
             message = $"Batch interrupted: {exception.Message}. {results.Count(result => result.Committed)} groups reported committed; earlier commits remain. Check the database audit history before retrying.";
             Logger.LogError(exception, "Batch reconciliation interrupted after {Count} reported commits.", results.Count(result => result.Committed));
         }
-        catch (WorkflowException exception)
-        {
-            messageIsError = true;
-            message = $"Batch interrupted: {exception.Message}. {results.Count(result => result.Committed)} groups reported committed; earlier commits remain. Check the database audit history before retrying.";
-            Logger.LogError(exception, "Batch reconciliation interrupted after {Count} reported commits.", results.Count(result => result.Committed));
-        }
         finally
         {
             busy = false;

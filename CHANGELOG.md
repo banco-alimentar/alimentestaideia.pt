@@ -14,6 +14,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** Run the updated local tool against a restored copy first. Before applying to each target tenant, back up, pause writers, review recommendations and follow-ups, and dry-run the exact selected batch. Earlier commits remain after a later failure; verify per-group results and audit history before retrying. No schema migration is introduced.
 
 ### Fixed
+- Restored the Release build for [CleanProdHarden batch review](BancoAlimentar.AlimentaEstaIdeia.Tools.CleanProdHarden/Components/Shared/BatchReview.razor).
+  - **Context:** Azure DevOps reported `CS0246` because the component caught an undefined `WorkflowException`.
+  - **Options considered:** Introduce a new exception type or remove the unused handler.
+  - **Decision:** Remove the invalid catch and keep the existing handling for cancellation and invalid workflow state.
+  - **Rollout:** Rerun the solution build. No pipeline or database changes are required.
 - Retry concurrent [MB WAY status updates](BancoAlimentar.AlimentaEstaIdeia.Repository/DonationRepository.cs) and make the [status page](BancoAlimentar.AlimentaEstaIdeia.Web/Pages/Payments/MBWayPayment.cshtml.cs) check the persisted result before redirecting.
   - **Context:** The status page could hit `DbUpdateConcurrencyException` while saving a donation another request had updated, and reported the conflict as an Easypay lookup error.
   - **Options considered:** Suppress the exception on the page, or retry the write after reloading the donation and payment.
@@ -41,6 +46,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Rollout:** No production configuration or deployment change. Rerun the affected test projects in CI.
 
 ### Changed
+- Restored `developer` and separated branch retention from the [developer validation ruleset](https://github.com/banco-alimentar/alimentestaideia.pt/rules/27791240), with updated [contribution guidance](Documentation/CONTRIBUTING.md).
+  - **Context:** `developer` was missing again after PR #951 merged it into `master`. Automatic post-merge deletion was enabled, and the existing ruleset's admin bypass also covered its deletion restriction.
+  - **Options considered:** Restore without changing settings, remove the admin bypass from all validation rules, or disable automatic deletion and add a separate deletion-only rule without bypass actors.
+  - **Decision:** Disable repository-wide automatic head-branch deletion and enforce [Preserve developer branch](https://github.com/banco-alimentar/alimentestaideia.pt/rules/28306376) for exactly `refs/heads/developer` with no bypass actors. Preserve existing build/secret checks and the admin direct-push bypass in the validation ruleset.
+  - **Rollout:** Restored and verified `developer` at PR #951's final head SHA, `785ae39cb0379201aff3f8cf6bc79db697b1cbf8`. Verified its protected status and effective no-bypass deletion rule through GitHub. Feature branches now need manual cleanup. Target project PRs at `developer`; do not use it as a PR head into `master`.
 - Consolidated the current Dependabot package updates in [Directory.Packages.props](Directory.Packages.props).
   - **Context:** Ten Dependabot PRs independently changed central NuGet versions; several targeted the same Application Insights packages, and six proposed major upgrades outside the repository's current .NET 10 compatibility range.
   - **Options considered:** Merge the individual PRs separately, combine the compatible minor/patch updates, or migrate the application to newer major package APIs and target frameworks as part of this change.

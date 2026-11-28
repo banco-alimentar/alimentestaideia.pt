@@ -14,7 +14,20 @@ The process is straight-forward.
  - Keep package versions in `Directory.Packages.props`; project files should declare package references without versions.
  - Run `dotnet restore BancoAlimentar.AlimentaEstaIdeia.Web.sln` and `dotnet list BancoAlimentar.AlimentaEstaIdeia.Web.sln package --vulnerable --include-transitive --no-restore` when changing dependencies. The solution includes the maintained tool projects and their tests.
  - [Mark any commit with the issue that you're working on](https://gitdailies.com/articles/link-github-commit-to-issue/)
- - Repository admins can push commits directly to the [developer](https://github.com/banco-alimentar/alimentestaideia.pt/tree/developer) branch. Admin direct pushes bypass its ruleset, including required status checks, secret-alert resolution, and branch deletion protection. Contributors without admin access should create a Pull Request against `developer` and pick an approver (eg: tiagonmas).
+ - Repository admins can push commits directly to the [developer](https://github.com/banco-alimentar/alimentestaideia.pt/tree/developer) branch. Admin direct pushes can bypass the existing validation ruleset, including required status checks and secret-alert resolution, but not the separate deletion-protection ruleset. Contributors without admin access should create a Pull Request against `developer` and pick an approver (eg: tiagonmas).
+
+## Keeping the developer branch
+
+All project pull requests must target `developer`, not `master`. Never use `developer` as the source branch of a pull request into `master`.
+
+The repository has two complementary safeguards:
+
+- **Settings > General > Pull Requests:** **Automatically delete head branches** is disabled. Merged feature branches need manual cleanup.
+- **Settings > Rules > Rulesets:** [Preserve developer branch](https://github.com/banco-alimentar/alimentestaideia.pt/rules/28306376) is active, targets exactly `refs/heads/developer`, and restricts deletions with an empty bypass list. Ordinary branch deletion is blocked even for repository admins. The separate [developer validation ruleset](https://github.com/banco-alimentar/alimentestaideia.pt/rules/27791240) retains its existing checks and admin bypass.
+
+Keep the retention ruleset separate from validation rules so allowing an admin to push directly does not also permit deleting the integration branch. Administrators can still edit repository settings; do not disable the retention rule or add bypass actors.
+
+If `developer` is missing, verify its last commit using the relevant merged pull request's head SHA and merge parent before restoring it. Do not assume an old remote-tracking ref is current. On 2026-11-28, PR #951 verified `785ae39cb0379201aff3f8cf6bc79db697b1cbf8` as its final head commit; the branch was restored to that commit. After any restoration, verify the remote SHA, the branch's protected status, and that the no-bypass deletion rule applies. Do not test protection by attempting to delete the live branch.
 
 We make an effor to follow Microsoft's [Code With Engineering Playbook](https://github.com/Microsoft/code-with-engineering-playbook)
 
