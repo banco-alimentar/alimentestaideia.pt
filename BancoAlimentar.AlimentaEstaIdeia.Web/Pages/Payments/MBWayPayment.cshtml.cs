@@ -21,6 +21,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using InlineObject9 = Easypay.Rest.Client.Model.InlineObject9;
 
@@ -112,6 +113,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
 
                 SinglePaymentStatus paymentStatus = response.ResolvePaymentStatus();
                 string providerStatus = response.Method?.Status;
+                bool isComplete = response.IsSinglePaymentComplete();
 
                 // Validate Payment status (EasyPay+Repository)
                 if (paymentStatus == SinglePaymentStatus.Pending || paymentStatus == SinglePaymentStatus.Active)
@@ -119,25 +121,38 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                     PaymentStatus = PaymentStatus.WaitingPayment;
                     Response.Headers.Append("Refresh", PageRefreshInSeconds.ToString());
                 }
-                else if (response.IsSinglePaymentComplete())
-                {
-                    PaymentStatus = PaymentStatus.Payed;
-                    this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
-                    ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, Donation.PublicId);
-                    return RedirectToPage("/Thanks", new { Donation.PublicId });
-                }
-                else if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
+                else if (!isComplete && this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
                 {
                     // Webhook may have completed the donation while Easypay still reports failed/expired.
                     return thanksRedirect;
                 }
-                else if (paymentStatus == SinglePaymentStatus.Failed
+                else if (isComplete
+                    || paymentStatus == SinglePaymentStatus.Failed
                     || paymentStatus == SinglePaymentStatus.Deleted
                     || string.Equals(providerStatus, "error", StringComparison.OrdinalIgnoreCase))
                 {
-                    PaymentStatus = PaymentStatus.ErrorPayment;
-                    this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
-                    this.context.Complete();
+                    bool updated = this.context.Donation.UpdatePaymentStatus<MBWayPayment>(Donation.PublicId, paymentStatus);
+                    if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
+                    {
+                        return thanksRedirect;
+                    }
+
+                    if (updated && !isComplete)
+                    {
+                        PaymentStatus = PaymentStatus.ErrorPayment;
+                    }
+                    else
+                    {
+                        EasyPayApiError = true;
+                        this.telemetryClient.TrackEvent(
+                            "MBWayPaymentStatusPersistenceRejected",
+                            new Dictionary<string, string>
+                            {
+                                { "DonationId", donationId.ToString() },
+                                { "PaymentId", paymentId.ToString() },
+                                { "ProviderStatus", paymentStatus.ToString() },
+                            });
+                    }
                 }
                 else
                 {
@@ -154,12 +169,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
                         { "DonationId", donationId.ToString() },
                         { "PaymentId", paymentId.ToString() },
                         { "ErrorCode", (ex as ApiException)?.ErrorCode.ToString() ?? "unknown" },
-                        { "PaymentStatus", "easypay_api_error" },
+                        { "PaymentStatus", ex is DbUpdateConcurrencyException ? "payment_status_concurrency_conflict" : "easypay_api_error" },
                     });
 
-                if (this.TryRedirectToThanksForCompletedDonation(Donation.PublicId, out thanksRedirect))
+                if (this.context.Donation.IsDonationPaid(publicId))
                 {
-                    return thanksRedirect;
+                    // Finish the donation flow on the next request, without saving this request's failed changes.
+                    return RedirectToPage("/Thanks", new { PublicId = publicId });
                 }
             }
 
@@ -182,15 +198,13 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Pages.Payments
         private bool TryRedirectToThanksForCompletedDonation(Guid publicId, out IActionResult redirectResult)
         {
             redirectResult = null;
-            int donationId = this.context.Donation.GetDonationIdFromPublicId(publicId);
-            Donation donation = this.context.Donation.GetFullDonationById(donationId);
-            if (donation?.PaymentStatus != PaymentStatus.Payed)
+            if (!this.context.Donation.IsDonationPaid(publicId))
             {
                 return false;
             }
 
-            ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, donation.PublicId);
-            redirectResult = RedirectToPage("/Thanks", new { donation.PublicId });
+            ThanksModel.CompleteDonationFlow(HttpContext, this.context.User, publicId);
+            redirectResult = RedirectToPage("/Thanks", new { PublicId = publicId });
             return true;
         }
     }
