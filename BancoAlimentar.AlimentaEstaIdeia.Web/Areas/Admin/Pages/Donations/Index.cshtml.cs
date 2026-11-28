@@ -69,6 +69,12 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
         public string EmailSearch { get; set; }
 
         /// <summary>
+        /// Gets or sets the donation ID search filter.
+        /// </summary>
+        [BindProperty(SupportsGet = true)]
+        public int? DonationIdSearch { get; set; }
+
+        /// <summary>
         /// Gets or sets the donation amount search filter.
         /// </summary>
         [BindProperty(SupportsGet = true)]
@@ -136,6 +142,7 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
             !string.IsNullOrWhiteSpace(ServiceReferenceSearch)
             || !string.IsNullOrWhiteSpace(NifSearch)
             || !string.IsNullOrWhiteSpace(EmailSearch)
+            || DonationIdSearch.HasValue
             || !string.IsNullOrWhiteSpace(AmountSearch)
             || DonationDateSearch.HasValue
             || !string.IsNullOrWhiteSpace(PublicIdSearch)
@@ -222,6 +229,11 @@ namespace BancoAlimentar.AlimentaEstaIdeia.Web.Areas.Admin.Pages.Donations
 
         private IQueryable<Donation> ApplyFilters(IQueryable<Donation> query)
         {
+            if (DonationIdSearch.HasValue)
+            {
+                query = query.Where(donation => donation.Id == DonationIdSearch.Value);
+            }
+
             if (!string.IsNullOrWhiteSpace(ServiceReferenceSearch))
             {
                 query = query.Where(donation =>
